@@ -1,0 +1,113 @@
+<div id="cpdsearchform" style="display: none;">
+	<p>Please select the type of property which you are interested in.</p>
+
+	<form method="GET" action="">
+
+		<table>
+			<tbody>
+				<tr align="center">
+					<td>
+						<select id="sectors" name="sectors" onchange="cpd_current_instructions_sector_changed()">
+						[sectoroptions]
+						</select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</form>
+</div>
+
+<div id="cpdsearchresults"></div>
+
+<div id="cpdsearchresultmodel" class="searchresult" style="display: none;">
+
+	<table id="cpdsearchresultsholdingtabletop" class="searchresultsholdingtable">
+		<tbody>
+			<tr>
+				<td width="400">
+					<b>Result number:</b>
+					<span id="resultnum" class="value">[resultnum]</span>
+				</td>
+				<td>
+					<b>Property reference:</b>
+					<span id="propref" class="value">[propref]</span>
+				</td>
+				<td>
+					<b>Type:</b>
+					<span id="typedesc" class="value">[typedesc]</span>
+				</td>
+				<td>
+					<b>Size:</b>
+					<span id="sizedesc" class="value">[sizedesc]</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<table id="cpdsearchresultsholdingtablemiddle" class="searchresultsholdingtable">
+		<tbody>
+			<tr>
+				<td width="150">
+					<b>Location:</b> <span id="areadesc" class="value">[areadesc]</span>
+				</td>
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span id="summary" class="value">[summary]</span>
+				</td>
+				<td valign="top">
+					<span id="photo" class="value">[photo]</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<table id="cpdsearchresultsholdingtablebottom" class="searchresultsholdingtable">
+		<tbody>
+			<tr>
+				<td width="150">
+					<div class="terms">
+						<a href="terms-and-conditions" target="blank"> Important terms and conditions.</a>
+					</div>
+				</td>
+				<td>
+					<a class="registerinterest">
+						<img src="[themeurl]/images/registerInterest.gif" alt="Register Interest"/>
+					</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<br/>
+
+</div>
+
+<div id="cpdsearchnavigationmodel" class="result" style="display: none;">
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					<a class="navbarprevpage" style="display: none;">Previous page</a>
+					<span class="navbartotals">
+						<span>Total results: <span class="navbarresultcount">[resultcount]</span>
+					</span>
+					<span class="navbarpagelist">
+						<span>Page <span class="navbarpagenum">[pagenum]</span> of <span class="navbarpagecount">[pagecount]</span></span>
+					</span>
+					<span class="navbarperpageoptions">
+						Results per page:
+						<select id="limit" name="limit" onchange="cpd_current_instructions_per_page_changed()">
+							[perpageoptions]
+						</select>
+					</span>
+					<a class="navbarnextpage" style="display: none;">Next page</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+

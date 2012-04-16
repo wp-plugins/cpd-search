@@ -1,0 +1,67 @@
+<div id="cpdsearchform_sidebar" style="display: block;">	
+<div id="searchformholdingcontainer_sidebar" class="div-sidebar">
+    <form action="[actionurl]" method="post" id="form-sidebar"> 
+	<table class="searchformholdingtable">
+		<tbody>
+			<tr>
+				<td class="formcolumnleft">
+					<b id="md_size">Size :</b>
+				</td>
+				<td class="formcolumnright">
+					<input type="text" id="sizefrom_sidebar" name="sizefrom" value="[sizefrom]" size="5">
+					to
+					<input type="text" id="sizeto_sidebar" name="sizeto" value="[sizeto]" size="5">
+					<select id="sizeunits_sidebar" name="sizeunits" class="styledselect sizeunits">
+						[sizeunitoptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Property Type</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="sectors_sidebar" name="sectors[]" multiple="multiple" class="styledselect">
+						[sectoroptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Tenure</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="tenure_sidebar" name="tenure" class="styledselect tenure">
+						[tenureoptions]
+					</select>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+				<b>Area</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="areas_sidebar" name="areas[]" multiple="multiple" class="styledselect">
+						[areaoptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Location</b>:
+				</td>
+				<td class="formcolumnright">
+					<input id="address_sidebar" name="address" value="[address]" size="32" class="styledselect"> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+				</td>
+				<td class="formcolumnright">
+					<input id="submit" type="image" src="[themeurl]/images/submit.gif">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+    </form>
+</div>
+</div>

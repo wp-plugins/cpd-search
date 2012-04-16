@@ -1,0 +1,149 @@
+<form id="searchform" method="post" action="">
+    <div id="search_dialog">
+      <div id="map_dialog" style="width: [cpd_map_widget_width]px; height: [cpd_map_widget_height]px;">
+        <div id="map_canvas" style="width: 100%; height: 100%;"></div>
+      </div>
+      <div id="loading_dialog" class="dialog draggable loading">
+        <fieldset>
+          <legend>Loading...</legend>
+        <fieldset>
+      </div>
+      <div id="criteria_dialog_minimised" class="dialog draggable">
+        <fieldset>
+          <legend>Criteria</legend>
+        </fieldset>
+      </div>
+      <div id="criteria_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Criteria</legend>
+          <ul>
+            <li title="Click anywhere on the map to update the search origin">
+              <label for="origin">Origin:</label>
+              <div id="origin_value">N/A</div>
+            </li>
+            <li id="radius_button" class="clickable" title="Click here to change the search radius">
+              <label for="radius">Radius:</label>
+              <div id="radius_value">N/A</div>
+            </li>
+            <li id="size_button" class="clickable" title="Click here to change the size criteria">
+              <label for="size">Size:</label>
+              <div id="size_value">All</div>
+            </li>
+            <li id="types_button" class="clickable" title="Click here to change the types of property to include in the search">
+              <label for="types">Types:</label>
+              <div id="types_value">All</div>
+            </li>
+            <li id="refreshbutton" class="clickable" title="Click here to refresh the results">
+              <label>Refresh results</label>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+      <div id="searching_dialog" class="dialog draggable searching">
+        <fieldset>
+          <legend>Searching...</legend>
+        <fieldset>
+      </div>
+      <div id="no_results_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>No properties found within the given area range and criteria.</legend>
+        <fieldset>
+      </div>
+      <div id="results_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend id="results_dialog_stats">Results</legend>
+          <div class="dialog_inset">
+            <table>
+              <caption id="results_dialog_address">Loading...</caption>
+              <tbody>
+                <tr>
+                  <td rowspan="2">
+                    <img id="results_dialog_highlight_photo"/>
+                  </td>
+                  <td>
+                    <span>Type:</span>
+                    <span id="results_dialog_type"></span>
+                  </td>
+                  <td>
+                    <span>Size:</span>
+                    <span id="results_dialog_size"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                     <span id="results_dialog_summary"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+      </div>
+      <div id="radius_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Radius</legend>
+          <div id="radius_slider"></div>
+        </fieldset>
+      </div>
+      <div id="size_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Size</legend>
+          <div class="dialog_inset clickable">
+            From <input id="sizefrom_value" class="sizeinput"/> to <input id="sizeto_value" class="sizeinput"/> m<super>2</super>
+          </div>
+          <div id="sizerange_clear" class="dialog_inset clickable">
+            Clear size criteria
+          </div>
+        </fieldset>
+      </div>
+      <div id="types_dialog" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Types</legend>
+          <ul id="typeslist">
+            <li class="type-option">Loading...</li>
+          </ul>
+        </fieldset>
+      </div>
+      <div id="basket_dialog_minimised" class="dialog draggable basket">
+        <fieldset>
+          <legend>No properties in basket.</legend>
+        </fieldset>
+      </div>
+      <div id="basket_dialog" class="dialog draggable basket">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>No properties in basket.</legend>
+          <ul id="basketlist">
+          </ul>
+        <fieldset>
+      </div>
+      <div id="help_dialog_1" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Help - Introduction</legend>
+          <div class="dialog_inset">
+            <p>To change the origin of the search, click anywhere on the map. To change the radius and other search parameters, click on the 'Criteria' box.</p>
+          </div>
+        <fieldset>
+      </div>
+      <div id="help_dialog_2" class="dialog draggable">
+        <img src="[plugin_url]/images/X.png" class="closebutton"/>
+        <fieldset>
+          <legend>Help - Search Results</legend>
+          <div class="dialog_inset">
+            <p>You can now control the map to locate the properties that interest you.</p>
+            <p>Mousing over a pin on the map will show you brief details.</p>
+            <p>Clicking on a red pin on the map will add it to your basket, and turn the pin green. Clicking on a green pin will remove it from your basket.</p>
+            <p>To register for more information regarding properies in your basket, click on your basket and select 'Register'.</p>
+          </div>
+        <fieldset>
+      </div>
+    </div>
+</form>
+
