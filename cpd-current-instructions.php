@@ -1,6 +1,7 @@
 <?php
 
 require_once(dirname(__FILE__) . "/cpd-common.php");
+require_once(dirname(__FILE__) . "/cpd-register-interest.php");
 
 function cpd_current_instructions_init() {
 	wp_enqueue_script('cpd-current-instructions-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-current-instructions-controller.js");
@@ -40,7 +41,8 @@ function cpd_current_instructions_gather_inputs() {
 
 function cpd_current_instructions() {
 	cpd_current_instructions_init();
-
+	cpd_register_interest_init();
+	
 	// Gather inputs from request/session
 	cpd_current_instructions_gather_inputs();
 	$start = $_SESSION['cpd_current_instructions_start'];

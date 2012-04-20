@@ -6,7 +6,7 @@ var check_registration_password =  /^[A-Za-z0-9!@#$%^&amp;*()_]{6,20}$/;
 var check_registration_phone = /^[0-9-]{10,20}$/;
 
 function cpd_user_registration_success(data) {
-	jQuery('#cpdregisteringuser').dialog("close");
+	jQuery('#cpdregistering').dialog("close");
 
 	// Check for failure
 	if(!data.success) {
@@ -22,7 +22,7 @@ function cpd_user_registration_success(data) {
 }
 
 function cpd_user_registration_error(data) {
-	jQuery('#cpdregisteringuser').dialog("close");
+	jQuery('#cpdregistering').dialog("close");
 	
 	if(data != null && data.error != null && data.error.indexOf("UserAlreadyExistsException") > -1) {
 		// Show login form
@@ -68,7 +68,7 @@ function cpd_user_registration() {
 	};
 	
 	// Display 'registering...' dialog
-	jQuery('#cpdregisteringuser').dialog("open");
+	jQuery('#cpdregistering').dialog("open");
 	
 	// Send AJAX registration request to server
 	var ajaxopts = {

@@ -1,9 +1,9 @@
 === CPD Search ===
 Contributors: rossigee
-Tags: cpd, property, search
+Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
 Requires at least: 3.2
 Tested up to: 3.3.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 
 Allows you to add an extensive UK commercial property search facility to your website.
 
@@ -16,6 +16,9 @@ This plugin provides shortcodes and widgets that embed search forms into your WP
 After installation, see further instructions on configuration page (admin area, 'Settings -> CPD Search').
 
 == Changelog ==
+
+= 1.2.1 =
+* Fix issues with paging and registering interest on current instructions results.
 
 = 1.2.0 =
 * First public release.

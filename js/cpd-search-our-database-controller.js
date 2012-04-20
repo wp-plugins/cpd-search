@@ -143,15 +143,57 @@ function cpd_search_our_database_next_page() {
 	var page = Number(jQuery("span#pagenum").text()).valueOf() + 1;
 	jQuery('span#pagenum').text(page)
 	var limit = jQuery("select#limit option:selected").val();
-	window.location.hash = "page=" + page + "&limit=" + limit;
-	cpd_search_our_database();
+	var url = window.location.href;
+	var arr = url.split('&');
+	var i = 0;
+	var status = false;
+	for(i = 0; i < arr.length; i++) {
+		var item = arr[i];
+		var itemTemp = item.split('=');
+		if(itemTemp[0]=="limit") {
+			itemTemp[1] = limit;
+			status  =  true;
+		}
+		if(itemTemp[0] == "page") {
+			itemTemp[1] = page;
+			status = true;
+		}	
+		var strTemp = itemTemp.join('=');
+		arr[i] = strTemp;
+	}
+	var url = arr.join('&');
+	if(status == false) {
+		url += "&page="+page+"&limit="+limit;
+	}
+	window.location.href = url;
 }
 
 function cpd_search_our_database_per_page_changed() {
 	var page = Number(jQuery("span#pagenum").text()).valueOf();
 	var limit = jQuery("select#limit option:selected").val();
-	window.location.hash = "page=" + page + "&limit=" + limit;
-	cpd_search_our_database();
+	var url = window.location.href;
+	var arr = url.split('&');
+	var i = 0;
+	var status = false;
+	for(i = 0; i < arr.length; i++) {
+		var item = arr[i];
+		var itemTemp = item.split('=');
+		if(itemTemp[0]=="limit") {
+			itemTemp[1] = limit;
+			status  =  true;
+		}
+		if(itemTemp[0] == "page") {
+			itemTemp[1] = page;
+			status = true;
+		}	
+		var strTemp = itemTemp.join('=');
+		arr[i] = strTemp;
+	}
+	var url = arr.join('&');
+	if(status == false) {
+		url += "&page="+page+"&limit="+limit;
+	}
+	window.location.href = url;
 }
 
 function cpd_search_our_database_submit_form() {

@@ -64,19 +64,32 @@ function cpd_search_form_widget() {
 	$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
 	$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
 	$tenure =  $_SESSION['cpd_search_our_database_tenure'];
-
+    
 	// Read in necessary form template sections from plugin options
 	$form = cpd_get_template_contents("search_form_widget");
+    
 	
 	// Add options for actionurl pulldown
 	$widget_options = get_option( 'widget_search_form_widget' );
-	$actionurl = isset($widget_options[2]["url"]) ? $widget_options[2]["url"] : "";
+	$index  = 0;
+	$keytemp  = -1;
+	foreach($widget_options as $key=>$item)
+	{
+		$index++;
+		if(($index+1) == count($widget_options))
+			$keytemp = $key;
+	}
+	if($keytemp != -1)
+	{
+		$actionurl = isset($widget_options[$keytemp]["url"]) ? $widget_options[$keytemp]["url"] : "";
+	}
+	else
+		$actionurl = "";
 	$form = str_replace("[actionurl]", $actionurl, $form);
-	
 	// Add options for sizeunits pulldown
 	$sizeunitoptions = cpd_sizeunit_options($sizeunits);
 	$form = str_replace("[sizeunitoptions]", $sizeunitoptions, $form);
-
+	
 	// Add options for sector pulldown
 	$sectoroptions = cpd_sector_options($sectors);
 	$form = str_replace("[sectoroptions]", $sectoroptions, $form);
@@ -147,6 +160,7 @@ class CPD_SearchSidebar_Widget extends WP_Widget {
 		$instance['title'] = strip_tags( $new_instance['title'] );
 		$instance['url'] = strip_tags( $new_instance['url'] );
 		return $instance;
+		
 	}
 
 	function form( $instance ) {

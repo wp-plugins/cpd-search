@@ -95,6 +95,23 @@ function cpd_current_instructions_success(data) {
 				cpd_property_image_showcase(id, property.PropertyID);
 			});
 		}
+		
+		// Activate the register interest, or registered interest button accordingly
+		if(registering_interest_refs.indexOf(propref) > -1) {
+			jQuery("#" + id + " .registerinterest").hide();
+			jQuery("#" + id + " .registeringinterest").show();
+		}
+		else if(registered_interest_refs.indexOf(propref) > -1) {
+			jQuery("#" + id + " .registerinterest").hide();
+			jQuery("#" + id + " .registeredinterest").show();
+		}
+		else {
+			jQuery("#" + id + " .registerinterest").attr("propref", propref);
+			jQuery("#" + id + " .registerinterest").click(function() {
+				var propref = this.attributes.getNamedItem("propref").nodeValue;
+				cpd_register_interest(propref);
+			});
+		}
 	}
 	
 	// Add navigation bars
