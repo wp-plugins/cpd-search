@@ -17,6 +17,9 @@ After installation, see further instructions on configuration page (admin area, 
 
 == Changelog ==
 
+= 1.2.2 =
+* Re-release w/version number fixed in plugin.
+
 = 1.2.1 =
 * Fix issues with paging and registering interest on current instructions results.
 
