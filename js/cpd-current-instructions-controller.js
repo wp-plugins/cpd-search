@@ -59,6 +59,11 @@ function cpd_current_instructions_success(data) {
 	// Count pages
 	var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
 	var limit = Number(jQuery('span#limit').text()).valueOf();
+	jQuery("select#limit option").each(function() { 
+		jQuery(this).removeAttr('selected');
+		if(Number(this.text).valueOf() == limit)
+			jQuery(this).attr('selected','selected');
+	});
 	var start = ((pagenum - 1) * limit) + 1;
 	var pagecount = Math.floor((data.total - 1) / limit) + 1;
 	
@@ -66,7 +71,8 @@ function cpd_current_instructions_success(data) {
 	var resultnum = start;
 	for (i in data.results) {
 		var property = data.results[i];
-		var id = "property" + property.PropertyID;
+		var propref = property.PropertyID.toString();
+		var id = "property" + propref;
 		
 		// Clone a result model for this result
 		var result = jQuery("#cpdsearchresultmodel").clone().attr("id", id);
@@ -77,7 +83,7 @@ function cpd_current_instructions_success(data) {
 		
 		// Populate it
 		jQuery("#" + id + " #resultnum").html(resultnum++);
-		jQuery("#" + id + " #propref").html(property.PropertyID);
+		jQuery("#" + id + " #propref").html(propref);
 		jQuery("#" + id + " #typedesc").html(property.SectorDescription);
 		jQuery("#" + id + " #sizedesc").html(property.SizeDescription);
 		jQuery("#" + id + " #areadesc").html(property.RegionName);
@@ -92,7 +98,8 @@ function cpd_current_instructions_success(data) {
 			jQuery("#" + id + " #photo").after("<a id=\"photolink\"></a>");
 			jQuery("#" + id + " #photo").appendTo("#" + id + " #photolink");
 			jQuery("#" + id + " #photo").click(function() {
-				cpd_property_image_showcase(id, property.PropertyID);
+				var propref = this.attributes.getNamedItem("propref").nodeValue;
+				cpd_property_image_showcase(id, propref);
 			});
 		}
 		
@@ -119,8 +126,10 @@ function cpd_current_instructions_success(data) {
 	jQuery('#cpdsearchresults').prepend(navbar.clone().show());
 	jQuery('#cpdsearchresults').append(navbar.clone().show());
 	jQuery('.navbarresultcount').html(data.total);
-	jQuery('.navbarpagenum').html(pagenum);
+	jQuery('.navbarpagenum').val(pagenum);
 	jQuery('.navbarpagecount').html(pagecount);
+	jQuery('#pagecount').html(pagecount);
+	
 	if(pagecount > 1 && pagenum > 1) {
 		jQuery('.navbarprevpage').show().click(cpd_current_instructions_prev_page);
 	}
@@ -161,8 +170,24 @@ function cpd_current_instructions_prev_page() {
 	jQuery('span#pagenum').text(page);
 
 	jQuery('#cpdsearching').show();
-	cpd_current_instructions_update_hash();
 	cpd_current_instructions();
+}
+
+function cpd_current_instructions_number_page(obj,e) {
+	if(typeof e == 'undefined' && window.event) {
+		e = window.event;
+	}
+	if(e.keyCode != 13) {
+		return;
+	}
+	var page = Number(obj.value).valueOf();
+	var pagecount = Number(jQuery("#pagecount").text()).valueOf();
+	if(page > pagecount) {
+		page = pagecount;
+	}
+	jQuery('span#pagenum').text(page)		
+	var limit = jQuery("select#limit option:selected").val();
+	cpd_search_our_database();
 }
 
 function cpd_current_instructions_next_page() {
@@ -172,23 +197,22 @@ function cpd_current_instructions_next_page() {
 	jQuery('span#pagenum').text(page)
 
 	jQuery('#cpdsearching').show();
-	cpd_current_instructions_update_hash();
 	cpd_current_instructions();
 }
 
-function cpd_current_instructions_per_page_changed() {
-	var limit = jQuery("select#limit option:selected").val();
-	jQuery('span#perpage').text(limit);
-
+function cpd_current_instructions_per_page_changed(obj) {
+	page = 1;
+	jQuery('span#pagenum').text(page)
+	var limit = Number(obj.value).valueOf();
+	jQuery('span#limit').text(limit);
 	jQuery('#cpdsearching').show();
-	cpd_current_instructions_update_hash();
 	cpd_current_instructions();
 }
 
 function cpd_current_instructions() {
 	// Determine start result number and page length
-	var pagenum = Math.floor(jQuery('#pagenum').html());
-	var limit = Math.floor(jQuery("#limit").html());
+	var pagenum = Math.floor(jQuery('span#pagenum').html());
+	var limit = Math.floor(jQuery("span#limit").html());
 	var start = ((pagenum - 1) * limit) + 1;
 	
 	// Gather criteria from form widgets

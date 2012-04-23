@@ -62,6 +62,7 @@ function cpd_current_instructions() {
 		"\t<span id=\"pagenum\">[pagenum]</span>\n".
 		"\t<span id=\"limit\">[limit]</span>\n".
 		"\t<span id=\"trigger\">[trigger]</span>\n".
+		"\t<span id=\"pagecount\">[pagecount]</span>\n".
 		"</div>\n";
 
 	// Add sector options

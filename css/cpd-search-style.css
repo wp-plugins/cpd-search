@@ -233,16 +233,51 @@ div#sizefrom_value, div#sizeto_value {
 }
 
 
-#cpdregistering
-{
-    margin-right: auto; 
-    margin-left: auto; 
-    font-size: 18px; 
-    margin-top: 18px; 
-    width: 330px; 
-    height: 50px; 
-    line-height: 50px; 
-    background: none repeat scroll 0% 0% rgb(255, 255, 255); 
-    padding: 5px; 
-    color: rgb(51, 51, 51);
+#cpdregistering {
+	margin-right: auto; 
+	margin-left: auto; 
+	font-size: 18px; 
+	margin-top: 18px; 
+	width: 330px; 
+	height: 50px; 
+	line-height: 50px; 
+	background: none repeat scroll 0% 0% rgb(255, 255, 255); 
+	padding: 5px; 
+	color: rgb(51, 51, 51);
 }
+
+#pagenums {
+	width:30px;
+}
+
+.navbarpagelist span span, .navbarperpageoptions span, .navbartotals span span {
+	margin-top: 5px;
+}
+
+.navbarpagelist span, .navbarperpageoptions span, .navbartotals span span {
+	float: left;
+	margin-left:6px;
+}
+
+.split {
+	float: left;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-top: 4px;
+}
+
+.navbarpagelist a {
+	float: left;
+	margin-left: 6px;
+	margin-top: 5px;
+}
+
+.navbarpagelist input,.navbarperpageoptions select {
+	float: left;
+	margin-left: 6px;
+}
+
+.navbarperpageoptions {
+	float: left;
+}
+

@@ -94,6 +94,7 @@ function cpd_search_our_database() {
 		"\t<span id=\"areas\">[areas]</span>\n".
 		"\t<span id=\"address\">[address]</span>\n".
 		"\t<span id=\"trigger\">[trigger]</span>\n".
+		"\t<span id=\"pagecount\">[pagecount]</span>\n".
 		"</div>\n";
 
 	// Add options for sizeunits pulldown

@@ -42,6 +42,12 @@ function cpd_search_our_database_success(data) {
 	// Count pages
 	var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
 	var limit = Number(jQuery('span#limit').text()).valueOf();
+	jQuery("select#limit").val(limit);
+	jQuery("select#limit option").each(function() { 
+		jQuery(this).removeAttr('selected');
+		if(Number(this.text).valueOf() == limit)
+			jQuery(this).attr('selected','selected');
+	});
 	var start = ((pagenum - 1) * limit) + 1;
 	var pagecount = Math.floor((data.total - 1) / limit) + 1;
 	
@@ -65,7 +71,7 @@ function cpd_search_our_database_success(data) {
 		
 		// Populate it
 		jQuery("#" + id + " #resultnum").html(resultnum++);
-		jQuery("#" + id + " #propref").html(property.PropertyID);
+		jQuery("#" + id + " #propref").html(propref);
 		jQuery("#" + id + " #typedesc").html(property.SectorDescription);
 		jQuery("#" + id + " #sizedesc").html(property.SizeDescription);
 		jQuery("#" + id + " #areadesc").html(property.RegionName);
@@ -109,8 +115,10 @@ function cpd_search_our_database_success(data) {
 	jQuery('#cpdsearchresults').prepend(navbar.clone().show());
 	jQuery('#cpdsearchresults').append(navbar.clone().show());
 	jQuery('.navbarresultcount').html(data.total);
-	jQuery('.navbarpagenum').html(pagenum);
+	jQuery('.navbarpagenum').val(pagenum);
 	jQuery('.navbarpagecount').html(pagecount);
+	jQuery('#pagecount').html(pagecount);
+	
 	if(pagecount > 1 && pagenum > 1) {
 		jQuery('.navbarprevpage').show().click(cpd_search_our_database_prev_page);
 	}
@@ -130,11 +138,29 @@ function cpd_search_our_database_success(data) {
 }
 
 function cpd_search_our_database_prev_page() {
-	jQuery('.navbarprevpage').click(function() { return false; });
+	jQuery('.navbarprevpage').click(function() {
+		return false;
+	});
 	var page = Number(jQuery("span#pagenum").text()).valueOf() - 1;
 	jQuery('span#pagenum').text(page)
 	var limit = jQuery("select#limit option:selected").val();
-	window.location.hash = "page=" + page + "&limit=" + limit;
+	cpd_search_our_database();
+}
+
+function cpd_search_our_database_number_page(obj, e) {
+	if(typeof e == 'undefined' && window.event) {
+		e = window.event;
+	}
+	if(e.keyCode != 13) {
+		return;
+	}
+	var page = Number(obj.value).valueOf();
+	var pagecount = Number(jQuery("#pagecount").text()).valueOf();
+	if(page > pagecount) {
+		page = pagecount;
+	}
+	jQuery('span#pagenum').text(page)		
+	var limit = jQuery("select#limit option:selected").val();
 	cpd_search_our_database();
 }
 
@@ -143,57 +169,15 @@ function cpd_search_our_database_next_page() {
 	var page = Number(jQuery("span#pagenum").text()).valueOf() + 1;
 	jQuery('span#pagenum').text(page)
 	var limit = jQuery("select#limit option:selected").val();
-	var url = window.location.href;
-	var arr = url.split('&');
-	var i = 0;
-	var status = false;
-	for(i = 0; i < arr.length; i++) {
-		var item = arr[i];
-		var itemTemp = item.split('=');
-		if(itemTemp[0]=="limit") {
-			itemTemp[1] = limit;
-			status  =  true;
-		}
-		if(itemTemp[0] == "page") {
-			itemTemp[1] = page;
-			status = true;
-		}	
-		var strTemp = itemTemp.join('=');
-		arr[i] = strTemp;
-	}
-	var url = arr.join('&');
-	if(status == false) {
-		url += "&page="+page+"&limit="+limit;
-	}
-	window.location.href = url;
+	cpd_search_our_database();
 }
 
-function cpd_search_our_database_per_page_changed() {
-	var page = Number(jQuery("span#pagenum").text()).valueOf();
-	var limit = jQuery("select#limit option:selected").val();
-	var url = window.location.href;
-	var arr = url.split('&');
-	var i = 0;
-	var status = false;
-	for(i = 0; i < arr.length; i++) {
-		var item = arr[i];
-		var itemTemp = item.split('=');
-		if(itemTemp[0]=="limit") {
-			itemTemp[1] = limit;
-			status  =  true;
-		}
-		if(itemTemp[0] == "page") {
-			itemTemp[1] = page;
-			status = true;
-		}	
-		var strTemp = itemTemp.join('=');
-		arr[i] = strTemp;
-	}
-	var url = arr.join('&');
-	if(status == false) {
-		url += "&page="+page+"&limit="+limit;
-	}
-	window.location.href = url;
+function cpd_search_our_database_per_page_changed(obj) {
+	page = 1;
+	jQuery('span#pagenum').text(page)
+	var limit  = obj.value;
+	jQuery('span#limit').text(limit);
+	cpd_search_our_database();
 }
 
 function cpd_search_our_database_submit_form() {
