@@ -30,6 +30,7 @@ function cpd_register_interest_ajax() {
 	// Send our register interest request to the server
 	$registerInterest = new RegisterInterestType();
 	$registerInterest->PropertyID = $propref;
+	$registerInterest->ServiceContext = SERVICE_CONTEXT;
 	try {
 		$options = get_option('cpd-search-options');
 		$soapopts = array('trace' => 1, 'exceptions' => 1);

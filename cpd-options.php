@@ -69,13 +69,14 @@ function cpd_get_template_uri($id) {
 }
 
 function cpd_get_template_contents($id) {
+	$options = get_option('cpd-search-options');
+	if($options['cpd_development_mode']) {
+		return file_get_contents(dirname(__FILE__)."/inc/".$id."_ui.html");
+	}
 	if(!file_exists(cpd_get_template($id))) {
-		error_log("Using settings template for " . $id);
-		$options = get_option('cpd-search-options');
 		return $options["cpd_".$id."_ui"];
 	}
 
-	error_log("Returning theme template for " . $id);
 	return file_get_contents(cpd_get_template($id));
 }
 

@@ -3,7 +3,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of tags that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.2.3
+Version: 1.2.4
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -12,6 +12,8 @@ Text Domain: cpd-search
 */
 
 define('WP_DEBUG', true);
+
+define('SERVICE_CONTEXT', 'WordPressPlugin');
 
 // SOAP client helper code
 require_once(dirname(__FILE__) . "/lib/CPDPropertyService.php");
@@ -53,14 +55,15 @@ function cpd_jquery_init() {
 	wp_enqueue_script('jquery-ui-slider', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.slider.js", array('jquery-ui-widget'), "", true);
 	wp_enqueue_script('jquery-ui-dialog', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.dialog.js", array('jquery-ui-widget'), "", true);
 	wp_enqueue_script('jquery-ui-draggable', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.draggable.js", array('jquery-ui-widget'), "", true);
+	wp_enqueue_script('jquery-lightbox', cpd_plugin_dir_url(__FILE__) . "js/jquery.lightbox-0.5.min.js");
 	
 	// CPD custom CSS
 	wp_enqueue_style('cpd-search', cpd_plugin_dir_url(__FILE__) . "css/cpd-search-style.css");
 
 	// Third-party CSS
 	wp_enqueue_style('cpd-jquery', cpd_plugin_dir_url(__FILE__) . "css/jquery-ui-1.8.16.custom.css");
-	
 }
+
 //add_action('init', 'cpd_jquery_init');
 cpd_jquery_init();
 
@@ -72,9 +75,10 @@ require_once(dirname(__FILE__) . "/cpd-password-reset.php");
 require_once(dirname(__FILE__) . "/cpd-current-instructions.php");
 require_once(dirname(__FILE__) . "/cpd-search-our-database.php");
 require_once(dirname(__FILE__) . "/cpd-verify-user.php");
-require_once(dirname(__FILE__) . "/cpd-view-property-image.php");
 require_once(dirname(__FILE__) . "/cpd-map-search.php");
 require_once(dirname(__FILE__) . "/cpd-search-form-widget.php");
+require_once(dirname(__FILE__) . "/cpd-clipboard-form-widget.php");
+require_once(dirname(__FILE__) . "/cpd-save-searches-sidebar-widget.php");
 
 // AJAX handlers to back the form up
 require_once(dirname(__FILE__) . "/cpd-geocode.php");

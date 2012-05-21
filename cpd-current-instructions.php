@@ -2,9 +2,12 @@
 
 require_once(dirname(__FILE__) . "/cpd-common.php");
 require_once(dirname(__FILE__) . "/cpd-register-interest.php");
+require_once(dirname(__FILE__) . "/cpd-view-property-image.php");
+require_once(dirname(__FILE__) . "/cpd-view-property-pdf.php");
 
 function cpd_current_instructions_init() {
 	wp_enqueue_script('cpd-current-instructions-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-current-instructions-controller.js");
+	wp_enqueue_script('cpd-view-property-pdf-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-pdf-controller.js");
 	wp_localize_script('cpd-current-instructions-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 
@@ -69,10 +72,6 @@ function cpd_current_instructions() {
 	$sectoroptions = cpd_sector_options($sectors);
 	$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
-	// Add per-page options
-	$perpageoptions = cpd_perpage_options($limit);
-	$form = str_replace("[perpageoptions]", $perpageoptions, $form);
-
 	// Populate form defaults
 	$form = str_replace("[sectors]", json_encode($sectors), $form);
 
@@ -83,8 +82,13 @@ function cpd_current_instructions() {
 	$form = str_replace("[start]", $start, $form);
 	$form = str_replace("[limit]", $limit, $form);
 
-	// Add theme base URL
+	// Add per-page options
+	$perpageoptions = cpd_perpage_options($limit);
+	$form = str_replace("[perpageoptions]", $perpageoptions, $form);
+
+	// Add theme/plugin base URLs
 	$form = str_replace("[themeurl]", get_template_directory_uri(), $form);
+	$form = str_replace("[pluginurl]", plugins_url(), $form);
 
 	return $form;
 }
@@ -163,16 +167,20 @@ function cpd_current_instructions_ajax() {
 			// Add thumb URL, only if one is available
 			if(isset($record->PropertyMedia)) {
 				$mediaList = $record->PropertyMedia;
-				if($propList instanceof PropertyMediaType) {
-					$propList = array($propList);
+				if($mediaList instanceof PropertyMediaType) {
+					$mediaList = array($propList);
 				}
 				foreach($mediaList as $media) {
-//					if($media->Type == "photo" && $media->Position == 1) {
-					if($media->Position == 1) {
-						$row['MediaType'] = $media->Type;
-						$row['MediaURL'] = $media->URL;
+					if($media->Position > 1) {
+						continue;
+					}
+					if($media->Type == "photo") {
 						$row['ThumbURL'] = $media->ThumbURL;
-						break;
+						continue;
+					}
+					if($media->Type == "pdf" && $record->AgentRef == $options['cpd_agentref']) {
+						$row['PDFMediaID'] = $media->MediaID;
+						continue;
 					}
 				}
 			}

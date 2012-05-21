@@ -38,10 +38,16 @@ function cpd_search_our_database_success(data) {
 	jQuery('#cpdsearchresults').empty();
 	jQuery("#cpdsearchform").hide();
 	jQuery("#cpderror").dialog("close");
-	
+	var roles = jQuery("span#role").text();
 	// Count pages
 	var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
+	if(isNaN(pagenum)) {
+		pagenum = 1;
+	}
 	var limit = Number(jQuery('span#limit').text()).valueOf();
+	if(isNaN(limit)) {
+		limit = 20;
+	}
 	jQuery("select#limit").val(limit);
 	jQuery("select#limit option").each(function() { 
 		jQuery(this).removeAttr('selected');
@@ -78,6 +84,9 @@ function cpd_search_our_database_success(data) {
 		jQuery("#" + id + " #tenuredesc").html(property.TenureDescription);
 		jQuery("#" + id + " #address").html(property.Address);
 		jQuery("#" + id + " #summary").html(property.BriefSummary);
+		jQuery("#" + id + " .clipboardadd").attr("propref", propref);
+		jQuery("#" + id + " .buttonpdf").attr("propref", propref);
+		
 		if(property.ThumbURL === undefined) {
 			jQuery("#" + id + " #photo").html("(No photo)");
 		}
@@ -108,6 +117,15 @@ function cpd_search_our_database_success(data) {
 				cpd_register_interest(propref);
 			});
 		}
+
+		if(property.PDFMediaID !== undefined) {
+			jQuery("#" + id + " .buttonpdf").show();
+			jQuery("#" + id + " .buttonpdf").attr("mediaid", property.PDFMediaID);
+			jQuery("#" + id + " .buttonpdf").click(function() {
+				var media_id = this.attributes.getNamedItem("mediaid").nodeValue;
+				cpd_view_property_pdf(media_id);
+			});
+		}
 	}
 	
 	// Add navigation bars
@@ -133,6 +151,7 @@ function cpd_search_our_database_success(data) {
 	}
 
 	// Clear loading dialog and hide form
+	cpd_clipboard_widget_hide_show();
 	jQuery('#cpdsearching').hide();
 	jQuery('#cpdsearchform').hide();
 }
@@ -214,6 +233,7 @@ function cpd_search_our_database() {
 	}
 	var tenure = jQuery('select#tenure option:selected').val();
 	var address = jQuery('input#address').val();
+	var postcode = jQuery('input#postcode').val();
 	var postdata = {
 		'action':'cpd_search_our_database',
 		'start': start,
@@ -225,6 +245,7 @@ function cpd_search_our_database() {
 		'areas': areas,
 		'tenure': tenure,
 		'address': address,
+		'postcode': postcode,
 	};
 	
 	// Send AJAX search request to server
@@ -234,6 +255,28 @@ function cpd_search_our_database() {
 		data: postdata,
 		success: cpd_search_our_database_success,
 		error: cpd_search_our_database_error,
+		dataType: "json"
+	};
+	jQuery.ajax(ajaxopts);
+}
+
+function cpd_property_image_showcase(id, propref) {
+	// Go ask for the full image URL
+	var postdata = {
+		'action':'cpd_view_property_image',
+		'propref': propref,
+	};
+	
+	// Display 'loading...' dialog
+	jQuery('#cpdsearching').show();
+	
+	// Send AJAX search request to server
+	var ajaxopts = {
+		type: 'POST',
+		url: CPDAjax.ajaxurl,
+		data: postdata,
+		success: cpd_view_property_image_success,
+		error: cpd_view_property_image_error,
 		dataType: "json"
 	};
 	jQuery.ajax(ajaxopts);

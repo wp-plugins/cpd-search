@@ -92,8 +92,11 @@ class TenureType {
 }
 
 class PropertyStatusType {
-  const A = 'A';
-  const O = 'O';
+  const Available = 'Available';
+  const Under_Offer = 'Under Offer';
+  const Sold = 'Sold';
+  const Let = 'Let';
+  const Withdrawn = 'Withdrawn';
 }
 
 class SectorType {
@@ -142,9 +145,6 @@ class RadiusProximityType {
 class HoldType {
 }
 
-class SortOrderType {
-}
-
 class AN3 {
 }
 
@@ -190,6 +190,8 @@ class VisitorType {
   public $UserID; // int
   public $Name; // string
   public $Email; // string
+  public $Phone; // string
+  public $UserConfirmed; // boolean
   public $PropertyView; // PropertyView
   public $PropertyMediaView; // PropertyMediaView
   public $RegisteredInterest; // RegisteredInterest
@@ -217,6 +219,16 @@ class RegisteredInterest {
   public $PropertyID; // int
   public $InterestedDate; // dateTime
   public $ProcessedDate; // dateTime
+}
+
+class CPDAreaType {
+  public $ID; // int
+  public $Description; // string
+}
+
+class CPDPostcodePrefixType {
+  public $Prefix; // string
+  public $CPDAreaID; // string
 }
 
 class SearchPropertyType {
@@ -251,12 +263,8 @@ class SearchCriteriaType {
   public $MaxSize; // float
   public $SizeUnits; // SizeUnitsType
   public $RadiusProximity; // RadiusProximityType
+  public $SortField; // string
   public $SortOrder; // SortOrderType
-}
-
-class DetailLevelType {
-  const brief = 'brief';
-  const full = 'full';
 }
 
 class PostcodesType {
@@ -265,14 +273,17 @@ class PostcodesType {
 
 class RegisterInterestType {
   public $PropertyID; // int
+  public $ServiceContext; // string
 }
 
 class ViewingPropertyType {
   public $PropertyID; // int
+  public $ServiceContext; // string
 }
 
 class ViewingMediaType {
   public $MediaID; // int
+  public $ServiceContext; // string
 }
 
 class CreatePropertyType {
@@ -330,6 +341,26 @@ class GetRecentViewingsType {
 class ProcessRegisteredInterestType {
   public $ID; // int
   public $SendEmail; // boolean
+}
+
+class SearchCPDAreasType {
+  public $SearchCriteria; // CPDAreaCriteriaType
+}
+
+class CPDAreaCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $Substring; // string
+}
+
+class SearchCPDPostcodePrefixesType {
+  public $SearchCriteria; // CPDPostcodePrefixesCriteriaType
+}
+
+class CPDPostcodePrefixesCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $CPDAreaID; // int
 }
 
 class GetDBSchemaVersionResponseType {
@@ -400,6 +431,14 @@ class ProcessRegisteredInterestResponseType {
   public $RegisteredInterest; // RegisteredInterest
 }
 
+class SearchCPDAreasResponseType {
+  public $CPDArea; // CPDAreaType
+}
+
+class SearchCPDPostcodePrefixesResponseType {
+  public $PostcodePrefix; // CPDPostcodePrefixType
+}
+
 class ListMediaResponseType {
   public $PropertyMedia; // PropertyMediaType
 }
@@ -450,7 +489,6 @@ class CPDPropertyService extends SoapClient {
                                     'SizeUnitsType' => 'SizeUnitsType',
                                     'RadiusProximityType' => 'RadiusProximityType',
                                     'HoldType' => 'HoldType',
-                                    'SortOrderType' => 'SortOrderType',
                                     'AN3' => 'AN3',
                                     'RentUnitType' => 'RentUnitType',
                                     'HeadingsType' => 'HeadingsType',
@@ -462,9 +500,10 @@ class CPDPropertyService extends SoapClient {
                                     'PropertyView' => 'PropertyView',
                                     'PropertyMediaView' => 'PropertyMediaView',
                                     'RegisteredInterest' => 'RegisteredInterest',
+                                    'CPDAreaType' => 'CPDAreaType',
+                                    'CPDPostcodePrefixType' => 'CPDPostcodePrefixType',
                                     'SearchPropertyType' => 'SearchPropertyType',
                                     'SearchCriteriaType' => 'SearchCriteriaType',
-                                    'DetailLevelType' => 'DetailLevelType',
                                     'PostcodesType' => 'PostcodesType',
                                     'RegisterInterestType' => 'RegisterInterestType',
                                     'ViewingPropertyType' => 'ViewingPropertyType',
@@ -482,9 +521,10 @@ class CPDPropertyService extends SoapClient {
                                     'PostcodeLookupType' => 'PostcodeLookupType',
                                     'GetRecentViewingsType' => 'GetRecentViewingsType',
                                     'ProcessRegisteredInterestType' => 'ProcessRegisteredInterestType',
-                                    'InvalidTokenExceptionType' => 'InvalidTokenExceptionType',
-                                    'UnconfirmedUserExceptionType' => 'UnconfirmedUserExceptionType',
-                                    'AuthenticationFailedExceptionType' => 'AuthenticationFailedExceptionType',
+                                    'SearchCPDAreasType' => 'SearchCPDAreasType',
+                                    'CPDAreaCriteriaType' => 'CPDAreaCriteriaType',
+                                    'SearchCPDPostcodePrefixesType' => 'SearchCPDPostcodePrefixesType',
+                                    'CPDPostcodePrefixesCriteriaType' => 'CPDPostcodePrefixesCriteriaType',
                                     'GetDBSchemaVersionResponseType' => 'GetDBSchemaVersionResponseType',
                                     'GetSectorsResponseType' => 'GetSectorsResponseType',
                                     'SearchPropertyResponseType' => 'SearchPropertyResponseType',
@@ -503,6 +543,8 @@ class CPDPropertyService extends SoapClient {
                                     'PostcodeLookupResponseType' => 'PostcodeLookupResponseType',
                                     'GetRecentViewingsResponseType' => 'GetRecentViewingsResponseType',
                                     'ProcessRegisteredInterestResponseType' => 'ProcessRegisteredInterestResponseType',
+                                    'SearchCPDAreasResponseType' => 'SearchCPDAreasResponseType',
+                                    'SearchCPDPostcodePrefixesResponseType' => 'SearchCPDPostcodePrefixesResponseType',
                                     'ListMediaResponseType' => 'ListMediaResponseType',
                                     'SectorListType' => 'SectorListType',
                                     'PropertyListType' => 'PropertyListType',
@@ -780,6 +822,34 @@ class CPDPropertyService extends SoapClient {
    */
   public function ProcessRegisteredInterest(ProcessRegisteredInterestType $request) {
     return $this->__soapCall('ProcessRegisteredInterest', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchCPDAreasType $request
+   * @return SearchCPDAreasResponseType
+   */
+  public function SearchCPDAreas(SearchCPDAreasType $request) {
+    return $this->__soapCall('SearchCPDAreas', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchCPDPostcodePrefixesType $request
+   * @return SearchCPDPostcodePrefixesResponseType
+   */
+  public function SearchCPDPostcodePrefixes(SearchCPDPostcodePrefixesType $request) {
+    return $this->__soapCall('SearchCPDPostcodePrefixes', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

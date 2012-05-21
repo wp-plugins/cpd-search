@@ -1,12 +1,12 @@
 <?php
 
-function cpd_view_property_image_ajax() {
-	// Gather property reference
+function cpd_view_property_pdf_ajax() {
+	// Determine first PDF for given property
 	$media_id = $_POST['media_id'];
 	
 	// Perform search
 	$viewMedia = new ViewingMediaType();
-	$viewMedia->MediaID = $media_id;	
+	$viewMedia->MediaID = $media_id;
 	$viewMedia->ServiceContext = SERVICE_CONTEXT;
 	try {
 		// Create the SOAP client
@@ -77,7 +77,7 @@ function cpd_view_property_image_ajax() {
 	exit;
 }
 
-add_action('wp_ajax_cpd_view_property_image', 'cpd_view_property_image_ajax');
-add_action('wp_ajax_nopriv_cpd_view_property_image', 'cpd_view_property_image_ajax');
+add_action('wp_ajax_cpd_view_property_pdf', 'cpd_view_property_pdf_ajax');
+add_action('wp_ajax_nopriv_cpd_view_property_pdf', 'cpd_view_property_pdf_ajax');
 
 ?>

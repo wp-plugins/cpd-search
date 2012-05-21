@@ -196,8 +196,8 @@ jQuery(document).ready(function() {
 	jQuery("#cpdregistrationform").dialog({
 		title: "User registration",
 		autoOpen: false,
-		height: 580,
-		width: 510,
+		height: 540,
+		width: 420					,
 		resizable: false,
 		modal: true,
 		buttons: {
@@ -237,7 +237,7 @@ jQuery(document).ready(function() {
 		title: "Login existing user",
 		autoOpen: false,
 		height: 300,
-		width: 350,
+		width: 390,
 		modal: true,
 		buttons: {
 			"Login": function() {
@@ -318,7 +318,7 @@ jQuery(document).ready(function() {
 	jQuery("#cpderror").dialog({
 		title: "Error",
 		autoOpen: false,
-		height: 300,
+		height: 200,
 		width: 350,
 		modal: true,
 		buttons: {

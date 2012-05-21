@@ -1,5 +1,4 @@
 <?php
-
 class AgentsType {
   public $Agent; // AgentType
 }
@@ -26,23 +25,27 @@ class AgentType {
   public $MapImgUrl; // anyURI
   public $CCEmail; // string
   public $Invoicing; // boolean
-  public $DaysSearchable; // integer
+  public $DaysSearchable; // int
   public $DemoStatus; // boolean
   public $Sectors; // SectorsType
   public $Areas; // AreasType
   public $DefaultMethod; // string
   public $SpecifyMethod; // string
-  public $SodDays; // integer
-  public $AutomatchPeriod; // integer
+  public $SodDays; // int
+  public $AutomatchPeriod; // int
   public $AutomatchEmail; // string
-  public $Discount; // integer
-  public $TemplateVersion; // integer
+  public $Discount; // int
+  public $TemplateVersion; // int
   public $ReportStyle; // string
   public $EmailSubscription; // boolean
 }
 
 class ServicesType {
   public $Service; // string
+}
+
+class UIDsType {
+  public $UID; // int
 }
 
 class ReferencesType {
@@ -58,12 +61,16 @@ class AuthenticateAgentType {
 }
 
 class SearchAgentType {
+  public $Token; // string
   public $AgentSearchCriteria; // AgentSearchCriteriaType
 }
 
 class AgentSearchCriteriaType {
-  public $AreaID; // integer
-  public $PortalID; // integer
+  public $Start; // int
+  public $Limit; // int
+  public $DetailLevel; // DetailLevelType
+  public $AreaID; // int
+  public $PortalID; // int
   public $Owner; // string
   public $Contact; // string
   public $Email; // EmailType
@@ -71,6 +78,7 @@ class AgentSearchCriteriaType {
   public $AdminsOnly; // boolean
   public $AgentsOnly; // boolean
   public $Type; // string
+  public $UIDs; // UIDsType
   public $References; // ReferencesType
   public $WithOwner; // boolean
   public $WithoutOwner; // boolean
@@ -85,7 +93,7 @@ class AuthenticateAgentResponseType {
 }
 
 class SearchAgentResponseType {
-  public $ResultCount; // integer
+  public $ResultCount; // int
   public $Agents; // AgentsType
 }
 
@@ -106,24 +114,21 @@ class AreasType {
 class AgentService extends SoapClient {
 
   private static $classmap = array(
-                                    'InvalidTokenExceptionType' => 'InvalidTokenExceptionType',
-                                    'UnconfirmedUserExceptionType' => 'UnconfirmedUserExceptionType',
-                                    'AuthenticationFailedExceptionType' => 'AuthenticationFailedExceptionType',
                                     'AgentsType' => 'AgentsType',
                                     'AgentType' => 'AgentType',
                                     'ServicesType' => 'ServicesType',
+                                    'UIDsType' => 'UIDsType',
                                     'ReferencesType' => 'ReferencesType',
                                     'EmailType' => 'EmailType',
                                     'AuthenticateAgentType' => 'AuthenticateAgentType',
                                     'SearchAgentType' => 'SearchAgentType',
                                     'AgentSearchCriteriaType' => 'AgentSearchCriteriaType',
-                                    'SortOrderType' => 'SortOrderType',
                                     'AuthenticateAgentResponseType' => 'AuthenticateAgentResponseType',
                                     'SearchAgentResponseType' => 'SearchAgentResponseType',
                                     'AreasType' => 'AreasType',
                                    );
 
-  public function AgentService($wsdl = "http://staging.cpd.co.uk/soap/services/AgentService?wsdl", $options = array()) {
+  public function AgentService($wsdl = "https://staging.cpd.co.uk/soap/services/AgentService?wsdl", $options = array()) {
     foreach(self::$classmap as $key => $value) {
       if(!isset($options['classmap'][$key])) {
         $options['classmap'][$key] = $value;

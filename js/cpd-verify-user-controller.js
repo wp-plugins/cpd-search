@@ -55,7 +55,7 @@ jQuery(document).ready(function() {
 	jQuery("#cpdverifyuser").dialog({
 		title: "User verification",
 		autoOpen: false,
-		height: 300,
+		height: 150,
 		width: 350,
 		resizable: false,
 		modal: true,

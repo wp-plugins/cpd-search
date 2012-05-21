@@ -119,6 +119,15 @@ function cpd_current_instructions_success(data) {
 				cpd_register_interest(propref);
 			});
 		}
+
+		if(property.PDFMediaID !== undefined) {
+			jQuery("#" + id + " .buttonpdf").show();
+			jQuery("#" + id + " .buttonpdf").attr("mediaid", property.PDFMediaID);
+			jQuery("#" + id + " .buttonpdf").click(function() {
+				var media_id = this.attributes.getNamedItem("mediaid").nodeValue;
+				cpd_view_property_pdf(media_id);
+			});
+		}
 	}
 	
 	// Add navigation bars

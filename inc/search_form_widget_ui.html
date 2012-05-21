@@ -1,67 +1,88 @@
 <div id="cpdsearchform_sidebar" style="display: block;">	
-<div id="searchformholdingcontainer_sidebar" class="div-sidebar">
-    <form action="[actionurl]" method="post" id="form-sidebar"> 
-	<table class="searchformholdingtable">
-		<tbody>
-			<tr>
-				<td class="formcolumnleft">
-					<b id="md_size">Size :</b>
-				</td>
-				<td class="formcolumnright">
-					<input type="text" id="sizefrom_sidebar" name="sizefrom" value="[sizefrom]" size="5">
-					to
-					<input type="text" id="sizeto_sidebar" name="sizeto" value="[sizeto]" size="5">
-					<select id="sizeunits_sidebar" name="sizeunits" class="styledselect sizeunits">
-						[sizeunitoptions]
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td class="formcolumnleft">
-					<b>Property Type</b>:
-				</td>
-				<td class="formcolumnright">
-					<select id="sectors_sidebar" name="sectors[]" multiple="multiple" class="styledselect">
-						[sectoroptions]
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td class="formcolumnleft">
-					<b>Tenure</b>:
-				</td>
-				<td class="formcolumnright">
-					<select id="tenure_sidebar" name="tenure" class="styledselect tenure">
-						[tenureoptions]
-					</select>
-			</tr>
-			<tr>
-				<td class="formcolumnleft">
-				<b>Area</b>:
-				</td>
-				<td class="formcolumnright">
-					<select id="areas_sidebar" name="areas[]" multiple="multiple" class="styledselect">
-						[areaoptions]
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td class="formcolumnleft">
-					<b>Location</b>:
-				</td>
-				<td class="formcolumnright">
-					<input id="address_sidebar" name="address" value="[address]" size="32" class="styledselect"> 
-				</td>
-			</tr>
-			<tr>
-				<td>
-				</td>
-				<td class="formcolumnright">
-					<input id="submit" type="image" src="[themeurl]/images/submit.gif">
-				</td>
-			</tr>
-		</tbody>
-	</table>
-    </form>
-</div>
+	<div id="searchformholdingcontainer_sidebar" class="div-sidebar">
+		<form action="[actionurl]" method="post" id="form-sidebar"> 
+			<div id="searchheadersidebar">
+				Property Search
+			</div>
+			<table class="searchformholdingtable_sidebar">
+				<tbody>
+
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b id="md_size">Size :</b>
+						</td>
+						<td class="formcolumnright_sidebar">
+							<input type="text" id="sizefrom_sidebar" name="sizefrom" value="[sizefrom]" size="4"/>
+								to
+							<input type="text" id="sizeto_sidebar" name="sizeto" value="[sizeto]" size="4"/>
+							<select id="sizeunits_sidebar" name="sizeunits" class="styledselect_sidebar sizeunits">
+								[sizeunitoptions]
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b>Type</b>:
+						</td>
+						<td class="formcolumnright_sidebar">
+							<select id="sectors_sidebar" name="sectors[]" multiple="multiple" class="styledselect_sidebar">
+								[sectoroptions]
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b>Tenure</b>:
+						</td>
+						<td class="formcolumnright_sidebar">
+							<select id="tenure_sidebar" name="tenure" class="styledselect_sidebar tenure">
+								[tenureoptions]
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b>Area</b>:
+						</td>
+						<td class="formcolumnright_sidebar">
+							<select id="areas_sidebar" name="areas[]" multiple="multiple" class="styledselect_sidebar">
+								[areaoptions]
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b>Location</b>:
+						</td>
+						<td class="formcolumnright_sidebar">
+							<input id="address_sidebar" name="address" value="[address]" class="styledselect_sidebar"/> 
+						</td>
+					</tr>
+					<tr>
+						<td class="formcolumnleft_sidebar">
+							<b>Postcode:</b>:
+						</td>
+						<td class="formcolumnright_sidebar">
+							<input id="postcode_sidebar" name="postcode" value="[postcode]" class="styledselect_sidebar"/> 
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td class="formcolumnright_sidebar">
+							<input id="submit" type="image" src="[themeurl]/images/submit.gif"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+<!-- TO DO add Jquery pop up boxes for saved search options -->
+						</td>
+						<td class="formcolumnright_sidebar">
+							<a href="#" OnClick="cpd_saved_searches();">Save search</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
 </div>

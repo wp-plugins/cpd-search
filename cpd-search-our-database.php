@@ -2,16 +2,19 @@
 
 require_once(dirname(__FILE__) . "/cpd-common.php");
 require_once(dirname(__FILE__) . "/cpd-register-interest.php");
+require_once(dirname(__FILE__) . "/cpd-view-property-image.php");
+require_once(dirname(__FILE__) . "/cpd-view-property-pdf.php");
 
 function cpd_search_our_database_init() {
+	wp_enqueue_script('cpd-common', cpd_plugin_dir_url(__FILE__) ."js/cpd-common.js");
 	wp_enqueue_script('cpd-search-our-database-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-search-our-database-controller.js");
+	wp_enqueue_script('cpd-view-property-pdf-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-pdf-controller.js");
 	wp_localize_script('cpd-search-our-database-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 
 function cpd_search_our_database_gather_inputs() {
 	// Build the request from session-stored variables and any updated ones
 	// passed in with the POST request
-    
 	if(isset($_REQUEST['start'])) {
 		$_SESSION['cpd_search_our_database_start'] = $_REQUEST['start'];
 	}
@@ -40,6 +43,11 @@ function cpd_search_our_database_gather_inputs() {
 		$_SESSION['cpd_search_our_database_tenure'] = $_REQUEST['tenure'];
 	}
 	
+	if(isset($_REQUEST['postcode']))
+	{
+		$_SESSION['cpd_search_our_database_postcode'] = $_REQUEST['postcode'];
+	}
+	
 	// Ensure any missing values are defaulted
 	if(($_SESSION['cpd_search_our_database_start'] * 1) < 1) {
 		$_SESSION['cpd_search_our_database_start'] = 1;
@@ -61,7 +69,7 @@ function cpd_search_our_database_gather_inputs() {
 function cpd_search_our_database() {
 	cpd_search_our_database_init();
 	cpd_register_interest_init();
-
+	
 	// Gather inputs from request/session
 	cpd_search_our_database_gather_inputs();
 
@@ -74,7 +82,8 @@ function cpd_search_our_database() {
 	$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
 	$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
 	$tenure =  $_SESSION['cpd_search_our_database_tenure'];
-
+	$postcode = $_SESSION['cpd_search_our_database_postcode'];
+	
 	// Read in necessary form template sections from plugin options
 	$form = cpd_get_template_contents("common");
 	$form .= cpd_get_template_contents("user_registration");
@@ -91,6 +100,7 @@ function cpd_search_our_database() {
 		"\t<span id=\"sizeunits\">[sizeunits]</span>\n".
 		"\t<span id=\"sectors\">[sectors]</span>\n".
 		"\t<span id=\"tenure\">[tenure]</span>\n".
+		"\t<span id=\"postcode\">[postcode]</span>\n".
 		"\t<span id=\"areas\">[areas]</span>\n".
 		"\t<span id=\"address\">[address]</span>\n".
 		"\t<span id=\"trigger\">[trigger]</span>\n".
@@ -113,16 +123,13 @@ function cpd_search_our_database() {
 	$areaoptions = cpd_area_options($areas);
 	$form = str_replace("[areaoptions]", $areaoptions, $form);
 
-	// Add per-page options
-	$perpageoptions = cpd_perpage_options($limit);
-	$form = str_replace("[perpageoptions]", $perpageoptions, $form);
-
 	// Populate form defaults
 	$form = str_replace("[sizefrom]", $sizefrom, $form);
 	$form = str_replace("[sizeto]", $sizeto, $form);
 	$form = str_replace("[sizeunits]", $sizeunits, $form);
 	$form = str_replace("[sectors]", json_encode($sectors), $form);
 	$form = str_replace("[tenure]", $tenure, $form);
+	$form = str_replace("[postcode]", $postcode, $form);
 	$form = str_replace("[areas]", json_encode($areas), $form);
 	$form = str_replace("[address]", $address, $form);
 
@@ -133,9 +140,14 @@ function cpd_search_our_database() {
 	$form = str_replace("[start]", $start, $form);
 	$form = str_replace("[limit]", $limit, $form);
 
-	// Add theme base URL
-	$form = str_replace("[themeurl]", get_template_directory_uri(), $form);
+	// Add per-page options
+	$perpageoptions = cpd_perpage_options($limit);
+	$form = str_replace("[perpageoptions]", $perpageoptions, $form);
 
+	// Add theme/plugin base URLs
+	$form = str_replace("[themeurl]", get_template_directory_uri(), $form);
+	$form = str_replace("[pluginurl]", plugins_url(), $form);
+	
 	// Determine whether to trigger search or not
 	$trigger = false;
 	if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -163,6 +175,7 @@ function cpd_search_our_database_ajax() {
 	$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
 	$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
 	$tenure =  $_SESSION['cpd_search_our_database_tenure'];
+	$postcode =  $_SESSION['cpd_search_our_database_postcode'];
 	
 	// Send our search request to the server
 	$searchCriteria = new SearchCriteriaType();
@@ -194,7 +207,10 @@ function cpd_search_our_database_ajax() {
 	if(!empty($tenure)) {
 		$searchCriteria->Tenure = $tenure;
 	}
-
+	if(!empty($postcode)){
+		$searchCriteria->Postcode = $postcode;
+	}
+	
 	// Perform search
 	$searchRequest = new SearchPropertyType();
 	$searchRequest->SearchCriteria = $searchCriteria;
@@ -240,13 +256,20 @@ function cpd_search_our_database_ajax() {
 			// Add thumb URL, only if one is available
 			if(isset($record->PropertyMedia)) {
 				$mediaList = $record->PropertyMedia;
-				if($propList instanceof PropertyMediaType) {
-					$propList = array($propList);
+				if($mediaList instanceof PropertyMediaType) {
+					$mediaList = array($propList);
 				}
 				foreach($mediaList as $media) {
-					if($media->Type == "photo" && $media->Position == 1) {
+					if($media->Position > 1) {
+						continue;
+					}
+					if($media->Type == "photo") {
 						$row['ThumbURL'] = $media->ThumbURL;
-						break;
+						continue;
+					}
+					if($media->Type == "pdf" && $record->AgentRef == $options['cpd_agentref']) {
+						$row['PDFMediaID'] = $media->MediaID;
+						continue;
 					}
 				}
 			}

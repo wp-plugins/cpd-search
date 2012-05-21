@@ -32,6 +32,11 @@ function cpd_search_form_widget_gather_inputs() {
 	if(isset($_REQUEST['tenure'])) {
 		$_SESSION['cpd_search_our_database_tenure'] = $_REQUEST['tenure'];
 	}
+	if(isset($_REQUEST['postcode']))
+	{
+		$_SESSION['cpd_search_our_database_postcode'] = $_REQUEST['postcode'];
+	}
+	
 		
 	// Ensure any missing values are defaulted
 	if(($_SESSION['cpd_search_our_database_start'] * 1) < 1) {
@@ -64,6 +69,7 @@ function cpd_search_form_widget() {
 	$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
 	$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
 	$tenure =  $_SESSION['cpd_search_our_database_tenure'];
+	$postcode = $_SESSION['cpd_search_our_database_postcode'];
     
 	// Read in necessary form template sections from plugin options
 	$form = cpd_get_template_contents("search_form_widget");
@@ -112,6 +118,7 @@ function cpd_search_form_widget() {
 	$form = str_replace("[sizeunits]", $sizeunits, $form);
 	$form = str_replace("[sectors]", json_encode($sectors), $form);
 	$form = str_replace("[tenure]", $tenure, $form);
+	$form = str_replace("[postcode]", $postcode, $form);
 	$form = str_replace("[areas]", json_encode($areas), $form);
 	$form = str_replace("[address]", $address, $form);
 
