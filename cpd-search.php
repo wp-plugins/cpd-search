@@ -3,7 +3,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of tags that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.2.5
+Version: 1.2.6
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -52,9 +52,9 @@ function cpd_jquery_init() {
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('jquery-ui-core');
 	wp_enqueue_script('jquery-ui-mouse');
-	wp_enqueue_script('jquery-ui-slider', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.slider.js", array('jquery-ui-widget'), "", true);
-	wp_enqueue_script('jquery-ui-dialog', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.dialog.js", array('jquery-ui-widget'), "", true);
-	wp_enqueue_script('jquery-ui-draggable', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.draggable.js", array('jquery-ui-widget'), "", true);
+	wp_enqueue_script('jquery-ui-dialog');
+	wp_enqueue_script('jquery-ui-draggable');
+	wp_enqueue_script('jquery-ui-slider');
 	wp_enqueue_script('jquery-lightbox', cpd_plugin_dir_url(__FILE__) . "js/jquery.lightbox-0.5.min.js");
 	
 	// CPD custom CSS

@@ -11,16 +11,16 @@ function cpd_clipboard_widget_hide_show()
 {
 	if(jQuery("#cpdsearchnavigationmodel").length == 0)
 	{
-		jQuery("#clipboard").hide();
+		jQuery("#cpdclipboard_sidebar").hide();
 		return;
 	}
 	if(jQuery("#cpdsearchnavigationmodel").is(':hidden'))
 	{
-		jQuery("#clipboard").hide();
+		jQuery("#cpdclipboard_sidebar").hide();
 	}
 	else
 	{
-		jQuery("#clipboard").show();
+		jQuery("#cpdclipboard_sidebar").show();
 	}
 }
 
@@ -28,11 +28,11 @@ function cpd_clipboard_widget_sellect_all(obj)
 {	
 	if(jQuery(obj).is(':checked'))
 	{
-		jQuery("#clipboard_list li #cbx_clipboard").attr('checked','checked');
+		jQuery("#contentbox #cbx_clipboard:gt(0)").attr('checked','checked');
 	}
 	else
 	{
-		jQuery("#clipboard_list li #cbx_clipboard").removeAttr('checked');
+		jQuery("#contentbox #cbx_clipboard").removeAttr('checked');
 	}
 }
 
@@ -40,7 +40,8 @@ function cpd_clipboard_widget_sellect_obj(obj)
 {	
 	var i = 0;
 	var j = 0;
-	jQuery("#clipboard_list li #cbx_clipboard").each(function(){
+	
+	jQuery("#contentbox #cbx_clipboard").each(function(){
 		if(jQuery(this).is(':checked'))
 		{
 			j++;
@@ -60,6 +61,9 @@ function cpd_clipboard_widget_sellect_obj(obj)
 
 function cpd_clipboard_widget_success(data)
 {
+
+	var objItem = jQuery(".clipboardresultholdingtable1_sidebar:eq(0)").clone();
+	
 	if(!data.success) {
 		return cpd_clipboard_widget_error(null, data.error, data.error);
 	}
@@ -85,13 +89,17 @@ function cpd_clipboard_widget_success(data)
 		var postcode = property.Postcode;
 		var location = property.Location;
 		
-		var str = "<li propref_clipboard='" + PropertyID + "' id='" + PropertyID + "'><div class='checkbox'><input type='checkbox' name='cbx_clipboard' id='cbx_clipboard' onclick='cpd_clipboard_widget_sellect_obj(this);' /></div><div class='content-block'><p class='name'><span><img src='wp-content/plugins/cpd-search/images/btn_close.png' propref_clipboard='" + PropertyID + "' class='btn_close' onClick='cpd_clipboard_widget_delete(this);' width='15' height='13' /></span> " + name + "</p><p><span>Postcode:</span> " + postcode + "</p><p><span>Location:</span> " + location + "</p><p><span>Tenure:</span> " + tenure + "</p><p><span>Size:</span> " + size + "</p></div></li>";
-		
-		
-		jQuery("#clipboard_list .no-item").remove();
-		
-		jQuery("#clipboard_list").append(str);
-		
+		jQuery(objItem).attr("propref_clipboard",PropertyID);
+		jQuery(objItem).attr("id",PropertyID);
+		jQuery(objItem).find("img").attr("propref_clipboard",PropertyID);
+		jQuery(objItem).find("input").attr("propref_clipboard",PropertyID);
+		jQuery(objItem).find(".name").html(name);
+		jQuery(objItem).find(".Postcode").html(postcode);
+		jQuery(objItem).find(".Location").html(location);
+		jQuery(objItem).find(".Tenure").html(tenure);
+		jQuery(objItem).find(".Size").html(size);
+		jQuery(objItem).css("display","");
+		jQuery(".clipboardresultholdingtable1_sidebar").last().after(objItem);	
 		jQuery('#cpdsearching span').html("Searching... Please wait a moment.");
 		jQuery('#cpdsearching').hide();
 		cpd_clipboard_widget_check_show_scroll();
@@ -100,35 +108,30 @@ function cpd_clipboard_widget_success(data)
 
 function cpd_clipboard_widget_check_show_scroll()
 {
-	var list_li = jQuery("#clipboard #clipboard_list li");
-	jQuery("#clipboard #clipboard_list li").css('border-bottom','1px solid #DADADA');
-	jQuery("#clipboard #number_item").text(list_li.length);
+	var list_li = jQuery("#contentbox .clipboardresultholdingtable1_sidebar:gt(0)");
+	jQuery("#contentbox clipboardresultholdingtable1_sidebar").css('border-bottom','1px solid #DADADA');
+	jQuery("#form-sidebar #number_item").text(list_li.length);
 	
 	if(list_li.length <= 4)
 	{
-		jQuery("#clipboard .block").css('overflow-y','hidden');
+		jQuery("#contentbox").css('overflow-y','hidden');
 		var height = 0;
 		for(var i = 0;i<list_li.length;i++)
 		{
 			height += jQuery(list_li[i]).height();
 		}
-		jQuery("#clipboard .block").css('height',jQuery("#clipboard #clipboard_list").height());
-		jQuery("#clipboard .clipboard-content").css('height',height + 160);
-		jQuery("#clipboard .content-block").css('width',175);
+		jQuery("#contentbox").css('height',height);
 	}
 	else
 	{
-		jQuery("#clipboard .block").css('overflow-y','hidden');
+		jQuery("#contentbox").css('overflow-y','hidden');
 		var height = 0;
 		for(var i = 0;i<4;i++)
 		{
 			height += jQuery(list_li[i]).height() + 7;
 		}
-		jQuery("#clipboard .block").css('height',height);
-		jQuery("#clipboard .clipboard-content").css('height',height + 160);
-		jQuery("#clipboard .block").css('overflow-y','scroll');
-		jQuery("#clipboard .content-block").css('width',160);
-		
+		jQuery("#contentbox").css('height',height);
+		jQuery("#contentbox").css('overflow-y','scroll');
 	}
 	
 	if(list_li.length > 0)
@@ -148,7 +151,7 @@ function cpd_clipboard_widget_error(data, status, error) {
 
 function cpd_clipboard_widget(obj) {
 	
-	jQuery('#cpdsearching span').html("Add to clipboard... Please wait a moment.");
+	jQuery('#cpdsearching span').html("Adding to clipboard... Please wait a moment.");
 	jQuery('#cpdsearching').show();
 	
 	var propref = jQuery(obj).attr("propref");	
@@ -167,12 +170,13 @@ function cpd_clipboard_widget(obj) {
 		error: cpd_clipboard_widget_error,
 		dataType: "json"
 	};
+	
 	jQuery.ajax(ajaxopts);
 }
 
 function cpd_clipboard_widget_delete(obj)
 {
-	jQuery('#cpdsearching span').html("Delete item on clipboard... Please wait a moment.");
+	jQuery('#cpdsearching span').html("Deleting item from clipboard... Please wait a moment.");
 	jQuery('#cpdsearching').show();
 	
 	var propref = jQuery(obj).attr("propref_clipboard");	
@@ -189,7 +193,7 @@ function cpd_clipboard_widget_delete(obj)
 		data: postdata,
 		success: function(data){
 			
-			jQuery("#clipboard_list #" + propref).remove();
+			jQuery("#clipboardholdingcontainer_sidebar #" + propref).remove();
 			
 			jQuery('#cpdsearching span').html("Searching... Please wait a moment.");
 			jQuery('#cpdsearching').hide();
@@ -207,3 +211,48 @@ function cpd_clipboard_widget_delete(obj)
 	jQuery.ajax(ajaxopts);
 }
 
+function cpd_clipboard_widget_pushpost(){
+	
+	jQuery('#cpdsearching span').html("Posting clipboard contents... Please wait a moment.");
+	jQuery('#cpdsearching').show();
+	var input = [];
+	var id = [];
+	var input = jQuery('input:checkbox[name="cbx_clipboard[]"]:checked');
+	for (var i = 0; i< input.length;i++){
+		 id[i] = jQuery(input[i]).attr("propref_clipboard");	
+	}
+	if(id.length == 0)
+	{
+		alert("Please select an item to post");
+		jQuery('#cpdsearching').hide();
+		return false;
+	}
+	
+	
+	var postdata = {
+		'action':'cpd_clipboard_widget_pushpost_ajax',
+		'id':id,
+	};
+	
+	var ajaxopts = {
+		url : CPDAjax.ajaxurl,
+		type: 'POST',
+		data: postdata,		
+		success: function(data){
+			if (data.success==true){ 
+				var link = data.results['link'];
+				location.href = link;
+			}else
+				alert(data.error);
+		},
+		error: function(data){
+			alert(data.error);
+		},
+		dataType:"json"
+	};
+	
+	jQuery.ajax(ajaxopts);
+	jQuery('#cpdsearching').hide();
+	
+	return false;
+}

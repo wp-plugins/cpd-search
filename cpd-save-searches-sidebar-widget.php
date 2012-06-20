@@ -1,6 +1,6 @@
 <?php
 function cpd_save_searches_sidebar_widget_init(){
-	
+	wp_enqueue_script('jquery-ui-dialog', cpd_plugin_dir_url(__FILE__) . "js/jquery.ui.dialog.js", array('jquery-ui-widget'), "", true);
 	wp_enqueue_script('cpd-save-searches-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-saved-searches-sidebar-widget-controller.js");
 }
 
@@ -30,29 +30,13 @@ Class CPD_Save_Searches_Widget extends WP_Widget {
 		$home = home_url();
 		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
 		$title = apply_filters('widget_title', $instance['title'] );
+		$save_a_search = cpd_get_template_contents("saved_search_popup");
 		echo $before_widget;
 		if ( $title )
 			echo $before_title;
-			echo "<div id='saved_searches'>
-				  <div class='saved_searches-content'>
-					<h2><span>". $title ."</span></h2>
-					<div class='saved'>
-						<span class='properties'><span id='number_item_saved'></span> Searches saved</span>
-					</div>
-					<div class='block'>
-					<div class=''>
-                    <ul id='saved-searches'>";
-				echo cpd_saved_searches_widget_load_items();
-				echo"</ul>
-					</div>
-					</div>
-				  <div class='nav'>
-					<a href='#' name='open' id='open' OnClick='cpd_open_saved_searches();'>Open</a>
-					<a href='#' name='' id='' OnClick='cpd_last_result();'>Last Results</a>
-				  </div>
-				  </div>";
-			echo $after_title;
-			
+			echo cpd_saved_searches_widget_load_items();
+			echo $save_a_search;
+			echo $after_title;	
 		echo $after_widget;
 	}
 	
@@ -86,28 +70,63 @@ function cpd_saved_searches_widget_load_items()
 	$str = '';
 	$home = home_url();
 	$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');	
+	$conten_template  = cpd_get_template_contents("saved_searches");	
+	$form_save_search  = substr($conten_template,strpos($conten_template,"<!--template item-->"));			
 	
 	if(!isset($_SESSION['cpd_saved_searches_widget']) || count($_SESSION['cpd_saved_searches_widget']) == 0 )
 	{
-		
+		$item_template  = substr($conten_template,0,strpos($conten_template,"<!--template item-->"));	
+		$item_template  = str_replace("[display_none]","display:none",$item_template);			
+		$form_save_search  = str_replace("[contentbox]",$item_template,$form_save_search);
 	}
 	else 
 	{
-		$list_li = $_SESSION['cpd_saved_searches_widget'];	
+		$list_li = $_SESSION['cpd_saved_searches_widget'];
+				
 		if(count($list_li) != 0)
-		{
+		{	
+			$list_item_template = '';
+			$item_template  = substr($conten_template,0,strpos($conten_template,"<!--template item-->"));	
+			$item_template  = str_replace("[display_none]","display:none",$item_template);
+			$list_item_template .= $item_template;
 			foreach($list_li as $data)
-			{
-				$str .= "<li class='content-block' id='".$data['id']."'><div><p><input type='checkbox' name='clipboard_select_all[]' id='".$data['id']."' /><span>Search Name</span><span class='date-last'>Date Last Search</span><img src='wp-content/plugins/cpd-search/images/X.png' id='".$data['id']."' onClick='cpd_remove_saved_searches(this);' width='15' height='13' /></p><p><span>Postcode:</span><span class='postcode'>".$data['postcode']."</span><span class='location date-last'>Location:</span><span class='address'> ".$data['address']."</span></p><p><span>Tenure:</span><span class='tenure_text'> ".$data['tenure_text']."</span><span class='tenure' style='display:none'>".$data['tenure']."</span><span class='sectors' style='display:none'>".implode(',',$data['sectors'])."</span><span class='areas' style='display:none'>".implode(',',$data['areas'])."</span><span>Size:</span><span>".$data['sizefrom'].'-'. $data['sizeto'].$data['size_text']."</span><span class='sizefrom' style='display:none'>".$data['sizefrom']."</span><span class='sizeto' style='display:none'>".$data['sizeto']."</span><span class='size' style='display:none'>".$data['size']."</span></p></div></li>";
+			{	
+				$item_template  = substr($conten_template,0,strpos($conten_template,"<!--template item-->"));				
+				$item_template  = str_replace("[display_none]","",$item_template);
+				$item_template  = str_replace("[search_name]",$data['search_name'],$item_template);
+				$item_template  = str_replace("[date_last_search]",$data['date_last_search'],$item_template);
+				$item_template  = str_replace("[id]",$data['id'],$item_template);
+				$item_template  = str_replace("[postcode]",$data['postcode'],$item_template);
+				$item_template  = str_replace("[location]",$data['address'],$item_template);
+				$item_template  = str_replace("[tenure_text]",$data['tenure_text'],$item_template);
+				$item_template  = str_replace("[tenure]",$data['tenure'],$item_template);
+				$item_template  = str_replace("[sizefrom]",$data['sizefrom'],$item_template);
+				$item_template  = str_replace("[sizeto]",$data['sizeto'],$item_template);
+				$item_template  = str_replace("[size_units]",$data['size'],$item_template);
+				if ($data['sectors']!= null){
+					$item_template  = str_replace("[sectors]",implode(',',$data['sectors']),$item_template);
+				}else {
+					$item_template  = str_replace("[sectors]","",$item_template);
+				}
+				if ($data['areas']!= null){
+					$item_template  = str_replace("[areas]",implode(',',$data['areas']),$item_template);
+				}else{
+					$item_template  = str_replace("[areas]","",$item_template);
+				}
+				$item_template  = str_replace("[size]",$data['sizefrom'].'-'. $data['sizeto'].$data['size_text'],$item_template);
+				$list_item_template .= $item_template;
 			}
+			$form_save_search  = str_replace("[contentbox]",$list_item_template,$form_save_search);
 		}
 	}
-	return $str;
+	return $form_save_search;
 }
 
 
 function cpd_saved_searches_widget_ajax() {
 	
+	$search_name = trim($_REQUEST['search_name']);
+	$date_last_search = trim($_REQUEST['date_last_search']);
 	$id = trim($_REQUEST['id']);
 	$address= trim($_REQUEST['address']);
 	$postcode= trim($_REQUEST['postcode']);
@@ -119,6 +138,7 @@ function cpd_saved_searches_widget_ajax() {
 	$size= $_REQUEST['size'];
 	$sectors= $_REQUEST['sectors'];
 	$areas= $_REQUEST['areas'];
+
 	
 	if(!isset($_SESSION['cpd_saved_searches_widget']))
 	{
@@ -126,7 +146,9 @@ function cpd_saved_searches_widget_ajax() {
 		$_SESSION['cpd_saved_searches_widget'] = $cpd_saved_searches_widget;
 	}		
 	
-	$row=array();
+	$row = array();
+	$row['search_name'] = $search_name;
+	$row['date_last_search'] = $date_last_search;
 	$row['id'] = $id;
 	$row['address'] = $address;
 	$row['postcode'] = $postcode;
@@ -138,7 +160,7 @@ function cpd_saved_searches_widget_ajax() {
 	$row['size_text'] = $size_text;
 	$row['sectors'] = $sectors;
 	$row['areas'] = $areas;			
-	$results[]=$row;		
+	$results[] = $row;		
 	
 	$cpd_saved_searches_widget = $_SESSION['cpd_saved_searches_widget'];
 	$cpd_saved_searches_widget[] = $results[0];
@@ -147,6 +169,8 @@ function cpd_saved_searches_widget_ajax() {
 	
 	$response = array(
 		'success' => true,
+		'search_name'=> $search_name,
+		'date_last_search'=> $date_last_search,
 		'id'=> $id,
 		'address'=> $address,
 		'postcode'=> $postcode,
@@ -156,8 +180,9 @@ function cpd_saved_searches_widget_ajax() {
 		'sizefrom'=> $sizefrom,
 		'size'=> $size,
 		'size_text'=> $size_text,
-		'sectors'=> $sectors,
-		'areas'=> $areas,
+		'sectors'=> implode(",",$sectors),
+		'areas'=> implode(",",$areas),
+		
 	);
 	
 	header( "Content-Type: application/json" );
@@ -170,7 +195,7 @@ add_action('wp_ajax_cpd_saved_searches_widget_ajax', 'cpd_saved_searches_widget_
 add_action('wp_ajax_nopriv_cpd_saved_searches_widget_ajax', 'cpd_saved_searches_widget_ajax');
 
 //remmove ajax
-function cpd_remove_saved_searches_widget_ajax(){
+function cpd_saved_searches_widget_remove_item_widget_ajax(){
 	
 	$id = $_REQUEST['id'];	
 	$cpd_saved_searches_widget_temp = array();	
@@ -190,12 +215,13 @@ function cpd_remove_saved_searches_widget_ajax(){
 		'success' => true,
 		'id'=> $id,
 	);
+	
 	header( "Content-Type: application/json" );
 	echo json_encode($response);
 	exit;
 }
 
-add_action('wp_ajax_cpd_remove_saved_searches_widget_ajax', 'cpd_remove_saved_searches_widget_ajax');
-add_action('wp_ajax_nopriv_cpd_remove_saved_searches_widget_ajax', 'cpd_remove_saved_searches_widget_ajax');
+add_action('wp_ajax_cpd_saved_searches_widget_remove_item_widget_ajax', 'cpd_saved_searches_widget_remove_item_widget_ajax');
+add_action('wp_ajax_nopriv_cpd_saved_searches_widget_remove_item_widget_ajax', 'cpd_saved_searches_widget_remove_item_widget_ajax');
 
 ?>

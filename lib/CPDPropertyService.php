@@ -201,6 +201,7 @@ class PropertyView {
   public $ID; // int
   public $UserID; // int
   public $PropertyID; // int
+  public $ServiceContext; // string
   public $ViewDate; // dateTime
   public $ProcessedDate; // dateTime
 }
@@ -209,6 +210,7 @@ class PropertyMediaView {
   public $ID; // int
   public $UserID; // int
   public $MediaID; // int
+  public $ServiceContext; // string
   public $ViewDate; // dateTime
   public $ProcessedDate; // dateTime
 }
@@ -217,6 +219,7 @@ class RegisteredInterest {
   public $ID; // int
   public $UserID; // int
   public $PropertyID; // int
+  public $ServiceContext; // string
   public $InterestedDate; // dateTime
   public $ProcessedDate; // dateTime
 }
@@ -333,18 +336,15 @@ class PostcodeLookupType {
   public $Postcode; // string
 }
 
-class GetRecentViewingsType {
+class GetRecentVisitorsType {
   public $SinceDate; // dateTime
   public $OnlyUnprocessed; // boolean
 }
 
-class ProcessRegisteredInterestType {
+class ProcessVisitorsType {
   public $ID; // int
-  public $SendEmail; // boolean
-}
-
-class SearchCPDAreasType {
-  public $SearchCriteria; // CPDAreaCriteriaType
+  public $SendAgentEmail; // boolean
+  public $SendVisitorEmail; // boolean
 }
 
 class CPDAreaCriteriaType {
@@ -353,14 +353,26 @@ class CPDAreaCriteriaType {
   public $Substring; // string
 }
 
-class SearchCPDPostcodePrefixesType {
-  public $SearchCriteria; // CPDPostcodePrefixesCriteriaType
+class SearchCPDAreasType {
+  public $SearchCriteria; // CPDAreaCriteriaType
 }
 
 class CPDPostcodePrefixesCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $CPDAreaID; // int
+}
+
+class SearchCPDPostcodePrefixesType {
+  public $SearchCriteria; // CPDPostcodePrefixesCriteriaType
+}
+
+class CreateCPDPostcodePrefixType {
+  public $PostcodePrefix; // CPDPostcodePrefixType
+}
+
+class RemoveCPDPostcodePrefixType {
+  public $PostcodePrefix; // CPDPostcodePrefixType
 }
 
 class GetDBSchemaVersionResponseType {
@@ -423,12 +435,12 @@ class PostcodeLookupResponseType {
   public $PostcodeCoordinates; // PostcodeCoordinates
 }
 
-class GetRecentViewingsResponseType {
+class GetRecentVisitorsResponseType {
   public $Visitor; // VisitorType
 }
 
-class ProcessRegisteredInterestResponseType {
-  public $RegisteredInterest; // RegisteredInterest
+class ProcessVisitorsResponseType {
+  public $Visitor; // VisitorType
 }
 
 class SearchCPDAreasResponseType {
@@ -437,6 +449,13 @@ class SearchCPDAreasResponseType {
 
 class SearchCPDPostcodePrefixesResponseType {
   public $PostcodePrefix; // CPDPostcodePrefixType
+}
+
+class CreateCPDPostcodePrefixResponseType {
+  public $PostcodePrefix; // CPDPostcodePrefixType
+}
+
+class RemoveCPDPostcodePrefixResponseType {
 }
 
 class ListMediaResponseType {
@@ -519,12 +538,14 @@ class CPDPropertyService extends SoapClient {
                                     'SwapMediaPositionType' => 'SwapMediaPositionType',
                                     'RemoveMediaType' => 'RemoveMediaType',
                                     'PostcodeLookupType' => 'PostcodeLookupType',
-                                    'GetRecentViewingsType' => 'GetRecentViewingsType',
-                                    'ProcessRegisteredInterestType' => 'ProcessRegisteredInterestType',
-                                    'SearchCPDAreasType' => 'SearchCPDAreasType',
+                                    'GetRecentVisitorsType' => 'GetRecentVisitorsType',
+                                    'ProcessVisitorsType' => 'ProcessVisitorsType',
                                     'CPDAreaCriteriaType' => 'CPDAreaCriteriaType',
-                                    'SearchCPDPostcodePrefixesType' => 'SearchCPDPostcodePrefixesType',
+                                    'SearchCPDAreasType' => 'SearchCPDAreasType',
                                     'CPDPostcodePrefixesCriteriaType' => 'CPDPostcodePrefixesCriteriaType',
+                                    'SearchCPDPostcodePrefixesType' => 'SearchCPDPostcodePrefixesType',
+                                    'CreateCPDPostcodePrefixType' => 'CreateCPDPostcodePrefixType',
+                                    'RemoveCPDPostcodePrefixType' => 'RemoveCPDPostcodePrefixType',
                                     'GetDBSchemaVersionResponseType' => 'GetDBSchemaVersionResponseType',
                                     'GetSectorsResponseType' => 'GetSectorsResponseType',
                                     'SearchPropertyResponseType' => 'SearchPropertyResponseType',
@@ -541,10 +562,12 @@ class CPDPropertyService extends SoapClient {
                                     'SwapMediaPositionResponseType' => 'SwapMediaPositionResponseType',
                                     'RemoveMediaResponseType' => 'RemoveMediaResponseType',
                                     'PostcodeLookupResponseType' => 'PostcodeLookupResponseType',
-                                    'GetRecentViewingsResponseType' => 'GetRecentViewingsResponseType',
-                                    'ProcessRegisteredInterestResponseType' => 'ProcessRegisteredInterestResponseType',
+                                    'GetRecentVisitorsResponseType' => 'GetRecentVisitorsResponseType',
+                                    'ProcessVisitorsResponseType' => 'ProcessVisitorsResponseType',
                                     'SearchCPDAreasResponseType' => 'SearchCPDAreasResponseType',
                                     'SearchCPDPostcodePrefixesResponseType' => 'SearchCPDPostcodePrefixesResponseType',
+                                    'CreateCPDPostcodePrefixResponseType' => 'CreateCPDPostcodePrefixResponseType',
+                                    'RemoveCPDPostcodePrefixResponseType' => 'RemoveCPDPostcodePrefixResponseType',
                                     'ListMediaResponseType' => 'ListMediaResponseType',
                                     'SectorListType' => 'SectorListType',
                                     'PropertyListType' => 'PropertyListType',
@@ -803,11 +826,11 @@ class CPDPropertyService extends SoapClient {
   /**
    *  
    *
-   * @param GetRecentViewingsType $request
-   * @return GetRecentViewingsResponseType
+   * @param GetRecentVisitorsType $request
+   * @return GetRecentVisitorsResponseType
    */
-  public function GetRecentViewings(GetRecentViewingsType $request) {
-    return $this->__soapCall('GetRecentViewings', array($request),       array(
+  public function GetRecentVisitors(GetRecentVisitorsType $request) {
+    return $this->__soapCall('GetRecentVisitors', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -817,11 +840,11 @@ class CPDPropertyService extends SoapClient {
   /**
    *  
    *
-   * @param ProcessRegisteredInterestType $request
-   * @return ProcessRegisteredInterestResponseType
+   * @param ProcessVisitorsType $request
+   * @return ProcessVisitorsResponseType
    */
-  public function ProcessRegisteredInterest(ProcessRegisteredInterestType $request) {
-    return $this->__soapCall('ProcessRegisteredInterest', array($request),       array(
+  public function ProcessVisitors(ProcessVisitorsType $request) {
+    return $this->__soapCall('ProcessVisitors', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -850,6 +873,34 @@ class CPDPropertyService extends SoapClient {
    */
   public function SearchCPDPostcodePrefixes(SearchCPDPostcodePrefixesType $request) {
     return $this->__soapCall('SearchCPDPostcodePrefixes', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param CreateCPDPostcodePrefixType $request
+   * @return CreateCPDPostcodePrefixResponseType
+   */
+  public function CreateCPDPostcodePrefix(CreateCPDPostcodePrefixType $request) {
+    return $this->__soapCall('CreateCPDPostcodePrefix', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param RemoveCPDPostcodePrefixType $request
+   * @return RemoveCPDPostcodePrefixResponseType
+   */
+  public function RemoveCPDPostcodePrefix(RemoveCPDPostcodePrefixType $request) {
+    return $this->__soapCall('RemoveCPDPostcodePrefix', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

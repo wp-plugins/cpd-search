@@ -1,8 +1,12 @@
-function cpd_saved_searches(){
+var check_registration_name = /^[A-Za-z0-9_ ]{5,20}$/;
 
+function cpd_saved_searches(){
+	var search_name = jQuery("#cpdsaveasearch #search_name").val();
+	var date_last_search = jQuery("#cpdsaveasearch #date_last_search").val();
+	if (!check_registration_name.test(search_name)){return;}
+	if (!check_registration_name.test(date_last_search)){return;}
 	jQuery('#cpdsearching span').html("Save search... Please wait a moment.");
 	jQuery('#cpdsearching').show();
-	
 	var d = new Date();
 	var n = d.getTime();
 	var size = jQuery("select#sizeunits_sidebar option:selected").val();
@@ -21,9 +25,11 @@ function cpd_saved_searches(){
 	var sizeto = jQuery("#form-sidebar #sizeto_sidebar").val();
 	var areas_options = jQuery("select#areas_sidebar option:selected");
 	var areas = [];
+	
 	for (var i= 0; i< areas_options.length;i++ ){
 		areas[i] = areas_options[i].value;
 	}
+	
 	var address = jQuery('#address_sidebar').val();
 	var postcode = jQuery('#postcode_sidebar').val();
 	var postdata = {
@@ -39,6 +45,8 @@ function cpd_saved_searches(){
 		'sectors':sectors,
 		'areas':areas,
 		'id':n,
+		'search_name':search_name,
+		'date_last_search':date_last_search,
 	};
 	var ajaxopts = {
 		type: 'POST',
@@ -51,47 +59,67 @@ function cpd_saved_searches(){
 	jQuery.ajax(ajaxopts);
 }
 
-function cpd_saved_searches_success(data){
-	var str = "<li class='content-block' id='" + data['id'] + "'><div><p><input type='checkbox' name='clipboard_select_all[]' id='"+data['id']+"' /><span>Search Name</span><span class='date-last'>Date Last Search</span><img src='wp-content/plugins/cpd-search/images/X.png' id='"+ data['id'] +"' onClick='cpd_remove_saved_searches(this);' width='15' height='13' /></p><p><span>Postcode:</span><span class='postcode'>" + data['postcode'] + "</span><span class='location date-last'>Location:</span><span class='address'> " + data['address'] + "</span></p><p><span>Tenure:</span><span class='tenure_text'> " + data['tenure_text'] + "</span><span class='tenure' style='display:none'>"+ data['tenure'] +"</span><span class='sectors' style='display:none'>"+ data['sectors'] +"</span><span class='areas' style='display:none'>"+ data['areas'] +"</span><span>Size:</span><span>"+ data['sizefrom']+'-'+ data['sizeto'] + data['size_text'] +"</span><span class='sizefrom' style='display:none'>"+data['sizefrom']+"</span><span class='sizeto' style='display:none'>"+data['sizeto']+"</span><span class='size' style='display:none'>"+data['size']+"</span></p></div></li>";
-	jQuery("#saved-searches").append(str);
+function cpd_saved_searches_success(data){	
+	jQuery('#cpdsaveasearch').dialog('close');
+	var objItem = jQuery(".savesearchresultholdingtable1_sidebar:eq(0)").clone();
+	jQuery(objItem).find(".search_name").html(data['search_name']);
+	jQuery(objItem).find(".date_last_search").html(data['date_last_search']);
+	jQuery(objItem).attr("id",data['id']);
+	jQuery(objItem).find("input:checkbox").attr("id",data['id']);
+	jQuery(objItem).find("img").attr("id",data['id']);
+	jQuery(objItem).find(".postcode").html(data['postcode']);
+	jQuery(objItem).find(".location").html(data['address']);
+	jQuery(objItem).find(".tenure_text").html(data['tenure_text']);
+	jQuery(objItem).find(".tenure").html(data['tenure']);
+	jQuery(objItem).find(".size").html(data['size']);
+	jQuery(objItem).find(".sizefrom").html(data['sizefrom']);
+	jQuery(objItem).find(".sizeto").html(data['sizeto']);
+	jQuery(objItem).find(".size_units").html(data['size_units']);
+	jQuery(objItem).find(".sectors").html(data['sectors']);
+	jQuery(objItem).find(".areas").html(data['areas']);			
+	jQuery(objItem).find(".areas").css("display","");
+	jQuery(objItem).css("display","");
+	jQuery(".savesearchbottomtable_sidebar").before(objItem);	
 	jQuery('#cpdsearching span').html("Saving... Please wait a moment.");
 	jQuery('#cpdsearching').hide();
-	jQuery("#saved_searches #number_item_saved").text(jQuery("#saved-searches li").length);
+	cpd_saved_searches_number_item();
+	
 }
 
 //open saved seareches
-function cpd_open_saved_searches(){
+function cpd_saved_searches_widget_open_item(){
 	
-	var input = jQuery('input:checkbox[name="clipboard_select_all[]"]:checked');
-	
+	var input = jQuery('input:checkbox[name="savesearch_select_all[]"]:checked');
+
 	if(input.length == 1){
 		
 		var id = jQuery('input:checkbox:checked').attr("id");
-		var postcode = jQuery("#"+id).find(".postcode").text();
-		var address = jQuery("#"+id).find(".address").text();
-		var tenure = jQuery("#"+id).find(".tenure").text();
-		var sectors = jQuery("#"+id).find(".sectors").text();
-		var areas = jQuery("#"+id).find(".areas").text();
-		var sizefrom = jQuery("#"+id).find(".sizefrom").text();
-		var sizeto = jQuery("#"+id).find(".sizeto").text();
-		var size = jQuery("#"+id).find(".size").text();
+		var postcode = jQuery("#"+id).find("#data_hiden .postcode").text().trim();
+		var address = jQuery("#"+id).find("#data_hiden .location").text().trim();
+		var tenure = jQuery("#"+id).find("#data_hiden .tenure").text();
+		var sectors = jQuery("#"+id).find("#data_hiden .sectors").text();
+		var areas = jQuery("#"+id).find("#data_hiden .areas").text();
+		var sizefrom = jQuery("#"+id).find("#data_hiden .sizefrom").text();
+		var sizeto = jQuery("#"+id).find("#data_hiden .sizeto").text();
+		var size_text = jQuery("#"+id).find("#data_hiden .size_text").text();
+		var size_units = jQuery("#"+id).find("#data_hiden .size_units").text();
 		
 	} else{
 		
 		alert("Please chose one result saved");
-		
+		return false;
 	}
 	
 	var areas_split = areas.split(",");
 	var sectors_split = sectors.split(",");
-		
-	jQuery("#form-sidebar").find("#address_sidebar").val(address);
-	jQuery("#form-sidebar").find("#postcode_sidebar").val(postcode);
-	jQuery("#form-sidebar").find("#tenure_sidebar").val(tenure);
-	jQuery("#form-sidebar").find("#sizefrom_sidebar").val(sizefrom);
-	jQuery("#form-sidebar").find("#sizeto_sidebar").val(sizeto);
-	jQuery("#form-sidebar").find("#sizeunits_sidebar").val(size);
 	
+	jQuery("#form-sidebar #address_sidebar").val(address);
+	jQuery("#form-sidebar #postcode_sidebar").val(postcode);
+	jQuery("#form-sidebar #tenure_sidebar").val(tenure);
+	jQuery("#form-sidebar #sizefrom_sidebar").val(sizefrom);
+	jQuery("#form-sidebar #sizeto_sidebar").val(sizeto);
+	jQuery("#form-sidebar #sizeunits_sidebar").val(size_units);
+
 	jQuery("#form-sidebar").find("select#sectors_sidebar option").each(function (){
 		jQuery(this).removeAttr('selected');
 		for(var i = 0;i < sectors_split.length;i++){
@@ -107,14 +135,16 @@ function cpd_open_saved_searches(){
 			jQuery(this).attr('selected','selected');
 		}
 	});
+	return false;
 }
 
 //remove saved searches
-function cpd_remove_saved_searches(data){
+function cpd_saved_searches_widget_remove_item(data){
 	
 	var id = jQuery(data).attr("id");
+	
 	var postdata = {
-		'action':'cpd_remove_saved_searches_widget_ajax',
+		'action':'cpd_saved_searches_widget_remove_item_widget_ajax',
 		'id':id,
 	};
 	
@@ -123,26 +153,101 @@ function cpd_remove_saved_searches(data){
 		url: CPDAjax.ajaxurl,
 		data: postdata,
 		dataType: "json",
-		success: function(data){jQuery("#saved-searches #"+ id).remove();
-		jQuery("#saved_searches #number_item_saved").text(jQuery("#saved-searches li").length);
+		success: function(data){
+			jQuery("#cpdsavesearch_sidebar #"+ id).remove();
+			cpd_saved_searches_number_item();
 		},
-		error: function(data){alert("data error");},
+		error: function(data){alert("Data error");},
 	};
 	
 	jQuery.ajax(ajaxopts);
 }
 
-function cpd_last_result(){
-	
-	jQuery("#saved-searches li").find("input").attr("checked",false);
-	jQuery("#saved-searches li").last().find("input").attr("checked",true);
-	cpd_open_saved_searches();
+
+function cpd_saved_searches_widget_last_result(){
+		
+	cpd_saved_searches_widget_open_item();
 	cpd_search_our_database_submit_form();
 	
 }
 
+
+function cpd_saved_searches_number_item()
+{
+	number = 0;
+	jQuery(".savesearchresultholdingtable1_sidebar").each(function(){
+		if(!jQuery(this).is(':hidden'))
+		{
+			number ++;
+		}
+	});
+	jQuery(".savesearchtoptable_sidebar #number").text(number);
+}
+
+function cpd_saved_searches_widget_hide_show()
+{
+	if(jQuery("#cpdsearchnavigationmodel").length == 0)
+	{
+		jQuery("#cpdsavesearch_sidebar").hide();
+		return;
+	}
+	if(jQuery("#cpdsearchnavigationmodel").is(':hidden'))
+	{
+		jQuery("#cpdsavesearch_sidebar").hide();
+	}
+	else
+	{
+		jQuery("#cpdsavesearch_sidebar").show();
+	}
+}
+
 jQuery(document).ready(function(){
-	
-	jQuery("#saved_searches #number_item_saved").text(jQuery("#saved-searches li").length);
+	jQuery("#cpdsaveasearch").dialog({
+		title: "Save Search",
+		autoOpen: false,
+		height: 500,
+		width: 350,
+		modal: true,
+		buttons: {
+			"Save": cpd_saved_searches,
+			"Cancel": function() {
+				jQuery(this).dialog("close");
+			},
+		}
+	});
+	jQuery("#search_name").focusout(function(){
+		var search_name = jQuery(this).val();
+		if (!check_registration_name.test(search_name)){
+			jQuery("#error-search_name").show().html("please fill search name");
+			return;
+		}
+		jQuery("#error-search_name").hide();
+	});
+	jQuery("#date_last_search").focusout(function(){
+		var date_last_search = jQuery(this).val();
+		if (!check_registration_name.test(date_last_search)){
+			jQuery("#error-date_last_search").show().html("please fill note");
+			return;
+		}
+		jQuery("#error-date_last_search").hide();
+	});
+	cpd_saved_searches_widget_hide_show();
+	cpd_saved_searches_number_item();
+	jQuery("#savesearch").click(function(){
+		jQuery("#cpdsaveasearch").dialog("open");
+	});
+	jQuery("#cpdsavesearch_sidebar input[type=checkbox]").live('click',function(){
+		var currentCheckbox = jQuery(this);
+		var temp = currentCheckbox.attr("checked");
+		if(temp == "checked")
+		{
+			jQuery("#cpdsavesearch_sidebar input[type=checkbox]").each(function(){
+				if(jQuery(this).attr("id") != currentCheckbox.attr("id"))
+				{
+					jQuery(this).removeAttr("checked");
+				}
+			});		
+		}	
+	});
 	
 })

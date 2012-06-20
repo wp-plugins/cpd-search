@@ -34,34 +34,7 @@ class CPD_Clipboard_Widget extends WP_Widget {
 		
 		if ( $title )
 			echo $before_title;
-						echo "<div id='clipboard'>
-				  <div class='clipboard-content'>
-					<h2><span>". $title ."</span></h2>
-					<div class='saved'>
-						<span><label><input type='checkbox' name='cbx_clipboard_all' id='cbx_clipboard_all' onclick='cpd_clipboard_widget_sellect_all(this);' />Select all</label></span>
-						<span class='properties'><span id='number_item'></span> properties saved</span>
-					</div>
-					<div class='block'>
-					<div class='location'>
-                    <ul id='clipboard_list'>";
-					echo cpd_clipboard_widget_load_items();
-					echo"</ul>
-					</div>
-					</div>
-				  <div class='nav'>
-				  <p><a href='#' name='btn_preview_clipboard' id='btn_preview_clipboard'>PREVIEW</a></p>
-				  <ul>		
-					  <li><a href='#' class='email'>eMail</a></li>
-					  <li><a href='#' class='print'>Print</a></li>
-					  <li class='last'><a href='#' class='save'>Save</a></li>
-				  </ul>
-				  <ul class='last'>		
-					  <li><a href='#'>Twiter</a></li>
-					  <li><a href='#'>Facebook</a></li>
-					  <li class='last'><a href='#'>Blog post</a></li>
-				  </ul>
-				  </div>
-				  </div>";
+			echo cpd_clipboard_widget_load_items();
 			echo $after_title;
 		echo $after_widget;
 	}
@@ -90,10 +63,13 @@ function cpd_clipboard_widget_load_items()
 	$str = '';
 	$home = home_url();
 	$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
-	
+	$content_template  = cpd_get_template_contents("clipboard_widget");
+	$form_clipboard  = substr($conten_template,strpos($content_template,"<!--template item-->"));
 	if(!isset($_SESSION['cpd_clipboard_widget_propref_objs']) || count($_SESSION['cpd_clipboard_widget_propref_objs']) == 0 )
 	{
-		
+		$item_template  = substr($content_template,0,strpos($content_template,"<!--template item-->"));	
+		$item_template  = str_replace("[display_none]","display:none",$item_template);			
+		$form_clipboard  = str_replace("[contentbox]",$item_template,$form_clipboard);
 	}
 	else 
 	{
@@ -101,13 +77,27 @@ function cpd_clipboard_widget_load_items()
 		
 		if(count($list_propref_obj) != 0)
 		{
+			$list_item_template = '';
+			$item_template_displaynnone  = substr($content_template,0,strpos($content_template,"<!--template item-->"));	
+			$item_template_displaynnone  = str_replace("[display_none]","display:none",$item_template_displaynnone);
 			foreach($list_propref_obj as $obj)
 			{
-				$str .= "<li propref_clipboard = '".$obj['PropertyID']."' id = '".$obj['PropertyID']."'><div class='checkbox'><input type='checkbox' name='cbx_clipboard' id='cbx_clipboard' onclick='cpd_clipboard_widget_sellect_obj(this);' /></div><div class='content-block'><p class='name'> <span><img src='".$path_dir_plugin."images/btn_close.png' propref_clipboard = '".$obj['PropertyID']."' class='btn_close' onClick='cpd_clipboard_widget_delete(this);' width='15' height='13' /></span> ". $obj['Address']. "</p><p><span>Postcode:</span> " .$obj['Postcode'] . "</p><p><span>Location:</span> " .$obj['Location'] . "</p><p><span>Tenure:</span> " .$obj['TenureDescription'] . "</p><p><span>Size:</span> " .$obj['SizeDescription'] . "</p></div></li>";
+				$item_template  = substr($content_template,0,strpos($content_template,"<!--template item-->"));				
+				$item_template  = str_replace("[display_none]","",$item_template);
+				$item_template  = str_replace("[id]",$obj['PropertyID'],$item_template);
+				$item_template  = str_replace("[pluginurl]",$path_dir_plugin,$item_template);
+				$item_template  = str_replace("[Address]",$obj['Address'],$item_template);
+				$item_template  = str_replace("[Postcode]",$obj['Postcode'],$item_template);
+				$item_template  = str_replace("[Location]",$obj['Location'],$item_template);
+				$item_template  = str_replace("[TenureDescription]",$obj['TenureDescription'],$item_template);
+				$item_template  = str_replace("[SizeDescription]",$obj['SizeDescription'],$item_template);
+				$list_item_template .= $item_template;
 			}
+			$list_item_template = $item_template_displaynnone.$list_item_template;
+			$form_clipboard  = str_replace("[contentbox]",$list_item_template,$form_clipboard);
 		}
 	}
-	return $str;
+	return $form_clipboard;
 }
 
 function cpd_clipboard_widget_load_widgets() {
@@ -136,7 +126,8 @@ function cpd_clipboard_widget_ajax() {
 		{
 			$status = false;
 		}
-	}		
+	}	
+	
 	if($status)
 	{
 		$list_propref[] = $propref;
@@ -151,6 +142,7 @@ function cpd_clipboard_widget_ajax() {
 		echo json_encode($response);
 		exit;
 	}
+	
 	$_SESSION['cpd_clipboard_widget_propref'] = $list_propref;
 	
 	
@@ -166,6 +158,7 @@ function cpd_clipboard_widget_ajax() {
 	// Perform search
 	$searchRequest = new SearchPropertyType();
 	$searchRequest->SearchCriteria = $searchCriteria;
+	
 	try {
 		$options = get_option('cpd-search-options');
 		$soapopts = array('trace' => 1, 'exceptions' => 1);
@@ -295,7 +288,6 @@ function cpd_clipboard_widget_delete_ajax() {
 	}		
 	
 	$_SESSION['cpd_clipboard_widget_propref'] = $list_propref_temp;
-	
 	$response = array(
 	'success' => true,
 	);
@@ -307,4 +299,147 @@ function cpd_clipboard_widget_delete_ajax() {
 
 add_action('wp_ajax_cpd_clipboard_widget_delete_ajax', 'cpd_clipboard_widget_delete_ajax');
 add_action('wp_ajax_nopriv_cpd_clipboard_widget_delete_ajax', 'cpd_clipboard_widget_delete_ajax');
+
+function cpd_clipboard_widget_pushpost_ajax(){
+
+	$current_user = wp_get_current_user();
+	
+	if (0 == $current_user->ID ) {
+		$response = array(
+			'success' => false,
+			'error'  => "Please login",
+		);
+		header( "Content-Type: application/json" );
+		echo json_encode($response);
+		exit;
+	} elseif ($current_user->roles[0] != 'administrator'){
+		$response = array(
+			'success' => false,
+			'error'  => "You are not enough permission",
+		);
+		header( "Content-Type: application/json" );
+		echo json_encode($response);
+		exit;	
+	}
+	
+	$propref = array();
+	$propref = $_REQUEST['id'];
+	$num_li  = count($propref);
+	$temp = '';
+	
+	for($i = 0; $i < $num_li;$i++){
+		$temp .= '[publish_property_ref id="'.$propref[$i].'"]<br/>';
+	}
+	
+	$update_post = array(
+			'post_content' => $temp,
+			'post_type'    => 'post',
+			'post_status'  => 'publish',
+			'post_title'   => 'publish_property_ref '.$propref[$i]
+		);
+		
+	$post = wp_insert_post($update_post);
+	$link = get_edit_post_link($post,'&');
+	
+	$results   = array();
+		$results['propref']	= $propref;
+		$results['link'] = $link;
+	
+	$response = array(
+		'success' => true,
+		'results'  => $results
+	);
+	
+	header( "Content-Type: application/json" );
+	echo json_encode($response);
+	exit;
+}
+
+add_action('wp_ajax_cpd_clipboard_widget_pushpost_ajax', 'cpd_clipboard_widget_pushpost_ajax');
+add_action('wp_ajax_nopriv_cpd_clipboard_widget_pushpost_ajax', 'cpd_clipboard_widget_pushpost_ajax');
+
+function publish_property_ref($atts){
+	
+	$propref = $atts["id"];
+	
+	// Send our search request to the server
+	$searchCriteria = new SearchCriteriaType();
+	$searchCriteria->Start = 1;
+	$searchCriteria->Limit = 1;
+	$searchCriteria->DetailLevel = "full";
+	$propertyIDsType = new PropertyIDsType();
+	$propertyIDsType->PropertyID = $propref;
+	$searchCriteria->PropertyIDs = $propertyIDsType;
+	
+	// Perform search
+	$searchRequest = new SearchPropertyType();
+	$searchRequest->SearchCriteria = $searchCriteria;
+	
+	try {
+		$options = get_option('cpd-search-options');
+		$soapopts = array('trace' => 1, 'exceptions' => 1);
+		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
+		$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+		$client->__setSOAPHeaders($headers);
+		$searchResponse = $client->SearchProperty($searchRequest);
+	}
+	catch(Exception $e) {
+		echo $e->getMessage();
+	}
+	
+	// Filter results to avoid sending sensitive fields over the wire
+	$results = array();
+	if(isset($searchResponse->PropertyList->Property)) {
+		// Workaround for PITA in PHP SOAP parser...
+		$propList = $searchResponse->PropertyList->Property;
+		if($propList instanceof PropertyType) {
+			$propList = array($propList);
+		}
+		
+		foreach($propList as $record) {
+			
+			$row = array();
+			$row['PropertyID'] = $record->PropertyID;
+			$row['SectorDescription'] = $record->SectorDescription;
+			$row['SizeDescription'] = $record->SizeDescription;
+			$row['TenureDescription'] = $record->TenureDescription;
+			$row['BriefSummary'] = $record->BriefSummary;
+			$row['Address'] = $record->Address;
+			$row['Latitude'] = $record->Latitude;
+			$row['Longitude'] = $record->Longitude;
+			$row['RegionName'] = $record->RegionName;
+			$row['Location'] = $record->RegionName;			
+			$row['Postcode'] = $record->Postcode;			
+			
+			// Add thumb URL, only if one is available
+			if(isset($record->PropertyMedia)) {
+				$mediaList = $record->PropertyMedia;
+				if($propList instanceof PropertyMediaType) {
+					$propList = array($propList);
+				}
+				foreach($mediaList as $media) {
+					if($media->Type == "photo" && $media->Position == 1) {
+						$row['ThumbURL'] = $media->ThumbURL;
+						break;
+					}
+				}
+			}
+			
+			$results[] = $row;
+			$form = cpd_get_template_contents("publish_property");
+			$form = str_replace("[resultnum]","", $form);
+			$form = str_replace("[propref]", $propref, $form);
+			$form = str_replace("[typedesc]", $row['SectorDescription'], $form);
+			$form = str_replace("[sizedesc]", $row['SizeDescription'], $form);
+			$form = str_replace("[areadesc]", $row['Address'], $form);
+			$form = str_replace("[summary]", $row['BriefSummary'], $form);
+			$form = str_replace("[photo]", "<img src='".$row['ThumbURL']."'", $form);
+			$form = str_replace("[themeurl]", get_template_directory_uri(), $form);
+			
+		}
+	}
+	return $form ;
+}
+
+add_shortcode('publish_property_ref','publish_property_ref');
 ?>

@@ -152,6 +152,7 @@ function cpd_search_our_database_success(data) {
 
 	// Clear loading dialog and hide form
 	cpd_clipboard_widget_hide_show();
+	cpd_saved_searches_widget_hide_show();
 	jQuery('#cpdsearching').hide();
 	jQuery('#cpdsearchform').hide();
 }

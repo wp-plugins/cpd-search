@@ -1,150 +1,108 @@
-<div id="cpdclipboard_sidebar" style="display: block;">	
-	<div id="clipboardholdingcontainer_sidebar" class="div-sidebar">
+<!-- template item save search -->
+<table class="savesearchresultholdingtable1_sidebar" style="[display_none]" id='[id]'>
+	<tbody>
+		<tr>
+			<td class="savesearchtopcolumnleft_sidebar">
+				<input type="checkbox" name="savesearch_select_all[]" value=""  id='[id]'/>
+			</td>
+			<td class="savesearchtopcolumnmiddle_sidebar search_name">
+				[search_name]
+			</td>
+			<td class="savesearchtopcolumnmiddle_sidebar date_last_search">				
+				[date_last_search]
+			</td>
+			<td class="savesearchtopcolumnright_sidebar">
+				<img src="[themeurl]/images/btn_close.png" id='[id]' onclick="cpd_saved_searches_widget_remove_item(this);" />
+			</td>
+		</tr>
+		<tr>
+			<td class="savesearchmiddlecolumnleft_sidebar">
+			</td>
+			<td colspan="2">
+				<table>
+					<tr>
+						<td class ="savedsearchesdetailstextbold">
+							Postcode:
+						</td>
+						<td class="savesearchmiddlecolumnmiddle1_sidebar postcode">
+							[postcode]
+						</td>
+					</tr>
+					<tr>
+						<td class="savedsearchesdetailstextbold">
+							Location:
+						</td>
+						<td class="savesearchmiddlecolumnright_sidebar location">
+							[location]
+						</td>
+					</tr>
+					<tr>
+						<td class="savedsearchesdetailstextbold">
+							Tenure:
+						</td>
+						<td class="savesearchmiddlecolumnmiddle1_sidebar tenure_text">
+							[tenure_text]
+						</td>
+					</tr>
+					<tr>
+						<td class="savedsearchesdetailstextbold">
+							Size:
+						</td>
+						<td class="savesearchmiddlecolumnright_sidebar size">
+							[size]
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan="4" style="display: none;" id="data_hiden">			
+				<span class="postcode">[postcode]</span>
+				<span class="location">[location]</span>
+				<span class="tenure_text">[tenure_text]</span>
+					<span class="size">[size]</span>
+				<span class="sizefrom">[sizefrom]</span>
+				<span class="sizeto">[sizeto]</span>
+				<span class="size_units">[size_units]</span>
+				<span class="sectors">[sectors]</span>
+				<span class="areas">[areas]</span>
+				<span class="tenure">[tenure]</span>
+			</td>
+		</tr>
+	</tfoot>
+</table>
+	<div class="clipboardseperator"></div>
+<!--template item-->
+<!-- template box save search -->
+<div id="cpdsavesearch_sidebar" style="display: block;">	
+	<div id="savesearchholdingcontainer_sidebar" class="div-sidebar">
 		<form action="[actionurl]" method="post" id="form-sidebar"> 
-			<div id="clipboardheadersidebar">
+			<div id="savesearchheadersidebar">
 				Saved Searches
 			</div>
-			<table class="clipboardtoptable_sidebar">
+			<table class="savesearchtoptable_sidebar">
 				<tbody>
 					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
+						<td class="savesearchtopcolumnleft_sidebar">
 						</td>
-						<td class="clipboardtopcolumnmiddlesavedproperties_sidebar">
+						<td class="savesearchtopcolumnmiddlesavedproperties_sidebar">
 						</td>
-						<td class="clipboardtopcolumnrightsavedproperties_sidebar">
-							3 Searches Saved
+						<td class="savesearchtopcolumnrightsavedproperties_sidebar">
+							<span id="number"></span> Searches Saved
 						</td>
 					</tr>
 			</table>
-			<table class="clipboardresultholdingtable1_sidebar">
+			[contentbox]
+			<table class="savesearchbottomtable_sidebar">
 				<tbody>
 					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="clipboard_select_all" value=""  />
+						<td class="savesearchcontrolscolumnleft_sidebar">
+							<a href="#" onclick = 'cpd_saved_searches_widget_open_item();'><div class="buttonsidebar">Open</div></a>
 						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							Search Name
-						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							Date last search
-						</td>
-						<td class="clipboardtopcolumnright_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/clipboard_close_item.gif">
-						</td>
-					</tr>
-					<tr>
-						<td colspan="4">
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Postcode:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										B988RZ
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Location:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										London
-									</td>
-
-								</tr>
-							</table>
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Tenure:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										Freehold
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Size:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										1500sqm
-									</td>
-
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="clipboardresultholdingtable2_sidebar">
-				<tbody>
-					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="clipboard_select_all" value=""  />
-						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							Search Name
-						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							Date last search
-						</td>
-						<td class="clipboardtopcolumnright_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/clipboard_close_item.gif">
-						</td>
-					</tr>
-					<tr>
-						<td colspan="4">
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Postcode:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										B988RZ
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Location:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										London
-									</td>
-
-								</tr>
-							</table>
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Tenure:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										Both
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Size:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										15000sqm
-									</td>
-
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="clipboardbottomtable_sidebar">
-				<tbody>
-
-					<tr>
-						<td class="clipboardcontrolscolumnleft_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/open_search.gif">
-						</td>
-						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/last_results.gif">
-						</td>
-					</tr>
-					<tr>
-						<td class="clipboardcontrolscolumnleft_sidebar">
-							<a href="/save-a-search">Open</a>
-						</td>
-						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<a href="/save-a-search">Last Results</a>
+						<td class="savesearchcontrolscolumnmiddle_sidebar">
+							<a href="#" onclick = 'cpd_saved_searches_widget_last_result();' ><div class="buttonsidebar">Last Results</div></a>
 						</td>
 					</tr>
 					</tr>

@@ -1,3 +1,66 @@
+<!-- template item clipboard -->
+<table class="clipboardresultholdingtable1_sidebar" id="[id]" propref_clipboard="[id]" style="[display_none]">
+	<tbody>
+		<tr>
+			<td class="clipboardtopcolumnleft_sidebar">
+				<input type="checkbox" name="cbx_clipboard[]" value="" propref_clipboard = '[id]' id='cbx_clipboard' onclick='cpd_clipboard_widget_sellect_obj(this);' />
+			</td>
+			<td class="clipboardtopcolumnmiddle_sidebar name" >
+				[Address]
+			</td>
+			<td class="clipboardtopcolumnright_sidebar">
+				<img src='[themeurl]/images/btn_close.png' propref_clipboard = '[id]' class='btn_close' onClick='cpd_clipboard_widget_delete(this);' width='15' height='13' />
+			</td>
+		</tr>
+		<tr>
+			<td class="clipboardtopcolumnleft_sidebar">
+			</td>
+			<td>
+				<table>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Postcode:
+						</td>
+						<td class="clipboardmiddlecolumnmiddle1_sidebar Postcode">
+							[Postcode]
+						</td>
+					</tr>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Location:
+						</td>
+						<td class="clipboardmiddlecolumnright_sidebar Location">
+							[Location]
+						</td>					
+					</tr>
+				</table>
+				<table>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Tenure:
+						</td>
+						<td class="clipboardmiddlecolumnmiddle1_sidebar Tenure">
+							[TenureDescription]
+						</td>
+					</tr>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Size:
+						</td>
+						<td class="clipboardmiddlecolumnright_sidebar Size">
+							[SizeDescription]
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td class="clipboardtopcolumnright_sidebar">
+			</td>
+		</tr>
+	</tbody>
+</table>
+<div class="clipboardseperator"></div>
+<!--template item-->
+<!-- template box clipboard -->
 <div id="cpdclipboard_sidebar" style="display: block;">	
 	<div id="clipboardholdingcontainer_sidebar" class="div-sidebar">
 		<form action="[actionurl]" method="post" id="form-sidebar"> 
@@ -8,164 +71,49 @@
 				<tbody>
 					<tr>
 						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="clipboard_select_all" value=""  />
+							<input type='checkbox' name='cbx_clipboard_all' id='cbx_clipboard_all' onclick='cpd_clipboard_widget_sellect_all(this);' />
 						</td>
 						<td class="clipboardtopcolumnmiddlesavedproperties_sidebar">
 							Select all
 						</td>
 						<td class="clipboardtopcolumnrightsavedproperties_sidebar">
-							3 Properties Saved
+							<span id='number_item'></span> properties saved
 						</td>
 					</tr>
 			</table>
-			<table class="clipboardresultholdingtable1_sidebar">
-				<tbody>
-					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="clipboard_select_all" value=""  />
-						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							46 radway Close, Churchill...
-						</td>
-						<td class="clipboardtopcolumnright_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/clipboard_close_item.gif">
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Postcode:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										B988RZ
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Location:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										London
-									</td>
-
-								</tr>
-							</table>
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Tenure:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										Freehold
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Size:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										1500sqm
-									</td>
-
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="clipboardresultholdingtable2_sidebar">
-				<tbody>
-					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="clipboard_select_all" value=""  />
-						</td>
-						<td class="clipboardtopcolumnmiddle_sidebar">
-							46 radway Close, Churchill...
-						</td>
-						<td class="clipboardtopcolumnright_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/clipboard_close_item.gif">
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Postcode:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										B988RZ
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Location:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										London
-									</td>
-
-								</tr>
-							</table>
-							<table>
-								<tr>
-									<td class="clipboardmiddlecolumnleft_sidebar">
-										Tenure:
-									</td>
-									<td class="clipboardmiddlecolumnmiddle1_sidebar">
-										Freehold
-									</td>
-									<td class="clipboardmiddlecolumnmiddle2_sidebar">
-										Size:
-									</td>
-									<td class="clipboardmiddlecolumnright_sidebar">
-										1500sqm
-									</td>
-
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+				<div id='contentbox'>
+					[contentbox]
+				</div>
 			<table class="clipboardbottomtable_sidebar">
 				<tbody>
 					<tr>
 						<td colspan="3">
-							<div align="center">
+							<div id="clipboardpreviewrow">
 								<a href="/publish-a-property">PREVIEW</a>
 							</div>
 						</td>
 					</tr>
-
 					<tr>
 						<td class="clipboardcontrolscolumnleft_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/email.gif">
+							<a href=""><div class="buttonsidebar">eMail</div></a>
 						</td>
 						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/print.gif">
+							<a href=""><div class="buttonsidebar">Print</div></a>
 						</td>
 						<td class="clipboardcontrolscolumnright_sidebar">
-							<img src="http://www.stuartmelzack.local/wp-content/themes/stuartmelzack/images/download.gif">
-						</td>
-					</tr>
-<tr>
-						<td class="clipboardcontrolscolumnleft_sidebar">
-							<a href="">eMail</a>
-						</td>
-						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<a href="">Print</a>
-						</td>
-						<td class="clipboardcontrolscolumnright_sidebar">
-							<a href="">Save</a>
+							<a href=""><div class="buttonsidebar">Save</div></a>
 						</td>
 					</tr>
 					</tr>
 					<tr>
 						<td class="clipboardcontrolscolumnleft_sidebar">
-							<a href="/publish-a-property">Twitter</a>
+							<a href="/publish-a-property"><div class="buttonsidebar">Twitter</div></a>
 						</td>
 						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<a href="/publish-a-property">Facebook</a>
+							<a href="/publish-a-property"><div class="buttonsidebar">Facebook</div></a>
 						</td>
 						<td class="clipboardcontrolscolumnright_sidebar">
-							<a href="/publish-a-property">Blog post</a>
+							<a href="#" onclick='cpd_clipboard_widget_pushpost();'><div class="buttonsidebar">Post</div></a>
 						</td>
 					</tr>
 				</tbody>

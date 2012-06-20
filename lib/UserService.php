@@ -35,6 +35,7 @@ class PasswordChangeType {
 class AuthenticateUserType {
   public $Email; // string
   public $Password; // string
+  public $Agent; // string
 }
 
 class FetchPreferencesType {
