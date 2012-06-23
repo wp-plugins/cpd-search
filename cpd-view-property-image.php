@@ -5,12 +5,12 @@ function cpd_view_property_image_ajax() {
 	$media_id = $_POST['media_id'];
 	
 	// Perform search
+	$options = get_option('cpd-search-options');
 	$viewMedia = new ViewingMediaType();
 	$viewMedia->MediaID = $media_id;	
-	$viewMedia->ServiceContext = SERVICE_CONTEXT;
+	$viewMedia->ServiceContext = $options['cpd_service_context'];
 	try {
 		// Create the SOAP client
-		$options = get_option('cpd-search-options');
 		$soapopts = array('trace' => 1, 'exceptions' => 1);
 		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
 		$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);

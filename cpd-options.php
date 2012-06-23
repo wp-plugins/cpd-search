@@ -28,6 +28,7 @@ function cpd_search_admin_init() {
 	register_setting( 'cpd-search-options', 'cpd_search_results_per_page');
 	register_setting( 'cpd-search-options', 'cpd_map_widget_width');
 	register_setting( 'cpd-search-options', 'cpd_map_widget_height');
+	register_setting( 'cpd-search-options', 'cpd_service_context');
 	register_setting( 'cpd-search-options', 'cpd_development_mode');
 	
 	$options = array(
@@ -37,6 +38,7 @@ function cpd_search_admin_init() {
 		'cpd_map_widget_width' => '640',
 		'cpd_map_widget_height' => '480',
 		'cpd_search_results_per_page' => '10',
+		'cpd_service_context' => 'WordpressPlugin',
 		'cpd_development_mode' => false,
 	);
 
@@ -274,6 +276,12 @@ if ( function_exists('wp_nonce_field') )
     </td>
   </tr>
   <tr valign="top">
+    <th scope="row">Service Context</th>
+    <td>
+      <input name="cpd_service_context" value="<?php echo $options['cpd_service_context']; ?>"" />
+    </td>
+  </tr>
+  <tr valign="top">
     <th scope="row">Development mode (*)</th>
     <td>
       <input type="checkbox" name="cpd_development_mode" value="Y" <?php if($options['cpd_development_mode']) { ?>checked="checked"<?php } ?> />
@@ -307,6 +315,7 @@ function cpd_search_options_posted() {
 	$options['cpd_search_results_per_page'] = $_REQUEST['cpd_search_results_per_page'] * 1;
 	$options['cpd_map_widget_width'] = $_REQUEST['cpd_map_widget_width'] * 1;
 	$options['cpd_map_widget_height'] = $_REQUEST['cpd_map_widget_height'] * 1;
+	$options['cpd_service_context'] = $_REQUEST['cpd_service_context'];
 	$options['cpd_development_mode'] = $_REQUEST['cpd_development_mode'] == "Y";
 	
 	global $cpd_templates;

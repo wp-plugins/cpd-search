@@ -28,11 +28,11 @@ function cpd_register_interest_ajax() {
 	}
 	
 	// Send our register interest request to the server
+	$options = get_option('cpd-search-options');
 	$registerInterest = new RegisterInterestType();
 	$registerInterest->PropertyID = $propref;
-	$registerInterest->ServiceContext = SERVICE_CONTEXT;
+	$registerInterest->ServiceContext = $options['cpd_service_context'];
 	try {
-		$options = get_option('cpd-search-options');
 		$soapopts = array('trace' => 1, 'exceptions' => 1);
 		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
 		$headers = wss_security_headers($cpd_token, "");
