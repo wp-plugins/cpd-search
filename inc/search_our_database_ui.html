@@ -1,0 +1,216 @@
+<div id="cpdsearchform" style="display: none;">
+	<div id="searchformholdingcontainer">
+		<table class="searchformholdingtable">
+		<tbody>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Size</b>:
+				</td>
+				<td class="formcolumnright">
+					<input type="text" id="sizefrom" name="sizefrom" value="[sizefrom]" size="5"/>
+						to
+					<input type="text" id="sizeto" name="sizeto" value="[sizeto]" size="5"/>
+					<select id="sizeunits" name="sizeunits" class="styledselect sizeunits">
+						[sizeunitoptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Property Type</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="sectors" name="sectors[]" multiple="multiple" class="styledselect">
+						[sectoroptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Tenure</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="tenure" name="tenure" class="styledselect tenure">
+						[tenureoptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Area</b>:
+				</td>
+				<td class="formcolumnright">
+					<select id="areas" name="areas[]" multiple="multiple" class="styledselect">
+						[areaoptions]
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Location</b>:
+				</td>
+				<td class="formcolumnright">
+					<input id="address" name="address" value="[address]" size="32" class="styledselect" /> 
+				</td>
+			</tr>
+			<tr>
+				<td class="formcolumnleft">
+					<b>Postcode:</b>:
+				</td>
+				<td class="formcolumnright">
+					<input id="postcode" name="postcode" value="[postcode]" size="32" class="styledselect" /> 
+				</td>
+			</tr>
+			<tr>
+				<td>
+				</td>
+				<td class="formcolumnright">
+					<input id="submit" type="image" src="[themeurl]/images/submit.gif" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+</div>
+
+<div id="cpdsearchresults"></div>
+
+<div id="cpdsearchresultmodel" class="result" style="display: none;">
+	<div id="searchresultsholdingcontainer">
+		<table>
+			<tbody>
+				<tr>
+					<td width="100">
+						<b>Result number:</b>
+						<span id="resultnum" class="value">[resultnum]</span>
+					</td>
+					<td>
+						<b>Property reference:</b>
+						<span id="propref" class="value">[propref]</span>
+					</td>
+					<td>
+						<b>Type:</b>
+						<span id="typedesc" class="value">[typedesc]</span>
+					</td>
+					<td>
+						<b>Size:</b>
+						<span id="sizedesc" class="value">[sizedesc]</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table>
+			<tbody>
+				<tr>
+					<td width="100">
+						<b>Location:</b>
+					</td>
+					<td width="150">
+						<span id="areadesc" class="value">[areadesc]</span>
+					</td>
+					<td width="150">
+						<b>Photo:</b>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<b>Brief details:</b>
+					</td>
+					<td valign="top">
+						<span id="summary" class="value">[summary]</span>
+					</td>
+					<td >
+						<span id="photo" class="value">[photo]</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table>
+			<tbody>
+				<tr>
+					<td width="165">
+						<a class="registerinterest" style="button">
+							<div id="button">
+								Register Interest
+							</div>
+						</a>
+						<a class="registeringinterest" style="display: none;">
+							<div id="buttonactive">
+								Registering Interest
+							</div>
+						</a>
+						<a class="registeredinterest" style="display: none;">
+							<div id="buttonused">
+								Interest Registered
+							</div>
+						</a>
+					</td>
+					<td>
+						<a class="clipboardadd" onclick="cpd_clipboard_widget(this);">
+							<div id="button">
+								Add to Clipboard
+							</div>
+						</a>
+					</td>
+					<!--
+					<td>
+						<a>
+							<div id="button">
+								View Full details
+							</div>
+						</a>
+					</td>
+					 -->
+					<td>
+						<a class="buttonpdf" style="display: none;">
+							<img src="[pluginurl]/cpd-search/images/pdf_icon.jpg" alt="pdf" style="margin:0"/>
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<br/>
+	</div>
+</div>
+
+<div id="cpdsearchnavigationmodel" class="navbar" style="display: none;">
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					<span class="navbarpagelist">
+						<span>
+							<span>Page</span> 
+							<a class="navbarprevpage" style="display: none;">
+								<img src="[themeurl]/images/previous.gif" alt="Previous page"/>
+							</a>
+							<input id="pagenums" name="pagenums" class="navbarpagenum" onkeypress="cpd_search_our_database_number_page(event)" />
+							<a class="navbarnextpage" style="display: none;">
+								<img src="[themeurl]/images/next.gif" alt="Next page"/>
+							</a>
+							<span>of</span>
+							<span class="navbarpagecount">[pagecount]</span>
+						</span>
+					</span>
+					<span class="split">|</span>
+					<span class="navbarperpageoptions">
+						<span>View:</span>
+						<select id="limit" name="limit" onchange="cpd_search_our_database_per_page_changed(this)">
+							[perpageoptions]
+						</select>
+						<span>per page</span>
+					</span>
+					<span class="split">|</span>
+					<span class="navbartotals">
+						<span>Total</span>
+						<span class="navbarresultcount">[resultcount]</span>
+						<span>records found</span>
+					</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
