@@ -7,6 +7,8 @@ class UserType {
   public $Phone; // string
   public $Confirmed; // boolean
   public $Newsletter; // boolean
+  public $RegistrationContext; // string
+  public $RegistrationDate; // dateTime
 }
 
 class RegisterUserType {
@@ -15,6 +17,7 @@ class RegisterUserType {
   public $Phone; // string
   public $Agent; // string
   public $Password; // string
+  public $ServiceContext; // string
 }
 
 class VerifyUserType {

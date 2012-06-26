@@ -18,6 +18,7 @@ function cpd_user_registration_ajax() {
 	$userRegistration->Phone = $phone;
 	$userRegistration->Agent = $options['cpd_agentref'];
 	$userRegistration->Password = $password;
+	$userRegistration->ServiceContext = $options['cpd_service_context'];
 	try {
 		$soapopts = array('trace' => 1, 'exceptions' => 1);
 		$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);

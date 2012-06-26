@@ -480,6 +480,9 @@ class InvalidMediaTypeExceptionType {
 class PostcodeNotFoundExceptionType {
 }
 
+class CPDPostcodePrefixNotFoundExceptionType {
+}
+
 
 /**
  * CPDPropertyService class
@@ -574,6 +577,7 @@ class CPDPropertyService extends SoapClient {
                                     'PropertyMediaListType' => 'PropertyMediaListType',
                                     'InvalidMediaTypeExceptionType' => 'InvalidMediaTypeExceptionType',
                                     'PostcodeNotFoundExceptionType' => 'PostcodeNotFoundExceptionType',
+                                    'CPDPostcodePrefixNotFoundExceptionType' => 'CPDPostcodePrefixNotFoundExceptionType',
                                    );
 
   public function CPDPropertyService($wsdl = "https://staging.cpd.co.uk/soap/services/CPDPropertyService?wsdl", $options = array()) {
