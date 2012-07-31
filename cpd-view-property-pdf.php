@@ -1,6 +1,8 @@
 <?php
 
 function cpd_view_property_pdf_ajax() {
+	global $soapopts;
+
 	// Determine first PDF for given property
 	$media_id = $_POST['media_id'];
 	
@@ -11,7 +13,6 @@ function cpd_view_property_pdf_ajax() {
 	$viewMedia->ServiceContext = $options['cpd_service_context'];
 	try {
 		// Create the SOAP client
-		$soapopts = array('trace' => 1, 'exceptions' => 1);
 		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
 		$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
 		$client->__setSOAPHeaders($headers);

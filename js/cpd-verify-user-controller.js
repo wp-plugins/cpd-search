@@ -1,75 +1,83 @@
-function cpd_verify_token_success(data) {
-	jQuery('#cpdverifyuser').dialog("close");
+function CPDVerifyUser() {
+	var self = this;
 
-	// Check for failure
-	if(!data.success) {
-		return cpd_verify_token_error(data, data.error, data.error);
-	}
+	self.verifyTokenSuccess = function(data) {
+		jQuery('#cpdverifyuser').dialog("close");
 
-	// Add visual identification that verification passed
-	jQuery('#cpduserverified').show();
-}
+		// Check for failure
+		if(!data.success) {
+			return self.verifyTokenError(data, data.error, data.error);
+		}
 
-function cpd_verify_token_error(data) {
-	jQuery('#cpdverifyuser').dialog("close");
+		// Add visual identification that verification passed
+		jQuery('#cpduserverified').show();
+	};
+	self.verifyTokenError = function(data) {
+		jQuery('#cpdverifyuser').dialog("close");
 	
-	if(data != null && data.error != null && data.error.indexOf("InvalidTokenException") > -1) {
-		// Show registration form
-		jQuery('#cpdverifyuserfailed').show();
-		return;
-	}
-	if(data != null && data.error != null && data.error.indexOf("UserAlreadyExistsException") > -1) {
-		// Show registration form
-		jQuery('#cpdverifyuserfailed').show();
-		return;
-	}
+		if(data != null && data.error != null && data.error.indexOf("InvalidTokenException") > -1) {
+			jQuery('#cpdverifyuserfailed').show();
+			return;
+		}
+		if(data != null && data.error != null && data.error.indexOf("UserAlreadyExistsException") > -1) {
+			jQuery('#cpdverifyuserfailed').show();
+			return;
+		}
 
-	// Add visual identification that verification passed
-	jQuery('#cpdverifyuserfailed').show();
-}
-
-function cpd_verify_token(token) {
-	var postdata = {
-		'action':'cpd_verify_user',
-		'token': token,
+		// Add visual identification that verification passed
+		jQuery('#cpdverifyuserfailed').show();
+	};
+	self.verifyToken = function(token) {
+		var postdata = {
+			'action':'cpd_verify_user',
+			'token': token,
+		};
+	
+		// Display 'Verifying...' dialog
+		jQuery('#cpdverifyuser').hide();
+		jQuery('#cpdverifyuser').dialog("open");
+	
+		// Send AJAX request to server
+		var ajaxopts = {
+			type: 'POST',
+			url: CPDAjax.ajaxurl,
+			data: postdata,
+			success: self.verifyTokenSuccess,
+			error: self.verifyTokenError,
+			dataType: "json"
+		};
+		jQuery.ajax(ajaxopts);
 	};
 	
-	// Display 'Verifying...' dialog
-	jQuery('#cpdverifyuser').hide();
-	jQuery('#cpdverifyuser').dialog("open");
+	self.init = function() {
+		// Initialise various dialogs
+		jQuery("#cpdverifyuser").dialog({
+			title: "User verification",
+			autoOpen: false,
+			height: 150,
+			width: 350,
+			resizable: false,
+			modal: true,
+			buttons: {
+				"Cancel": function() {
+					jQuery(this).dialog("close");
+				}
+			}
+		});
+
+		jQuery("#cpdloading").hide();
 	
-	// Send AJAX password reset request to server
-	var ajaxopts = {
-		type: 'POST',
-		url: CPDAjax.ajaxurl,
-		data: postdata,
-		success: cpd_verify_token_success,
-		error: cpd_verify_token_error,
-		dataType: "json"
+		// Get token string and post it to AJAX method
+		var token = jQuery("#token").text();
+		self.verifyToken(token);
 	};
-	jQuery.ajax(ajaxopts);
+	
+	return self;
 }
+
+cpdVerifyUser = new CPDVerifyUser();
 
 jQuery(document).ready(function() {
-	// Initialise various dialogs
-	jQuery("#cpdverifyuser").dialog({
-		title: "User verification",
-		autoOpen: false,
-		height: 150,
-		width: 350,
-		resizable: false,
-		modal: true,
-		buttons: {
-			"Cancel": function() {
-				jQuery(this).dialog("close");
-			}
-		}
-	});
-
-	jQuery("#cpdloading").hide();
-	
-	// Get token string and post it to AJAX method
-	var token = jQuery("#token").text();
-	cpd_verify_token(token);
+	cpdVerifyUser.init();
 });
 
