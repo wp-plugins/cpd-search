@@ -1,4 +1,8 @@
 <?php
+class AgentIDsType {
+  public $ID; // int
+}
+
 class AgentsType {
   public $Agent; // AgentType
 }
@@ -17,35 +21,48 @@ class AgentType {
   public $Fax; // string
   public $Url; // anyURI
   public $Services; // ServicesType
-  public $TopImgUrl; // anyURI
-  public $BottomImgUrl; // anyURI
   public $Type; // string
-  public $SodEmail; // string
-  public $CSSUrl; // anyURI
-  public $MapImgUrl; // anyURI
-  public $CCEmail; // string
-  public $Invoicing; // boolean
   public $DaysSearchable; // int
-  public $DemoStatus; // boolean
-  public $Sectors; // SectorsType
-  public $Areas; // AreasType
-  public $DefaultMethod; // string
-  public $SpecifyMethod; // string
+  public $SodEmail; // string
   public $SodDays; // int
   public $AutomatchPeriod; // int
   public $AutomatchEmail; // string
   public $Discount; // int
-  public $TemplateVersion; // int
-  public $ReportStyle; // string
-  public $EmailSubscription; // boolean
+  public $MasterUserID; // int
+  public $AccountID; // int
+  public $CreatedBy; // int
+  public $CreatedDate; // dateTime
+  public $UpdatedBy; // int
+  public $UpdatedDate; // dateTime
+  public $ArchivedBy; // int
+  public $ArchivedDate; // dateTime
+}
+
+class AccountsType {
+  public $Account; // AccountType
+}
+
+class AccountType {
+  public $ID; // int
+  public $Name; // string
+}
+
+class TransactionsType {
+  public $Transaction; // TransactionType
+}
+
+class TransactionType {
+  public $ID; // int
+  public $EntryDate; // dateTime
+  public $Description; // string
+  public $FromAccountID; // int
+  public $ToAccountID; // int
+  public $Amount; // float
+  public $Cleared; // boolean
 }
 
 class ServicesType {
   public $Service; // string
-}
-
-class UIDsType {
-  public $UID; // int
 }
 
 class ReferencesType {
@@ -60,12 +77,12 @@ class AuthenticateAgentType {
   public $Password; // string
 }
 
-class SearchAgentType {
+class SearchAgentsType {
   public $Token; // string
-  public $AgentSearchCriteria; // AgentSearchCriteriaType
+  public $SearchAgentsCriteria; // SearchAgentsCriteriaType
 }
 
-class AgentSearchCriteriaType {
+class SearchAgentsCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $DetailLevel; // DetailLevelType
@@ -78,11 +95,61 @@ class AgentSearchCriteriaType {
   public $AdminsOnly; // boolean
   public $AgentsOnly; // boolean
   public $Type; // string
-  public $UIDs; // UIDsType
+  public $AgentIDs; // AgentIDsType
   public $References; // ReferencesType
   public $WithOwner; // boolean
   public $WithoutOwner; // boolean
   public $Keyword; // string
+  public $SortField; // string
+  public $SortOrder; // SortOrderType
+}
+
+class CreateAgentType {
+  public $Token; // string
+  public $Agent; // AgentType
+}
+
+class UpdateAgentType {
+  public $Token; // string
+  public $Agent; // AgentType
+}
+
+class ResetAgentPasswordType {
+  public $Token; // string
+  public $UID; // int
+  public $NewPassword; // string
+}
+
+class SearchAgentTokensType {
+  public $Token; // string
+  public $AgentTokensSearchCriteria; // AgentTokensSearchCriteriaType
+}
+
+class AgentTokensSearchCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $UID; // int
+  public $Keyword; // string
+  public $SortField; // string
+  public $SortOrder; // SortOrderType
+}
+
+class ListAgentServicesType {
+  public $Token; // string
+}
+
+class SearchAgentTransactionsType {
+  public $Token; // string
+  public $Criteria; // TransactionsCriteriaType
+}
+
+class TransactionsCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $AccountID; // int
+  public $Keyword; // string
+  public $FromDate; // dateTime
+  public $ToDate; // dateTime
   public $SortField; // string
   public $SortOrder; // SortOrderType
 }
@@ -92,13 +159,62 @@ class AuthenticateAgentResponseType {
   public $Agent; // AgentType
 }
 
-class SearchAgentResponseType {
+class SearchAgentsResponseType {
   public $ResultCount; // int
   public $Agents; // AgentsType
 }
 
+class CreateAgentResponseType {
+  public $Agent; // AgentType
+}
+
+class UpdateAgentResponseType {
+  public $Agent; // AgentType
+}
+
+class ResetAgentPasswordResponseType {
+}
+
+class SearchAgentTokensResponseType {
+  public $ResultCount; // int
+  public $AgentTokens; // AgentTokensType
+}
+
 class AreasType {
   public $Area; // string
+}
+
+class AgentTokenType {
+  public $UID; // int
+  public $Token; // string
+  public $Type; // string
+  public $CreatedDate; // dateTime
+  public $LastUsed; // dateTime
+  public $ExpiryDate; // dateTime
+}
+
+class AgentTokensType {
+  public $AgentToken; // AgentTokenType
+}
+
+class ListAgentServicesResponseType {
+  public $ResultCount; // int
+  public $AgentServices; // AgentServicesType
+}
+
+class AgentServiceType {
+  public $ID; // string
+  public $Name; // string
+  public $Description; // string
+}
+
+class AgentServicesType {
+  public $AgentService; // AgentServiceType
+}
+
+class SearchAgentTransactionsResponseType {
+  public $ResultCount; // int
+  public $Transactions; // TransactionsType
 }
 
 
@@ -114,18 +230,40 @@ class AreasType {
 class AgentService extends SoapClient {
 
   private static $classmap = array(
+                                    'AgentIDsType' => 'AgentIDsType',
                                     'AgentsType' => 'AgentsType',
                                     'AgentType' => 'AgentType',
+                                    'AccountsType' => 'AccountsType',
+                                    'AccountType' => 'AccountType',
+                                    'TransactionsType' => 'TransactionsType',
+                                    'TransactionType' => 'TransactionType',
                                     'ServicesType' => 'ServicesType',
-                                    'UIDsType' => 'UIDsType',
                                     'ReferencesType' => 'ReferencesType',
                                     'EmailType' => 'EmailType',
                                     'AuthenticateAgentType' => 'AuthenticateAgentType',
-                                    'SearchAgentType' => 'SearchAgentType',
-                                    'AgentSearchCriteriaType' => 'AgentSearchCriteriaType',
+                                    'SearchAgentsType' => 'SearchAgentsType',
+                                    'SearchAgentsCriteriaType' => 'SearchAgentsCriteriaType',
+                                    'CreateAgentType' => 'CreateAgentType',
+                                    'UpdateAgentType' => 'UpdateAgentType',
+                                    'ResetAgentPasswordType' => 'ResetAgentPasswordType',
+                                    'SearchAgentTokensType' => 'SearchAgentTokensType',
+                                    'AgentTokensSearchCriteriaType' => 'AgentTokensSearchCriteriaType',
+                                    'ListAgentServicesType' => 'ListAgentServicesType',
+                                    'SearchAgentTransactionsType' => 'SearchAgentTransactionsType',
+                                    'TransactionsCriteriaType' => 'TransactionsCriteriaType',
                                     'AuthenticateAgentResponseType' => 'AuthenticateAgentResponseType',
-                                    'SearchAgentResponseType' => 'SearchAgentResponseType',
+                                    'SearchAgentsResponseType' => 'SearchAgentsResponseType',
+                                    'CreateAgentResponseType' => 'CreateAgentResponseType',
+                                    'UpdateAgentResponseType' => 'UpdateAgentResponseType',
+                                    'ResetAgentPasswordResponseType' => 'ResetAgentPasswordResponseType',
+                                    'SearchAgentTokensResponseType' => 'SearchAgentTokensResponseType',
                                     'AreasType' => 'AreasType',
+                                    'AgentTokenType' => 'AgentTokenType',
+                                    'AgentTokensType' => 'AgentTokensType',
+                                    'ListAgentServicesResponseType' => 'ListAgentServicesResponseType',
+                                    'AgentServiceType' => 'AgentServiceType',
+                                    'AgentServicesType' => 'AgentServicesType',
+                                    'SearchAgentTransactionsResponseType' => 'SearchAgentTransactionsResponseType',
                                    );
 
   public function AgentService($wsdl = "https://staging.cpd.co.uk/soap/services/AgentService?wsdl", $options = array()) {
@@ -154,11 +292,95 @@ class AgentService extends SoapClient {
   /**
    *  
    *
-   * @param SearchAgentType $parameters
-   * @return SearchAgentResponseType
+   * @param SearchAgentsType $parameters
+   * @return SearchAgentsResponseType
    */
-  public function SearchAgent(SearchAgentType $parameters) {
-    return $this->__soapCall('SearchAgent', array($parameters),       array(
+  public function SearchAgents(SearchAgentsType $parameters) {
+    return $this->__soapCall('SearchAgents', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param CreateAgentType $parameters
+   * @return CreateAgentResponseType
+   */
+  public function CreateAgent(CreateAgentType $parameters) {
+    return $this->__soapCall('CreateAgent', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param UpdateAgentType $parameters
+   * @return UpdateAgentResponseType
+   */
+  public function UpdateAgent(UpdateAgentType $parameters) {
+    return $this->__soapCall('UpdateAgent', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param ResetAgentPasswordType $parameters
+   * @return ResetAgentPasswordResponseType
+   */
+  public function ResetAgentPassword(ResetAgentPasswordType $parameters) {
+    return $this->__soapCall('ResetAgentPassword', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchAgentTokensType $parameters
+   * @return SearchAgentTokensResponseType
+   */
+  public function SearchAgentTokens(SearchAgentTokensType $parameters) {
+    return $this->__soapCall('SearchAgentTokens', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param ListAgentServicesType $parameters
+   * @return ListAgentServicesResponseType
+   */
+  public function ListAgentServices(ListAgentServicesType $parameters) {
+    return $this->__soapCall('ListAgentServices', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchAgentTransactionsType $parameters
+   * @return SearchAgentTransactionsResponseType
+   */
+  public function SearchAgentTransactions(SearchAgentTransactionsType $parameters) {
+    return $this->__soapCall('SearchAgentTransactions', array($parameters),       array(
             'uri' => 'http://agent.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

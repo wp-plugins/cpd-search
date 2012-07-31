@@ -1,13 +1,11 @@
 <div id="cpdsaveasearch" style="display:none;">
-	<p class="">Please provide your name and contact email address.</p>
 	<form>
-		<form>
 		<fieldset>
 			<table>
 				<tbody>
 					<tr>
 						<td>
-							<label for="search_name">Name</label>
+							<label for="search_name">Search Name</label>
 						</td>
 						<td>
 							<input type="text" name="search_name" id="search_name"/><br/>
@@ -27,5 +25,43 @@
 			</table>
 		</fieldset>
 	</form>
+	</br>
+	<p class="">
+		Important: Please register with the form below if you want to keep your saved searches after this session. You are welcome to continue to save searches without registering but <b>data will be lost</b> after you close your browser.
+	</p>
+	<form>
+		<fieldset>
+			<table>
+				<tbody>
+					<tr>
+						<td>
+							<label for="search_name">Name</label>
+						</td>
+						<td>
+							<input type="text" name="search_name" id="search_name"/><br/>
+							<span class="search_name" id="error-search_name"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="date_last_search">Email Address</label>
+						</td>
+						<td>
+							<input type="text" name="date_last_search" id="date_last_search"/><br/>
+							<span class="date_last_search" id="error-date_last_search"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div id="button">
+								Register
+							</div>
+						</td>
+						<td>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</fieldset>
 	</form>
 </div>

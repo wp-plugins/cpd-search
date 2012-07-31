@@ -1,15 +1,14 @@
-<!-- template item clipboard -->
-<table class="clipboardresultholdingtable1_sidebar" id="[id]" propref_clipboard="[id]" style="[display_none]">
+<table id="clipboardwidgetmodelrow" style="display: none;">
 	<tbody>
 		<tr>
 			<td class="clipboardtopcolumnleft_sidebar">
-				<input type="checkbox" name="cbx_clipboard[]" value="" propref_clipboard = '[id]' id='cbx_clipboard' onclick='cpd_clipboard_widget_sellect_obj(this);' />
+				<input type="checkbox" name="cbx_clipboard[]" value="Y" class="cbx_clipboard" id="cbx_clipboard" />
 			</td>
 			<td class="clipboardtopcolumnmiddle_sidebar name" >
 				[Address]
 			</td>
 			<td class="clipboardtopcolumnright_sidebar">
-				<img src='[themeurl]/images/btn_close.png' propref_clipboard = '[id]' class='btn_close' onClick='cpd_clipboard_widget_delete(this);' width='15' height='13' />
+				<img src="[pluginurl]/images/btn_close.png" class="btn_close" />
 			</td>
 		</tr>
 		<tr>
@@ -21,7 +20,7 @@
 						<td class="clipboarddetailstextbold">
 							Postcode:
 						</td>
-						<td class="clipboardmiddlecolumnmiddle1_sidebar Postcode">
+						<td class="clipboardmiddlecolumnmiddle1_sidebar postcode">
 							[Postcode]
 						</td>
 					</tr>
@@ -29,9 +28,9 @@
 						<td class="clipboarddetailstextbold">
 							Location:
 						</td>
-						<td class="clipboardmiddlecolumnright_sidebar Location">
+						<td class="clipboardmiddlecolumnright_sidebar location">
 							[Location]
-						</td>					
+						</td>
 					</tr>
 				</table>
 				<table>
@@ -39,7 +38,7 @@
 						<td class="clipboarddetailstextbold">
 							Tenure:
 						</td>
-						<td class="clipboardmiddlecolumnmiddle1_sidebar Tenure">
+						<td class="clipboardmiddlecolumnmiddle1_sidebar tenure">
 							[TenureDescription]
 						</td>
 					</tr>
@@ -47,7 +46,7 @@
 						<td class="clipboarddetailstextbold">
 							Size:
 						</td>
-						<td class="clipboardmiddlecolumnright_sidebar Size">
+						<td class="clipboardmiddlecolumnright_sidebar size">
 							[SizeDescription]
 						</td>
 					</tr>
@@ -58,12 +57,12 @@
 		</tr>
 	</tbody>
 </table>
+
 <div class="clipboardseperator"></div>
-<!--template item-->
-<!-- template box clipboard -->
-<div id="cpdclipboard_sidebar" style="display: block;">	
+
+<div id="cpdclipboard_sidebar" style="display: block;">
 	<div id="clipboardholdingcontainer_sidebar" class="div-sidebar">
-		<form action="[actionurl]" method="post" id="form-sidebar"> 
+		<form action="[actionurl]" method="post" id="form-sidebar">
 			<div id="clipboardheadersidebar">
 				Clipboard
 			</div>
@@ -71,53 +70,66 @@
 				<tbody>
 					<tr>
 						<td class="clipboardtopcolumnleft_sidebar">
-							<input type='checkbox' name='cbx_clipboard_all' id='cbx_clipboard_all' onclick='cpd_clipboard_widget_sellect_all(this);' />
+							<input type="checkbox" name="cbx_clipboard_all" id="cbx_clipboard_all" />
 						</td>
 						<td class="clipboardtopcolumnmiddlesavedproperties_sidebar">
 							Select all
 						</td>
 						<td class="clipboardtopcolumnrightsavedproperties_sidebar">
-							<span id='number_item'></span> properties saved
+							<span class="savedcount"></span> properties saved
 						</td>
 					</tr>
 			</table>
-				<div id='contentbox'>
-					[contentbox]
-				</div>
+			<div id="contentbox">
+				[contentbox]
+			</div>
 			<table class="clipboardbottomtable_sidebar">
 				<tbody>
 					<tr>
 						<td colspan="3">
 							<div id="clipboardpreviewrow">
-								<a href="/publish-a-property">PREVIEW</a>
+								<a href="http://127.0.0.1/cpd/publish-a-property">PREVIEW</a>
 							</div>
 						</td>
 					</tr>
 					<tr>
 						<td class="clipboardcontrolscolumnleft_sidebar">
-							<a href=""><div class="buttonsidebar">eMail</div></a>
+							<a href="">
+								<div class="buttonsidebar">eMail</div>
+							</a>
 						</td>
 						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<a href=""><div class="buttonsidebar">Print</div></a>
+							<a href="">
+								<div class="buttonsidebar">Print</div>
+							</a>
 						</td>
 						<td class="clipboardcontrolscolumnright_sidebar">
-							<a href=""><div class="buttonsidebar">Save</div></a>
+							<a href="">
+								<div class="buttonsidebar">Save</div>
+							</a>
 						</td>
 					</tr>
 					</tr>
 					<tr>
 						<td class="clipboardcontrolscolumnleft_sidebar">
-							<a href="/publish-a-property"><div class="buttonsidebar">Twitter</div></a>
+							<a href="#">
+								<div class="buttonsidebar">Twitter</div>
+							</a>
 						</td>
 						<td class="clipboardcontrolscolumnmiddle_sidebar">
-							<a href="/publish-a-property"><div class="buttonsidebar">Facebook</div></a>
+							<a href="#">
+								<div class="buttonsidebar">Facebook</div>
+							</a>
 						</td>
 						<td class="clipboardcontrolscolumnright_sidebar">
-							<a href="#" onclick='cpd_clipboard_widget_pushpost();'><div class="buttonsidebar">Post</div></a>
+							<a>
+								<div class="buttonsidebar">Post</div>
+							</a>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 		</form>
+		<div class="widgetbottomspacer"/>
 	</div>
 </div>

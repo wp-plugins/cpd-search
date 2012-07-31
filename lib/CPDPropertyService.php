@@ -1,10 +1,19 @@
 <?php
+class PropertyIDsType {
+  public $PropertyID; // int
+}
+
+class PropertyListType {
+  public $Property; // PropertyType
+}
+
 class PropertyType {
   public $PropertyID; // int
   public $Address; // string
   public $BuildingNumber; // string
   public $BuildingName; // string
   public $AgentRef; // string
+  public $AgentID; // int
   public $AgentName; // string
   public $BriefSummary; // string
   public $ContactDetails; // string
@@ -16,8 +25,7 @@ class PropertyType {
   public $PublicHold; // boolean
   public $Headings; // HeadingsType
   public $Labels; // LabelsType
-  public $LastUpdatedBy; // string
-  public $LastUpdatedDate; // dateTime
+  public $ArchivableDate; // dateTime
   public $PropertyStatus; // PropertyStatusType
   public $ContactEmail; // string
   public $Contacts; // string
@@ -41,10 +49,14 @@ class PropertyType {
   public $AdditionalInfo; // string
   public $Latitude; // double
   public $Longitude; // double
-  public $CreatedBy; // string
-  public $CreationDate; // dateTime
   public $PropertyMedia; // PropertyMediaType
   public $RegionName; // string
+  public $CreatedBy; // int
+  public $CreatedDate; // dateTime
+  public $UpdatedBy; // int
+  public $UpdatedDate; // dateTime
+  public $ArchivedBy; // int
+  public $ArchivedDate; // dateTime
 }
 
 class PropertyMediaType {
@@ -61,8 +73,17 @@ class PropertyMediaType {
   public $ThumbQuality; // string
 }
 
+class PropertyHistoryType {
+  public $ID; // int
+  public $PropertyID; // int
+  public $UserID; // int
+  public $EntryDate; // dateTime
+  public $Action; // string
+  public $Data; // string
+}
+
 class SortUsingAgentsType {
-  public $Agent; // string
+  public $AgentID; // int
 }
 
 class CPDAreaIDsType {
@@ -77,8 +98,8 @@ class SectorsType {
   public $Sector; // SectorType
 }
 
-class PropertyIDsType {
-  public $PropertyID; // int
+class AgentUIDsType {
+  public $ID; // int
 }
 
 class ArchiveQtrsType {
@@ -184,6 +205,7 @@ class PostcodeCoordinates {
   public $Postcode; // string
   public $Longitude; // double
   public $Latitude; // double
+  public $RegionName; // string
 }
 
 class VisitorType {
@@ -195,6 +217,8 @@ class VisitorType {
   public $PropertyView; // PropertyView
   public $PropertyMediaView; // PropertyMediaView
   public $RegisteredInterest; // RegisteredInterest
+  public $RegistrationContext; // string
+  public $RegistrationDate; // dateTime
 }
 
 class PropertyView {
@@ -242,11 +266,12 @@ class SearchCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $DetailLevel; // DetailLevelType
+  public $RefsOnly; // boolean
+  public $Agent; // string
+  public $AgentIDs; // AgentUIDsType
   public $Archive; // boolean
   public $ArchiveQtrs; // ArchiveQtrsType
-  public $RefsOnly; // boolean
   public $SortUsingAgents; // SortUsingAgentsType
-  public $Agent; // string
   public $BuildingNumber; // string
   public $BuildingName; // string
   public $Address; // string
@@ -266,8 +291,30 @@ class SearchCriteriaType {
   public $MaxSize; // float
   public $SizeUnits; // SizeUnitsType
   public $RadiusProximity; // RadiusProximityType
-  public $SortField; // string
+  public $Keyword; // string
+  public $SortField; // SearchPropertiesSortFieldType
   public $SortOrder; // SortOrderType
+}
+
+class SearchPropertiesSortFieldType {
+  const ID = 'ID';
+  const Agent = 'Agent';
+  const Address = 'Address';
+  const Area = 'Area';
+  const Size = 'Size';
+  const UpdatedDate = 'UpdatedDate';
+}
+
+class SearchPropertyHistoryType {
+  public $PropertyHistoryCriteria; // PropertyHistoryCriteriaType
+}
+
+class PropertyHistoryCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $SortField; // SearchPropertiesSortFieldType
+  public $SortOrder; // SortOrderType
+  public $PropertyID; // int
 }
 
 class PostcodesType {
@@ -360,7 +407,7 @@ class SearchCPDAreasType {
 class CPDPostcodePrefixesCriteriaType {
   public $Start; // int
   public $Limit; // int
-  public $CPDAreaID; // int
+  public $CPDAreaIDs; // CPDAreaIDsType
 }
 
 class SearchCPDPostcodePrefixesType {
@@ -389,6 +436,11 @@ class SearchPropertyResponseType {
   public $PropertyList; // PropertyListType
 }
 
+class SearchPropertyHistoryResponseType {
+  public $ResultCount; // int
+  public $PropertyHistoryList; // PropertyHistoryListType
+}
+
 class RegisterInterestResponseType {
   public $RegisteredInterest; // RegisteredInterest
 }
@@ -399,13 +451,15 @@ class ViewingPropertyResponseType {
 
 class ViewingMediaResponseType {
   public $PropertyMediaView; // PropertyMediaView
+  public $PropertyMedia; // PropertyMediaType
 }
 
 class CreatePropertyResponseType {
-  public $PropertyID; // int
+  public $Property; // PropertyType
 }
 
 class UpdatePropertyResponseType {
+  public $Property; // PropertyType
 }
 
 class ArchivePropertyResponseType {
@@ -466,12 +520,12 @@ class SectorListType {
   public $Sector; // SectorDescriptionType
 }
 
-class PropertyListType {
-  public $Property; // PropertyType
-}
-
 class PropertyMediaListType {
   public $PropertyMedia; // PropertyMediaType
+}
+
+class PropertyHistoryListType {
+  public $PropertyHistory; // PropertyHistoryType
 }
 
 class InvalidMediaTypeExceptionType {
@@ -496,13 +550,16 @@ class CPDPostcodePrefixNotFoundExceptionType {
 class CPDPropertyService extends SoapClient {
 
   private static $classmap = array(
+                                    'PropertyIDsType' => 'PropertyIDsType',
+                                    'PropertyListType' => 'PropertyListType',
                                     'PropertyType' => 'PropertyType',
                                     'PropertyMediaType' => 'PropertyMediaType',
+                                    'PropertyHistoryType' => 'PropertyHistoryType',
                                     'SortUsingAgentsType' => 'SortUsingAgentsType',
                                     'CPDAreaIDsType' => 'CPDAreaIDsType',
                                     'PortalAreaIDsType' => 'PortalAreaIDsType',
                                     'SectorsType' => 'SectorsType',
-                                    'PropertyIDsType' => 'PropertyIDsType',
+                                    'AgentUIDsType' => 'AgentUIDsType',
                                     'ArchiveQtrsType' => 'ArchiveQtrsType',
                                     'TenureType' => 'TenureType',
                                     'PropertyStatusType' => 'PropertyStatusType',
@@ -526,6 +583,9 @@ class CPDPropertyService extends SoapClient {
                                     'CPDPostcodePrefixType' => 'CPDPostcodePrefixType',
                                     'SearchPropertyType' => 'SearchPropertyType',
                                     'SearchCriteriaType' => 'SearchCriteriaType',
+                                    'SearchPropertiesSortFieldType' => 'SearchPropertiesSortFieldType',
+                                    'SearchPropertyHistoryType' => 'SearchPropertyHistoryType',
+                                    'PropertyHistoryCriteriaType' => 'PropertyHistoryCriteriaType',
                                     'PostcodesType' => 'PostcodesType',
                                     'RegisterInterestType' => 'RegisterInterestType',
                                     'ViewingPropertyType' => 'ViewingPropertyType',
@@ -552,6 +612,7 @@ class CPDPropertyService extends SoapClient {
                                     'GetDBSchemaVersionResponseType' => 'GetDBSchemaVersionResponseType',
                                     'GetSectorsResponseType' => 'GetSectorsResponseType',
                                     'SearchPropertyResponseType' => 'SearchPropertyResponseType',
+                                    'SearchPropertyHistoryResponseType' => 'SearchPropertyHistoryResponseType',
                                     'RegisterInterestResponseType' => 'RegisterInterestResponseType',
                                     'ViewingPropertyResponseType' => 'ViewingPropertyResponseType',
                                     'ViewingMediaResponseType' => 'ViewingMediaResponseType',
@@ -573,8 +634,8 @@ class CPDPropertyService extends SoapClient {
                                     'RemoveCPDPostcodePrefixResponseType' => 'RemoveCPDPostcodePrefixResponseType',
                                     'ListMediaResponseType' => 'ListMediaResponseType',
                                     'SectorListType' => 'SectorListType',
-                                    'PropertyListType' => 'PropertyListType',
                                     'PropertyMediaListType' => 'PropertyMediaListType',
+                                    'PropertyHistoryListType' => 'PropertyHistoryListType',
                                     'InvalidMediaTypeExceptionType' => 'InvalidMediaTypeExceptionType',
                                     'PostcodeNotFoundExceptionType' => 'PostcodeNotFoundExceptionType',
                                     'CPDPostcodePrefixNotFoundExceptionType' => 'CPDPostcodePrefixNotFoundExceptionType',
@@ -625,6 +686,20 @@ class CPDPropertyService extends SoapClient {
    */
   public function SearchProperty(SearchPropertyType $request) {
     return $this->__soapCall('SearchProperty', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchPropertyHistoryType $request
+   * @return SearchPropertyHistoryResponseType
+   */
+  public function SearchPropertyHistory(SearchPropertyHistoryType $request) {
+    return $this->__soapCall('SearchPropertyHistory', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
