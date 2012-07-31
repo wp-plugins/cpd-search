@@ -35,7 +35,7 @@ class CPDSearchOurDatabase {
 		$form = cpd_get_template_contents("common");
 		$form .= cpd_get_template_contents("user_registration");
 		$form .= cpd_get_template_contents("user_login");
-		$form .= cpd_get_template_contents("user_password_change");
+		$form .= cpd_get_template_contents("user_password_reset");
 		$form .= cpd_get_template_contents("search_our_database");
 
 		// Add variables to be passed to JS controller
