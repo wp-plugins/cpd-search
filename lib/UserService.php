@@ -1,7 +1,15 @@
 <?php
+class UserIDsType {
+  public $ID; // int
+}
+
+class UsersType {
+  public $User; // UserType
+}
+
 class UserType {
   public $UID; // int
-  public $Agent; // string
+  public $AgentID; // int
   public $Name; // string
   public $Email; // string
   public $Phone; // string
@@ -50,6 +58,22 @@ class UpdatePreferencesType {
   public $User; // UserType
 }
 
+class SearchUsersType {
+  public $Token; // string
+  public $SearchUsersCriteria; // SearchUsersCriteriaType
+}
+
+class SearchUsersCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $DetailLevel; // DetailLevelType
+  public $AgentID; // int
+  public $UserIDs; // UserIDsType
+  public $Keyword; // string
+  public $SortField; // string
+  public $SortOrder; // SortOrderType
+}
+
 class RegisterUserResponseType {
   public $Token; // string
   public $User; // UserType
@@ -80,6 +104,11 @@ class UpdatePreferencesResponseType {
   public $User; // UserType
 }
 
+class SearchUsersResponseType {
+  public $ResultCount; // int
+  public $Users; // UsersType
+}
+
 class UserAlreadyExistsExceptionType {
 }
 
@@ -99,6 +128,8 @@ class UserAlreadyConfirmedExceptionType {
 class UserService extends SoapClient {
 
   private static $classmap = array(
+                                    'UserIDsType' => 'UserIDsType',
+                                    'UsersType' => 'UsersType',
                                     'UserType' => 'UserType',
                                     'RegisterUserType' => 'RegisterUserType',
                                     'VerifyUserType' => 'VerifyUserType',
@@ -107,6 +138,8 @@ class UserService extends SoapClient {
                                     'AuthenticateUserType' => 'AuthenticateUserType',
                                     'FetchPreferencesType' => 'FetchPreferencesType',
                                     'UpdatePreferencesType' => 'UpdatePreferencesType',
+                                    'SearchUsersType' => 'SearchUsersType',
+                                    'SearchUsersCriteriaType' => 'SearchUsersCriteriaType',
                                     'RegisterUserResponseType' => 'RegisterUserResponseType',
                                     'VerifyUserResponseType' => 'VerifyUserResponseType',
                                     'PasswordResetResponseType' => 'PasswordResetResponseType',
@@ -114,6 +147,7 @@ class UserService extends SoapClient {
                                     'AuthenticateUserResponseType' => 'AuthenticateUserResponseType',
                                     'FetchPreferencesResponseType' => 'FetchPreferencesResponseType',
                                     'UpdatePreferencesResponseType' => 'UpdatePreferencesResponseType',
+                                    'SearchUsersResponseType' => 'SearchUsersResponseType',
                                     'UserAlreadyExistsExceptionType' => 'UserAlreadyExistsExceptionType',
                                     'UserAlreadyConfirmedExceptionType' => 'UserAlreadyConfirmedExceptionType',
                                    );
@@ -219,6 +253,20 @@ class UserService extends SoapClient {
    */
   public function UpdatePreferences(UpdatePreferencesType $updatePreferencesRequest) {
     return $this->__soapCall('UpdatePreferences', array($updatePreferencesRequest),       array(
+            'uri' => 'http://user.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchUsersType $searchUsersRequest
+   * @return SearchUsersResponseType
+   */
+  public function SearchUsers(SearchUsersType $searchUsersRequest) {
+    return $this->__soapCall('SearchUsers', array($searchUsersRequest),       array(
             'uri' => 'http://user.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

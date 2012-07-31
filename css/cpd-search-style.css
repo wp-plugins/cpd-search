@@ -135,7 +135,7 @@ div#radius_dialog {
 	width: 240px;
 }
 
-div#radius_slider {
+div#radius_slider {550px
 	width: 100%;
 }
 
@@ -259,7 +259,7 @@ div#sizefrom_value, div#sizeto_value {
 #cpdregistering {
 	margin-right: auto; 
 	margin-left: auto; 
-	font-size: 18px; 
+	font-size: 14px; 
 	margin-top: 18px; 
 	width: 330px; 
 	height: 50px; 
@@ -410,11 +410,10 @@ td.formcolumnright {
 
 /*Search Results Styles*/
 
-#searchresultsholdingcontainer {
+.searchresultsholdingcontainer {
 	padding: 10px;
-	width: 550px;
-	margin-left: 20px;
-	background: #ffffff;
+	background: #000000;
+	margin-bottom: 1em;
 	border: 1px dashed #cccccc;
 	border-radius: 10px;
 	-moz-border-radius: 10px;
@@ -455,6 +454,18 @@ td.formcolumnright {
 	margin-left: 0px;
 	margin-bottom: 0px;
 	width:100%;
+		background-image: linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -o-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -moz-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -webkit-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -ms-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(1, rgb(205,209,207)),
+		color-stop(0.61, rgb(230,223,218))
+	);
 }
 
 table.searchformholdingtable_sidebar {
@@ -515,11 +526,10 @@ td.formcolumnright_sidebar {
 	font-family: arial;
 	font-size: 1.4em;
 	font-weight: bold;
-	color: #ffffff;
-	
+	color: #666666;
 }
 
-#buttonactive {
+.buttonactive {
 	padding: 0.4em;
 	border: solid 1px #cccccc;
 	border-radius: 10px;
@@ -537,7 +547,7 @@ td.formcolumnright_sidebar {
 	text-align: center;
 }
 
-#buttonused {
+.buttonused {
 	padding: 0.4em;
 	border: solid 1px #cccccc;
 	border-radius: 10px;
@@ -555,7 +565,7 @@ td.formcolumnright_sidebar {
 	text-align: center;
 }
 
-#button {
+.buttonunused {
 	padding: 0.4em;
 	border: solid 1px #cccccc;
 	border-radius: 10px;
@@ -888,7 +898,7 @@ td.formcolumnright_sidebar {
 	border-top-right-radius: 10px 10px;
 	border-bottom-right-radius: 10px 10px;
 	border-bottom-left-radius: 10px 10px;
-	background: #4c9dc1;
+	background: #cccccc;
 	margin-top: 10px;
 	margin-left: 0px;
 	margin-bottom: 10px;
@@ -904,7 +914,7 @@ table.clipboardtoptable_sidebar {
 	padding: 0em;
 }
 
-table.clipboardresultholdingtable1_sidebar {
+table.clipboardwidgetrow {
 	background: #ffffff;
 	width: 100%;
 	padding: 0px;
@@ -947,6 +957,10 @@ td.clipboardtopcolumnright_sidebar {
 	text-align: left;
 	padding-top: 0.3em;
 	padding-right: 0.3em;
+}
+
+td.clipboardtopcolumnright_sidebar  .btn_close {
+	cursor:pointer;
 }
 
 td.clipboardtopcolumnmiddlesavedproperties_sidebar {
@@ -1008,6 +1022,7 @@ td.clipboardmiddlecolumnright_sidebar {
 
 table.clipboardbottomtable_sidebar {
 	border-top: 1px solid #999999;
+	border-bottom:0px;
 	width: 100%;
 	background: #c3c3c3;
 	background-image: linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
@@ -1034,7 +1049,7 @@ table.clipboardbottomtable_sidebar {
 	font-family: arial;
 	font-size: 1em;
 	font-weight: bold;
-	color: #ffffff;
+	color: #666666;
 	
 }
 
@@ -1081,6 +1096,18 @@ td.savedsearchesdetailstextbold {
 	margin-left: 0px;
 	margin-bottom: 0px;
 	width:100%;
+	background-image: linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -o-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -moz-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -webkit-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -ms-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(1, rgb(205,209,207)),
+		color-stop(0.61, rgb(230,223,218))
+	);
 }
 
 #cpdsavesearch_sidebar  table.savesearchtoptable_sidebar {
@@ -1247,7 +1274,7 @@ td.savedsearchesdetailstextbold {
 	font-family: arial;
 	font-size: 1em;
 	font-weight: bold;
-	color: #ffffff;
+	color: #666666;
 	
 }
 
@@ -1260,4 +1287,55 @@ td.savesearchtopcolumnmiddle_sidebar search_name {
 	color: #333333;
 	padding-right: 0.2em;
 	
+}
+
+
+.widgetbottomspacer {
+	height: 1em;
+}
+
+#cpdqrregistrationform input[type="text"], #cpdqrregistrationform input[type="password"] {
+	margin: 3px 5px 3px 3px;
+	padding: 3px;
+	width: 208px;
+}
+
+#cpdqrregistrationform table {
+	width: 380px;
+	margin: 0 auto;
+}
+
+#cpdqrregistrationform table td {
+	height: 55px;
+}
+
+#cpdqrregistrationform a {
+	color: #1982D1;
+}
+
+#cpdqrregistrationform h3 {
+	color: #333333;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#cpdqrregistrationform p, #cpdqrregistrationform h3 {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+#cpdqrregistrationform .formerror {
+	color: red;
+	font-size: 14px;
+	margin-left:5px;
+}
+
+#cpdsearchresults {
+	margin-right: 1em;
+}
+
+input.navbarpagenum
+{
+	width:30px;
+	text-align:center;
 }

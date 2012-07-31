@@ -65,7 +65,7 @@
 				<td>
 				</td>
 				<td class="formcolumnright">
-					<input id="submit" type="image" src="[themeurl]/images/submit.gif" />
+					<input id="submit" type="image" src="[pluginurl]/images/submit.gif" />
 				</td>
 			</tr>
 		</tbody>
@@ -77,25 +77,25 @@
 <div id="cpdsearchresults"></div>
 
 <div id="cpdsearchresultmodel" class="result" style="display: none;">
-	<div id="searchresultsholdingcontainer">
+	<div class="searchresultsholdingcontainer">
 		<table>
 			<tbody>
 				<tr>
 					<td width="100">
 						<b>Result number:</b>
-						<span id="resultnum" class="value">[resultnum]</span>
+						<span class="resultnum value">[resultnum]</span>
 					</td>
 					<td>
 						<b>Property reference:</b>
-						<span id="propref" class="value">[propref]</span>
+						<span class="propref value">[propref]</span>
 					</td>
 					<td>
 						<b>Type:</b>
-						<span id="typedesc" class="value">[typedesc]</span>
+						<span class="typedesc value">[typedesc]</span>
 					</td>
 					<td>
 						<b>Size:</b>
-						<span id="sizedesc" class="value">[sizedesc]</span>
+						<span class="sizedesc value">[sizedesc]</span>
 					</td>
 				</tr>
 			</tbody>
@@ -108,7 +108,7 @@
 						<b>Location:</b>
 					</td>
 					<td width="150">
-						<span id="areadesc" class="value">[areadesc]</span>
+						<span class="areadesc value">[areadesc]</span>
 					</td>
 					<td width="150">
 						<b>Photo:</b>
@@ -119,10 +119,10 @@
 						<b>Brief details:</b>
 					</td>
 					<td valign="top">
-						<span id="summary" class="value">[summary]</span>
+						<span class="summary value">[summary]</span>
 					</td>
 					<td >
-						<span id="photo" class="value">[photo]</span>
+						<span class="photo value">[photo]</span>
 					</td>
 				</tr>
 			</tbody>
@@ -132,42 +132,31 @@
 			<tbody>
 				<tr>
 					<td width="165">
+						<a class="clipboardadd">
+							<div class="button">
+								Add to Clipboard
+							</div>
+						</a>
+					</td>
+					<td>
 						<a class="registerinterest" style="button">
-							<div id="button">
+							<div class="button">
 								Register Interest
 							</div>
 						</a>
 						<a class="registeringinterest" style="display: none;">
-							<div id="buttonactive">
+							<div class="buttonactive">
 								Registering Interest
 							</div>
 						</a>
 						<a class="registeredinterest" style="display: none;">
-							<div id="buttonused">
+							<div class="buttonused">
 								Interest Registered
 							</div>
 						</a>
 					</td>
 					<td>
-						<a class="clipboardadd" onclick="cpd_clipboard_widget(this);">
-							<div id="button">
-								Add to Clipboard
-							</div>
-						</a>
-					</td>
-					<!--
-					<td>
-						<a>
-							<div id="button">
-								View Full details
-							</div>
-						</a>
-					</td>
-					 -->
-					<td>
-						<a class="buttonpdf" style="display: none;">
-							<img src="[pluginurl]/cpd-search/images/pdf_icon.jpg" alt="pdf" style="margin:0"/>
-						</a>
+						<div class="fb-like" data-send="false" data-layout="button_count" data-width="50" data-show-faces="false" data-font="verdana"></div>
 					</td>
 				</tr>
 			</tbody>
@@ -185,11 +174,11 @@
 						<span>
 							<span>Page</span> 
 							<a class="navbarprevpage" style="display: none;">
-								<img src="[themeurl]/images/previous.gif" alt="Previous page"/>
+								<img src="[pluginurl]/images/previous.gif" alt="Previous page"/>
 							</a>
-							<input id="pagenums" name="pagenums" class="navbarpagenum" onkeypress="cpd_search_our_database_number_page(event)" />
+							<input type="text" class="navbarpagenum" value="[pagenum]"></input>
 							<a class="navbarnextpage" style="display: none;">
-								<img src="[themeurl]/images/next.gif" alt="Next page"/>
+								<img src="[pluginurl]/images/next.gif" alt="Next page"/>
 							</a>
 							<span>of</span>
 							<span class="navbarpagecount">[pagecount]</span>
@@ -198,7 +187,7 @@
 					<span class="split">|</span>
 					<span class="navbarperpageoptions">
 						<span>View:</span>
-						<select id="limit" name="limit" onchange="cpd_search_our_database_per_page_changed(this)">
+						<select class="limit" name="limit">
 							[perpageoptions]
 						</select>
 						<span>per page</span>

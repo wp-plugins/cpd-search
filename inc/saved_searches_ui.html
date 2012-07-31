@@ -1,18 +1,17 @@
-<!-- template item save search -->
-<table class="savesearchresultholdingtable1_sidebar" style="[display_none]" id='[id]'>
+<table class="savesearchresultholdingtable1_sidebar" style="display: none;">
 	<tbody>
 		<tr>
 			<td class="savesearchtopcolumnleft_sidebar">
-				<input type="checkbox" name="savesearch_select_all[]" value=""  id='[id]'/>
+				<input type="checkbox" name="savesearch_select_all[]" value="Y" />
 			</td>
 			<td class="savesearchtopcolumnmiddle_sidebar search_name">
 				[search_name]
 			</td>
-			<td class="savesearchtopcolumnmiddle_sidebar date_last_search">				
+			<td class="savesearchtopcolumnmiddle_sidebar date_last_search">
 				[date_last_search]
 			</td>
 			<td class="savesearchtopcolumnright_sidebar">
-				<img src="[themeurl]/images/btn_close.png" id='[id]' onclick="cpd_saved_searches_widget_remove_item(this);" />
+				<img src="[pluginurl]/images/btn_close.png" />
 			</td>
 		</tr>
 		<tr>
@@ -21,7 +20,7 @@
 			<td colspan="2">
 				<table>
 					<tr>
-						<td class ="savedsearchesdetailstextbold">
+						<td class="savedsearchesdetailstextbold">
 							Postcode:
 						</td>
 						<td class="savesearchmiddlecolumnmiddle1_sidebar postcode">
@@ -58,11 +57,11 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			<td colspan="4" style="display: none;" id="data_hiden">			
+			<td colspan="4" style="display: none;" id="data_hiden">
 				<span class="postcode">[postcode]</span>
 				<span class="location">[location]</span>
 				<span class="tenure_text">[tenure_text]</span>
-					<span class="size">[size]</span>
+				<span class="size">[size]</span>
 				<span class="sizefrom">[sizefrom]</span>
 				<span class="sizeto">[sizeto]</span>
 				<span class="size_units">[size_units]</span>
@@ -73,10 +72,10 @@
 		</tr>
 	</tfoot>
 </table>
-	<div class="clipboardseperator"></div>
-<!--template item-->
-<!-- template box save search -->
-<div id="cpdsavesearch_sidebar" style="display: block;">	
+
+<div class="clipboardseperator"></div>
+
+<div id="cpdsavesearch_sidebar" style="display: block;">
 	<div id="savesearchholdingcontainer_sidebar" class="div-sidebar">
 		<form action="[actionurl]" method="post" id="form-sidebar"> 
 			<div id="savesearchheadersidebar">
@@ -99,15 +98,20 @@
 				<tbody>
 					<tr>
 						<td class="savesearchcontrolscolumnleft_sidebar">
-							<a href="#" onclick = 'cpd_saved_searches_widget_open_item();'><div class="buttonsidebar">Open</div></a>
+							<a href="javascript:void(0)">
+								<div class="buttonsidebar">Open</div>
+							</a>
 						</td>
 						<td class="savesearchcontrolscolumnmiddle_sidebar">
-							<a href="#" onclick = 'cpd_saved_searches_widget_last_result();' ><div class="buttonsidebar">Last Results</div></a>
+							<a href="javascript:void(0)">
+								<div class="buttonsidebar">Last Results</div>
+							</a>
 						</td>
 					</tr>
 					</tr>
 				</tbody>
 			</table>
 		</form>
+		<div class="widgetbottomspacer"/>
 	</div>
 </div>

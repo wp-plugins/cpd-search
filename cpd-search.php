@@ -1,17 +1,18 @@
 <?php
+
 /*
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
-Description: Provides a range of tags that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.2.8
+Description: Provides a range of page/post tags and widgets that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
+Version: 1.4.2
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
 
- Copyright 2011-2012 The CPD Team. All rights reserved. Every last one of them.
+Copyright 2011-2012 The CPD Team. All rights reserved. Every last one of them.
 */
 
-define('WP_DEBUG', true);
+//define('WP_DEBUG', true);
 
 // SOAP client helper code
 require_once(dirname(__FILE__) . "/lib/CPDPropertyService.php");
@@ -65,20 +66,28 @@ function cpd_jquery_init() {
 //add_action('init', 'cpd_jquery_init');
 cpd_jquery_init();
 
-// Add shortcodes and AJAX handlers for embedding forms and their results
-require_once(dirname(__FILE__) . "/cpd-register-interest.php");
+// User management handlers
 require_once(dirname(__FILE__) . "/cpd-user-registration.php");
+require_once(dirname(__FILE__) . "/cpd-verify-user.php");
 require_once(dirname(__FILE__) . "/cpd-user-login.php");
 require_once(dirname(__FILE__) . "/cpd-password-reset.php");
+require_once(dirname(__FILE__) . "/cpd-password-change.php");
+
+// Search handlers
 require_once(dirname(__FILE__) . "/cpd-current-instructions.php");
 require_once(dirname(__FILE__) . "/cpd-search-our-database.php");
-require_once(dirname(__FILE__) . "/cpd-verify-user.php");
 require_once(dirname(__FILE__) . "/cpd-map-search.php");
-require_once(dirname(__FILE__) . "/cpd-search-form-widget.php");
-require_once(dirname(__FILE__) . "/cpd-clipboard-form-widget.php");
-require_once(dirname(__FILE__) . "/cpd-save-searches-sidebar-widget.php");
+require_once(dirname(__FILE__) . "/cpd-register-interest.php");
 
-// AJAX handlers to back the form up
+// Landing page for QR code advertisments
+require_once(dirname(__FILE__) . "/cpd-qr-code-landing.php");
+
+// Sidebar widgets
+require_once(dirname(__FILE__) . "/cpd-search-form-widget.php");
+require_once(dirname(__FILE__) . "/cpd-clipboard-widget.php");
+require_once(dirname(__FILE__) . "/cpd-saved-searches-widget.php");
+
+// Utility functions
 require_once(dirname(__FILE__) . "/cpd-geocode.php");
 require_once(dirname(__FILE__) . "/cpd-sectors.php");
 

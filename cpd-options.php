@@ -1,85 +1,114 @@
 <?php
 
-/**
- * Code and template for handling plugin settings.
- */
+require_once(dirname(__FILE__) . "/cpd-area-options.php");
 
-$cpd_templates = array(
-	"common" => "Common Dialogs",
-	"user_registration" => "User Registration",
-	"user_verification" => "User Verification",
-	"user_login" => "User Login",
-	"user_password_change" => "User Password Change",
-	"current_instructions" => "Current Instructions",
-	"search_our_database" => "Search Our Database",
-	"search_form_widget" => "Search Form Widget",
+$soapopts = array('trace' => 1, 'exceptions' => 1, 'features' => SOAP_SINGLE_ELEMENT_ARRAYS);
+
+$results_per_page_options = array(
+	"5", "10", "20", "25", "50", "100"
 );
 
-function cpd_search_admin_init() {
-	$options = get_option('cpd-search-options');
-	if(count($options) > 0) {
-		return;
+function cpd_sector_options($sectors, $all = false) { 
+	if(!is_array($sectors)) {
+		$sectors = array();
 	}
-	
-	// Register settings
-	register_setting( 'cpd-search-options', 'cpd_soap_base_url');
-	register_setting( 'cpd-search-options', 'cpd_agentref');
-	register_setting( 'cpd-search-options', 'cpd_password');
-	register_setting( 'cpd-search-options', 'cpd_search_results_per_page');
-	register_setting( 'cpd-search-options', 'cpd_map_widget_width');
-	register_setting( 'cpd-search-options', 'cpd_map_widget_height');
-	register_setting( 'cpd-search-options', 'cpd_service_context');
-	register_setting( 'cpd-search-options', 'cpd_development_mode');
-	
-	$options = array(
-		'cpd_soap_base_url' => 'http://soap.cpd.co.uk/services/',
-		'cpd_agentref' => 'youragentref',
-		'cpd_password' => 'password',
-		'cpd_map_widget_width' => '640',
-		'cpd_map_widget_height' => '480',
-		'cpd_search_results_per_page' => '10',
-		'cpd_service_context' => 'WordpressPlugin',
-		'cpd_development_mode' => false,
+
+	// Build sectors options
+	// [TODO] Should gather this from a GetSectors SOAP API call
+	$sector_options = array(
+		"O" => "Offices",
+		"S" => "Shops",
+		"R" => "Restaurant/Takeaway",
+		"E" => "Education",
+		"H" => "Medical",
 	);
+	if($all) {
+		$sector_options = array(
+			"O" => "Offices",
+			"SO" => "Serviced Office",
+			"S" => "Shops",
+			"I" => "Industrial",
+			"BU" => "Business Units",
+			"R" => "Restaurant/Takeaway",
+			"PU" => "Pubs",
+			"L" => "Leisure",
+			"W" => "Retail Warehousing",
+			"X" => "Showrooms",
+			"M" => "Motor Related",
+			"C" => "Mixed/Commercial",
+			"H" => "Medical",
+			"G" => "Studio/Gallery",
+			"AC" => "Arts/Crafts",
+			"U" => "Live/Work Unit",
+			"E" => "Education",
+			"A" => "Storage",
+			"B" => "Land/Site",
+			"Z" => "Hall/Misc",
+			"GC" => "Garden Centers",
+		);
+	}
+	foreach($sector_options as $key => $value) {
+		$selected = (in_array($key, $sectors) ? "selected=\"selected\"" : "");
+		$sectoroptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
+	}
+	return $sectoroptions;
+}
 
-	// Default an option for each template from it's template
-	global $cpd_templates;
-	foreach($cpd_templates as $id => $name) {
-		register_setting( 'cpd-search-options', "cpd_".$id."_html");
-		$form = file_get_contents(dirname(__FILE__) . "/inc/".$id."_ui.html");
-		$options["cpd_".$id."_ui"] = $form;
+function cpd_area_options($areas) {
+	if(!is_array($areas)) {
+		$areas = array();
 	}
 
-	update_option('cpd-search-options', $options);
-}
-
-function cpd_search_admin_menu() {
-	add_options_page(
-		__('CPD Search', 'cpd-search'),
-		__('CPD Search', 'cpd-search'),
-		'manage_options',
-		__FILE__,
-		'cpd_search_options_page');
-}
-
-function cpd_get_template($id) {
-	return get_template_directory()."/cpdtemplates/".$id."_ui.html";
-}
-
-function cpd_get_template_uri($id) {
-	return get_template_directory_uri()."/cpdtemplates/".$id."_ui.html";
-}
-
-function cpd_get_template_contents($id) {
-	$options = get_option('cpd-search-options');
-	if($options['cpd_development_mode']) {
-		return file_get_contents(dirname(__FILE__)."/inc/".$id."_ui.html");
+	// Add options for perpage pulldown
+	global $cpd_area_options;
+	$areaoptions = "";
+	foreach($cpd_area_options as $key => $value) {
+		$selected = (in_array($key, $areas) ? "selected=\"selected\"" : "");
+		$areaoptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
 	}
-	if(!file_exists(cpd_get_template($id))) {
-		return $options["cpd_".$id."_ui"];
-	}
+	return $areaoptions;
+}
 
-	return file_get_contents(cpd_get_template($id));
+function cpd_sizeunit_options($sizeunits) {
+	// Add options for sizeunits pulldown
+	$sizeunit_options = array(
+		"1" => "sq m",
+		"2" => "sq ft",
+		"3" => "acres",
+		"4" => "hectares",
+	);
+	$sizeunitoptions = "";
+	foreach($sizeunit_options as $key => $value) {
+		$selected = ($key == $sizeunits ? "selected=\"selected\"" : "");
+		$sizeunitoptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
+	}
+	return $sizeunitoptions;
+}
+
+function cpd_tenure_options($tenure) {
+	// Add options for tenure pulldown
+	$tenure_options = array(
+		"" => "Leasehold and Freehold",
+		"F" => "Freehold",
+		"L" => "Leasehold",
+	);
+	$tenureoptions = "";
+	foreach($tenure_options as $key => $value) {
+		$selected = ($key == $tenure ? "selected=\"selected\"" : "");
+		$tenureoptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
+	}
+	return $tenureoptions;
+}
+
+function cpd_perpage_options($limit) {
+	// Add options for perpage pulldown
+	global $results_per_page_options;
+	$perpageoptions = "";
+	foreach($results_per_page_options as $value) {
+		$selected = ($value == $limit ? "selected='selected'" : "");
+		$perpageoptions .= "<option value=\"".$value."\" ".$selected.">".$value."</option>\n";
+	}
+	return $perpageoptions;
 }
 
 function cpd_search_options_page() {
@@ -182,6 +211,20 @@ if ( function_exists('wp_nonce_field') )
   <li>The other options should not generally be used, as they are intended for CPD plugin developers and support engineers.</li>
 </ul>
 
+<h3>Preparation</h3>
+
+<p>During the course of the visitor's session, this plugin may send various e-mails during the course of the visit. These e-mails are sent using the standard WordPress mail delivery mechanism, which you may need to configure. They are generated using a simple template mechanism, described further down, which allows you to customise the colour, style, logo and wording of the e-mails for your organisation.</p>
+
+<p>The e-mails sent will often contain links back to your site which the visitor must click. These links will arrive at landing pages that you will need to set up in advance. These landing pages are:</p>
+<dl>
+  <dt><dfn>User confirmation</dfn></dt>
+  <dd>A page (e.g. '/confirm-user?token=xyz'), containing the '[cpd_verify_user]' shortcode.</dd>
+  <dt><dfn>Change password</dfn></dt>
+  <dd>A page (e.g. '/change-password?token=xyz'), containing the '[cpd_password_reset]' shortcode.</dd>
+</dl>
+
+<p>In order to provide your visitors with full details of your listings, or have you contact them if they click 'register interest' on any results, they will need to register their contact details.</p>
+
 <h3>Creating Search Pages</h3>
 
 <p>To embed a search form into a WordPress page, create a new WordPress page or post, containing one of the following short codes:</p>
@@ -192,44 +235,11 @@ if ( function_exists('wp_nonce_field') )
 <!--  <li><tt>[cpd_map_search]</tt> - Geographically oriented search, based on Google Maps (unfinished/experimental!)</li> -->
 </ul>
 
-<p>To customise the HTML and CSS used to present these, it is easiest to copy files from the 'inc' folder that is supplied with this plugin into a 'cpdtemplates' subfolder of the theme you are using. This plugin will use these files from the theme if they are found, otherwise it will use the copies stored here in the plugin configuration.</p>
+<h3>Template mechanism</h3>
 
-<h3>Handling User Registration</h3>
+<p>By default, the plugin will use the templates supplied in the 'inc' folder of this plugin. These are designed to be simple, clean and easy to extend by adding custom CSS rules to the site theme.</p>
 
-<p>Additionally, you should also create landing pages to fulfil the 'verify user' and 'change password' links that may be sent by CPD at the user's request, once the system is fully configured. These are simply pages that contain one of the following shortcodes each.</p>
-
-<ul>
-  <li><tt>[cpd_verify_user]</tt> - Performs a simple token check and displays success or failure. Example URI: '/verify-user?token=xyz...'.</li>
-  <li><tt>[cpd_password_change]</tt> - Allows a confirmed user to change their password. Example URI: '/password-change'.</li>
-<!--  <li><tt>[cpd_map_search]</tt> - (unfinished/experimental!)</li> -->
-</ul>
-
-<p>When preparing for deployment, please <a href="mailto:support@cpd.co.uk">send us</a> the production URLs for these pages, so we can update the e-mail templates we send.</p>
-
-<h3>UI Templates</h3>
-
-<p>The UI for the search forms, results and all other dialogs  
-<?php
-  global $cpd_templates;
-  foreach($cpd_templates as $id => $name) {
-    $template_file = cpd_get_template($id);
-    $template_uri = cpd_get_template_uri($id);
-    ?>
-<h4><?php echo $name; ?></h4>
-    <?php
-    if(file_exists($template_file)) {
-      ?>
-<p>Found template in theme (<tt><a href="<?php echo $template_uri; ?>"><?php echo $template_uri; ?></a></tt>).</p>
-      <?php
-    }
-    else {
-      ?>
-            <?php  the_editor($options["cpd_{$id}_ui"], "cpd_{$id}_ui");
- ?>
-      <?php
-    }
-  }
-?>
+<p>Should these templates need further customisation at the HTML level, they can be copied from the 'inc' folder into a 'cpdtemplates' subfolder in the root of the site's current theme, and customised there.</p>
 
 <!--
 
@@ -257,8 +267,6 @@ if ( function_exists('wp_nonce_field') )
 
 <h3>General Settings</h3>
 
-<p>These settings are defaults that will be applied to all the available search forms.</p>
-
 <table class="form-table">
   <tr valign="top">
     <th scope="row">Default results per page</th>
@@ -276,20 +284,21 @@ if ( function_exists('wp_nonce_field') )
     </td>
   </tr>
   <tr valign="top">
-    <th scope="row">Service Context</th>
+    <th scope="row">Service context (**)</th>
     <td>
       <input name="cpd_service_context" value="<?php echo $options['cpd_service_context']; ?>"" />
     </td>
   </tr>
   <tr valign="top">
-    <th scope="row">Development mode (*)</th>
+    <th scope="row">Development mode (**)</th>
     <td>
       <input type="checkbox" name="cpd_development_mode" value="Y" <?php if($options['cpd_development_mode']) { ?>checked="checked"<?php } ?> />
     </td>
   </tr>
 </table>
 
-<p>(*) Development mode may display additional technical information at runtime, both in the UI and in the server logs.</p>
+<p>(*) The service context is an optional short, alphanumeric string with no spaces, that will be used to identify visitors that register on this site, as opposed to other sites belonging to the same agent. The default value used, if not configured here, is 'WordpressPlugin'.</p>
+<p>(**) Development mode currently forces the use of the default 'inc' templates, and may display additional technical information at runtime, both in the UI and in the server logs.</p>
 
 <?php
 	if (isset($_POST['submit'])) {
@@ -337,9 +346,10 @@ function cpd_search_options_posted() {
 }
 
 function cpd_search_server_check() {
+	global $soapopts;
+
 	// Check details, and report success/failure of connection
 	$options = get_option('cpd-search-options');
-	$soapopts = array('trace' => 1, 'exceptions' => 1);
 	$client = new SoapClient($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
 	$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
 	$client->__setSOAPHeaders($headers);
