@@ -220,7 +220,7 @@ if ( function_exists('wp_nonce_field') )
   <dt><dfn>User confirmation</dfn></dt>
   <dd>A page (e.g. '/confirm-user?token=xyz'), containing the '[cpd_verify_user]' shortcode.</dd>
   <dt><dfn>Change password</dfn></dt>
-  <dd>A page (e.g. '/change-password?token=xyz'), containing the '[cpd_password_reset]' shortcode.</dd>
+  <dd>A page (e.g. '/change-password?token=xyz'), containing the '[cpd_password_change]' shortcode.</dd>
 </dl>
 
 <p>In order to provide your visitors with full details of your listings, or have you contact them if they click 'register interest' on any results, they will need to register their contact details.</p>

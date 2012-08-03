@@ -47,6 +47,7 @@ function CPDVerifyUser() {
 			dataType: "json"
 		};
 		jQuery.ajax(ajaxopts);
+		jQuery("#cpdverifyuser").show();
 	};
 	
 	self.init = function() {

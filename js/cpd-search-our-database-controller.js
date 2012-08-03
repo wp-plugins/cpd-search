@@ -176,9 +176,10 @@ function CPDSearchOurDatabase() {
 		// Clear 'loading...' dialog
 		jQuery("#cpdloading").hide();
 
-		// Start with initial page of results, if so configured
+		// Start with initial page of results, if so configured		
 		var trigger = jQuery("span#trigger").html() == "yes";
-		if(trigger) {
+		
+		if(trigger && jQuery(".search-our-database").length > 0) {			
 			return self.search_database();
 		}
 		

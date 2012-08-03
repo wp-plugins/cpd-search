@@ -1,6 +1,17 @@
 <?php 
 
 class CPDClipboardWidget extends WP_Widget {
+	function init() {
+		add_action( 'widgets_init', array('CPDClipboardWidget', 'load_widgets'));
+		add_action('wp_ajax_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
+		add_action('wp_ajax_nopriv_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
+		add_action('wp_ajax_cpd_clipboard_widget_delete_ajax', array('CPDClipboardWidget', 'delete_ajax'));
+		add_action('wp_ajax_nopriv_cpd_clipboard_widget_delete_ajax', array('CPDClipboardWidget', 'delete_ajax'));
+		add_action('wp_ajax_cpd_clipboard_widget_pushpost_ajax', array('CPDClipboardWidget', 'pushpost_ajax'));
+		add_action('wp_ajax_nopriv_cpd_clipboard_widget_pushpost_ajax', array('CPDClipboardWidget', 'pushpost_ajax'));
+		add_shortcode('publish_property_ref', array('CPDClipboardWidget', 'publish_property_ref'));
+	}
+
 	function CPDClipboardWidget() {
 		wp_enqueue_script('cpd-add-clipboard', cpd_plugin_dir_url(__FILE__) . "js/cpd-clipboard-widget-controller.js");
 		
@@ -394,17 +405,6 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 }
 
-add_action( 'widgets_init', array('CPDClipboardWidget', 'load_widgets'));
-
-add_action('wp_ajax_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
-add_action('wp_ajax_nopriv_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
-
-add_action('wp_ajax_cpd_clipboard_widget_delete_ajax', array('CPDClipboardWidget', 'delete_ajax'));
-add_action('wp_ajax_nopriv_cpd_clipboard_widget_delete_ajax', array('CPDClipboardWidget', 'delete_ajax'));
-
-add_action('wp_ajax_cpd_clipboard_widget_pushpost_ajax', array('CPDClipboardWidget', 'pushpost_ajax'));
-add_action('wp_ajax_nopriv_cpd_clipboard_widget_pushpost_ajax', array('CPDClipboardWidget', 'pushpost_ajax'));
-
-add_shortcode('publish_property_ref', array('CPDClipboardWidget', 'publish_property_ref'));
+CPDClipboardWidget::init();
 
 ?>

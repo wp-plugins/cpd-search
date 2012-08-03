@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of page/post tags and widgets that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.4.2
+Version: 1.4.4
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -40,9 +40,6 @@ function myEndSession() {
 }
 
 function cpd_jquery_init() {
-	if (is_admin()) {
-		return;
-	}
 	
 	// Google Maps setup
 	wp_enqueue_script('google-maps', "http://maps.googleapis.com/maps/api/js?sensor=false", array(), "", false);
@@ -53,14 +50,14 @@ function cpd_jquery_init() {
 	wp_enqueue_script('jquery-ui-mouse');
 	wp_enqueue_script('jquery-ui-dialog');
 	wp_enqueue_script('jquery-ui-draggable');
+	wp_enqueue_script('jquery-ui-droppable');
 	wp_enqueue_script('jquery-ui-slider');
-	wp_enqueue_script('jquery-lightbox', cpd_plugin_dir_url(__FILE__) . "js/jquery.lightbox-0.5.min.js");
 	
 	// CPD custom CSS
 	wp_enqueue_style('cpd-search', cpd_plugin_dir_url(__FILE__) . "css/cpd-search-style.css");
 
 	// Third-party CSS
-	wp_enqueue_style('cpd-jquery', cpd_plugin_dir_url(__FILE__) . "css/jquery-ui-1.8.16.custom.css");
+	wp_enqueue_style('cpd-jquery-ui', cpd_plugin_dir_url(__FILE__) . "css/jquery-ui-1.8.16.custom.css");
 }
 
 //add_action('init', 'cpd_jquery_init');

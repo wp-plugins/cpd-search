@@ -153,8 +153,11 @@ function CPDCurrentInstructions() {
 		// Hook up inputs
 		jQuery("select.sectors").change(self.sector_changed);
 		
-		// Perform initial search
-		cpdCurrentInstructions.search_database();
+		if (jQuery(".current-instructions").length > 0){				
+			
+			// Perform initial search
+			cpdCurrentInstructions.search_database();
+		}
 	};
 	
 	return self;

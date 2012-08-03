@@ -3,6 +3,11 @@
 require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDSearchFormWidget extends WP_Widget {
+	function init() {
+		add_shortcode('cpd_search_form_widget', array('CPDSearchFormWidget', 'form'));
+		add_action('widgets_init', array('CPDSearchFormWidget', 'load_widgets'));
+	}
+
 	function load_widgets() {
 		register_widget('CPDSearchFormWidget');
 	}
@@ -188,8 +193,6 @@ class CPDSearchFormWidget extends WP_Widget {
 	}
 }
 
-add_shortcode('cpd_search_form_widget', array('CPDSearchFormWidget', 'form'));
-
-add_action('widgets_init', array('CPDSearchFormWidget', 'load_widgets'));
+CPDSearchFormWidget::init();
 
 ?>

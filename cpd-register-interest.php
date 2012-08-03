@@ -3,7 +3,7 @@
 require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDRegisterInterest {
-	function init() {
+	function init() {		
 		wp_enqueue_script('cpd-register-interest-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-register-interest-controller.js");
 		wp_localize_script('cpd-register-interest-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
 		add_action('wp_ajax_cpd_register_interest', array('CPDRegisterInterest', 'ajax'));

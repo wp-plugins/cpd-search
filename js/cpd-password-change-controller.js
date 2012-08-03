@@ -102,7 +102,7 @@ function CPDPasswordChange() {
 			jQuery('#error-password2').hide();
 		});
 		
-		jQuery(".submit").click(self.passwordChange);
+		jQuery(".submitpasswordchange").click(self.passwordChange);
 	}
 	
 	return self;

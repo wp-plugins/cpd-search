@@ -28,6 +28,9 @@ class AgentType {
   public $AutomatchPeriod; // int
   public $AutomatchEmail; // string
   public $Discount; // int
+  public $UpdateCharge; // float
+  public $UserVerificationURL; // string
+  public $UserPasswordChangeURL; // string
   public $MasterUserID; // int
   public $AccountID; // int
   public $CreatedBy; // int
@@ -36,6 +39,10 @@ class AgentType {
   public $UpdatedDate; // dateTime
   public $ArchivedBy; // int
   public $ArchivedDate; // dateTime
+}
+
+class AccountIDsType {
+  public $ID; // int
 }
 
 class AccountsType {
@@ -138,6 +145,20 @@ class ListAgentServicesType {
   public $Token; // string
 }
 
+class SearchAgentAccountsType {
+  public $Token; // string
+  public $Criteria; // AccountsCriteriaType
+}
+
+class AccountsCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $AccountIDs; // AccountIDsType
+  public $Keyword; // string
+  public $FromDate; // dateTime
+  public $ToDate; // dateTime
+}
+
 class SearchAgentTransactionsType {
   public $Token; // string
   public $Criteria; // TransactionsCriteriaType
@@ -147,11 +168,18 @@ class TransactionsCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $AccountID; // int
-  public $Keyword; // string
   public $FromDate; // dateTime
   public $ToDate; // dateTime
-  public $SortField; // string
-  public $SortOrder; // SortOrderType
+}
+
+class CreateTransactionType {
+  public $Token; // string
+  public $Transaction; // TransactionType
+}
+
+class DeleteTransactionType {
+  public $Token; // string
+  public $TransactionID; // int
 }
 
 class AuthenticateAgentResponseType {
@@ -212,9 +240,22 @@ class AgentServicesType {
   public $AgentService; // AgentServiceType
 }
 
+class SearchAgentAccountsResponseType {
+  public $ResultCount; // int
+  public $Accounts; // AccountsType
+}
+
 class SearchAgentTransactionsResponseType {
   public $ResultCount; // int
+  public $StartingBalance; // float
   public $Transactions; // TransactionsType
+}
+
+class CreateTransactionResponseType {
+  public $Transaction; // TransactionType
+}
+
+class DeleteTransactionResponseType {
 }
 
 
@@ -233,6 +274,7 @@ class AgentService extends SoapClient {
                                     'AgentIDsType' => 'AgentIDsType',
                                     'AgentsType' => 'AgentsType',
                                     'AgentType' => 'AgentType',
+                                    'AccountIDsType' => 'AccountIDsType',
                                     'AccountsType' => 'AccountsType',
                                     'AccountType' => 'AccountType',
                                     'TransactionsType' => 'TransactionsType',
@@ -249,8 +291,12 @@ class AgentService extends SoapClient {
                                     'SearchAgentTokensType' => 'SearchAgentTokensType',
                                     'AgentTokensSearchCriteriaType' => 'AgentTokensSearchCriteriaType',
                                     'ListAgentServicesType' => 'ListAgentServicesType',
+                                    'SearchAgentAccountsType' => 'SearchAgentAccountsType',
+                                    'AccountsCriteriaType' => 'AccountsCriteriaType',
                                     'SearchAgentTransactionsType' => 'SearchAgentTransactionsType',
                                     'TransactionsCriteriaType' => 'TransactionsCriteriaType',
+                                    'CreateTransactionType' => 'CreateTransactionType',
+                                    'DeleteTransactionType' => 'DeleteTransactionType',
                                     'AuthenticateAgentResponseType' => 'AuthenticateAgentResponseType',
                                     'SearchAgentsResponseType' => 'SearchAgentsResponseType',
                                     'CreateAgentResponseType' => 'CreateAgentResponseType',
@@ -263,7 +309,10 @@ class AgentService extends SoapClient {
                                     'ListAgentServicesResponseType' => 'ListAgentServicesResponseType',
                                     'AgentServiceType' => 'AgentServiceType',
                                     'AgentServicesType' => 'AgentServicesType',
+                                    'SearchAgentAccountsResponseType' => 'SearchAgentAccountsResponseType',
                                     'SearchAgentTransactionsResponseType' => 'SearchAgentTransactionsResponseType',
+                                    'CreateTransactionResponseType' => 'CreateTransactionResponseType',
+                                    'DeleteTransactionResponseType' => 'DeleteTransactionResponseType',
                                    );
 
   public function AgentService($wsdl = "https://staging.cpd.co.uk/soap/services/AgentService?wsdl", $options = array()) {
@@ -376,11 +425,53 @@ class AgentService extends SoapClient {
   /**
    *  
    *
+   * @param SearchAgentAccountsType $parameters
+   * @return SearchAgentAccountsResponseType
+   */
+  public function SearchAgentAccounts(SearchAgentAccountsType $parameters) {
+    return $this->__soapCall('SearchAgentAccounts', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
    * @param SearchAgentTransactionsType $parameters
    * @return SearchAgentTransactionsResponseType
    */
   public function SearchAgentTransactions(SearchAgentTransactionsType $parameters) {
     return $this->__soapCall('SearchAgentTransactions', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param CreateTransactionType $parameters
+   * @return CreateTransactionResponseType
+   */
+  public function CreateTransaction(CreateTransactionType $parameters) {
+    return $this->__soapCall('CreateTransaction', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param DeleteTransactionType $parameters
+   * @return DeleteTransactionResponseType
+   */
+  public function DeleteTransaction(DeleteTransactionType $parameters) {
+    return $this->__soapCall('DeleteTransaction', array($parameters),       array(
             'uri' => 'http://agent.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

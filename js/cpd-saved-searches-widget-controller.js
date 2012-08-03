@@ -28,7 +28,7 @@ function CPDSavedSearchesWidget() {
 		jQuery(".savesearchbottomtable_sidebar").before(objItem);	
 		jQuery('#cpdsearching span').html("Saving... Please wait a moment.");
 		jQuery('#cpdsearching').hide();
-		
+				
 		self.hide_show();
 		self.number_item();
 	};
@@ -146,7 +146,7 @@ function CPDSavedSearchesWidget() {
 	};
 
 	self.removeSearch = function(data) {
-		var id = jQuery(data).attr("id");
+		var id = jQuery(this).attr("id");
 		
 		var postdata = {
 			'action':'cpd_saved_searches_widget_remove_item_widget_ajax',
@@ -179,7 +179,7 @@ function CPDSavedSearchesWidget() {
 	};
 
 	self.hide_show = function() {
-		if(jQuery("#cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar .savesearchresultholdingtable1_sidebar").length > 1) {
+		if(jQuery("#cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar .savesearchresultholdingtable1_sidebar").length > 0) {
 			jQuery("#cpdsavesearch_sidebar").show();
 			return;
 		}
@@ -194,7 +194,7 @@ function CPDSavedSearchesWidget() {
 			return;
 		}
 		
-		if(jQuery("#cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar .savesearchresultholdingtable1_sidebar").length == 1) {
+		if(jQuery("#cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar .savesearchresultholdingtable1_sidebar").length == 0) {
 			jQuery("#cpdsavesearch_sidebar").hide();
 			return;
 		}
@@ -202,6 +202,88 @@ function CPDSavedSearchesWidget() {
 		jQuery("#cpdsavesearch_sidebar").show();
 	};
 
+	/* registration when save search */
+	self.check_registration_name = /^[A-Za-z0-9_ ]{5,20}$/;
+	self.check_registration_email = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+	self.check_registration_phone = /^[0-9-]{10,20}$/;
+	self.check_password =  /^[A-Za-z0-9!@#$%^&amp;*()_]{6,20}$/;
+
+	self.registrationSuccess = function(data) {				
+		jQuery("#cpdsaveasearch #cpdregistering").hide();
+		jQuery('#cpdsaveasearch .msg').hide();
+		// Check for failure
+		if(!data.success) {
+			return self.registrationError(data, data.error, data.error);
+		}
+
+		// Hide registration form, show 'thankyou etc' part		
+		jQuery('#cpdsaveasearch .msg').html('Thank you. You have now been registered.');
+		jQuery('#cpdsaveasearch .msg').show();
+		
+		jQuery("#cpdsaveasearch #register").hide();
+
+		// Process nearly registered interests
+		cpdRegisterInterest.processQueue();
+	};
+	
+	self.registrationError = function(jqXHR, textStatus, errorThrown) {
+		jQuery('#cpdsaveasearch .msg').hide();
+		jQuery("#cpdsaveasearch #cpdregistering").hide();
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("UserAlreadyExistsException") > -1) {
+			// Show login form
+			jQuery('#cpdsaveasearch .msg').html("No need to register. There is already an account for this e-mail address. Please try logging in with your existing credentials, or request a password reset if you have forgotten them.");
+			jQuery('#cpdsaveasearch .msg').show();
+			return;
+		}
+		if(jqXHR != null && jqXHR.error != null) {
+			jQuery('#cpdsaveasearch .msg').html("ERROR: " + jqXHR.error);
+			jQuery('#cpdsaveasearch .msg').show();
+		}
+	
+		
+		jQuery('#cpdsaveasearch .msg').html("Registration error!");
+		jQuery('#cpdsaveasearch .msg').show();
+	};
+	
+	self.registration = function() {		
+	
+		// Validation checks
+		var name = jQuery('#cpdsaveasearch #name').val();
+		var email = jQuery('#cpdsaveasearch #email').val();		
+		var phone = jQuery('#cpdsaveasearch #phone').val();
+		
+		if(!self.check_registration_name.test(name)) {
+			return;
+		}
+		if(!self.check_registration_email.test(email)) {
+			return;
+		}
+		if(!self.check_registration_phone.test(phone)) {
+			return;
+		}
+		
+		jQuery("#cpdsaveasearch #cpdregistering").show();
+
+		// Prepare to send
+		var postdata = {
+			'action':'cpd_user_registration',
+			'name': jQuery('#cpdsaveasearch #name').val(),
+			'email': jQuery('#cpdsaveasearch #email').val(),
+			'phone': jQuery('#cpdsaveasearch #phone').val(),
+		};
+
+		// Send AJAX registration request to server
+		var ajaxopts = {
+			type: 'POST',
+			url: CPDAjax.ajaxurl,
+			data: postdata,
+			success: self.registrationSuccess,
+			error: self.registrationError,
+			dataType: "json"
+		};
+		jQuery.ajax(ajaxopts);		
+	};
+	
 	self.init = function() {
 		jQuery("#cpdsaveasearch").dialog({
 			title: "Save Search",
@@ -216,6 +298,9 @@ function CPDSavedSearchesWidget() {
 				},
 			}
 		});
+		
+		jQuery(".savesearchtopcolumnright_sidebar .btn_remove").live('click',self.removeSearch);
+		
 		jQuery("#search_name").focusout(function() {
 			var search_name = jQuery(this).val();
 			if (!check_registration_name.test(search_name)) {
@@ -233,12 +318,46 @@ function CPDSavedSearchesWidget() {
 			jQuery("#error-date_last_search").hide();
 		});
 		
+		// Add verification of user name
+		jQuery('#cpdsaveasearch #name').focusout(function() {
+			var name = jQuery(this).val();
+			if (!self.check_registration_name.test(name)){
+				jQuery('#cpdsaveasearch  #error-name').show().html("Minimum 5 characters");
+				return;
+			}
+			jQuery('#cpdsaveasearch #error-name').hide();
+		});
+
+		// Add verification of email
+		jQuery('#cpdsaveasearch #email').focusout(function() {
+			var email = jQuery(this).val();
+			if (!self.check_registration_email.test(email)) {
+				jQuery('#cpdsaveasearch #error-email').show().html("Invalid email address");
+				return;
+			}
+			jQuery('#cpdsaveasearch  #error-email').hide();
+		});
+			
+		// Add verification of phone
+		jQuery('#cpdsaveasearch #phone').focusout(function() {
+			var phone = jQuery(this).val();
+			if (!self.check_registration_phone.test(phone)){
+				jQuery('#cpdsaveasearch  #error-phone').show().html("Invalid phone number");
+				return;
+			}
+			jQuery('#cpdsaveasearch  #error-phone').hide();
+		});
+		
 		self.hide_show();
 		self.number_item();
 		
 		jQuery("#savesearch").click(function() {
 			jQuery("#cpdsaveasearch").dialog("open");
+			return false; 
 		});
+		
+		jQuery("#cpdsaveasearch #button").click(self.registration);
+		
 		jQuery("#cpdsavesearch_sidebar input[type=checkbox]").live('click',function() {
 			var currentCheckbox = jQuery(this);
 			var temp = currentCheckbox.attr("checked");

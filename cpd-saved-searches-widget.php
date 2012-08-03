@@ -1,7 +1,7 @@
 <?php
 
 class CPDSavedSearchesWidget extends WP_Widget {
-	function init(){
+	function init(){		
 		wp_enqueue_script('cpd-saved-searches-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-saved-searches-widget-controller.js");
 		add_action('widgets_init', array('CPDSavedSearchesWidget','load_widgets'));
 		add_action('wp_ajax_cpd_saved_searches_widget_ajax', array('CPDSavedSearchesWidget', 'ajax'));
@@ -30,8 +30,8 @@ class CPDSavedSearchesWidget extends WP_Widget {
 		extract($args);
 		$home = home_url();
 		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
-		$title = apply_filters('widget_title', $instance['title'] );
-		$save_a_search = cpd_get_template_contents("saved_search_popup");
+		$title = apply_filters('widget_title', $instance['title'] );		
+		$save_a_search = cpd_get_template_contents("saved_search_popup");		
 		echo $before_widget;
 		if ($title) {
 			echo $before_title;
@@ -160,7 +160,17 @@ class CPDSavedSearchesWidget extends WP_Widget {
 		$cpd_saved_searches_widget = $_SESSION['cpd_saved_searches_widget'];
 		$cpd_saved_searches_widget[] = $results[0];
 		$_SESSION['cpd_saved_searches_widget'] = $cpd_saved_searches_widget;
-	
+		
+		if(is_null($sectors))
+		{
+			$sectors = array();
+		}
+		
+		if(is_null($areas))
+		{
+			$areas = array();
+		}
+		
 		$response = array(
 			'pluginurl' => $path_dir_plugin,
 			'success' => true,
@@ -174,7 +184,7 @@ class CPDSavedSearchesWidget extends WP_Widget {
 			'sizeto'=> $sizeto,
 			'sizefrom'=> $sizefrom,
 			'size'=> $size,
-			'size_text'=> $size_text,
+			'size_text'=> $size_text,			
 			'sectors'=> implode(",", $sectors),
 			'areas'=> implode(",", $areas),
 		);
