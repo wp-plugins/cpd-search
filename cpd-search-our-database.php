@@ -39,22 +39,25 @@ class CPDSearchOurDatabase {
 		$form .= cpd_get_template_contents("search_our_database");
 
 		// Add variables to be passed to JS controller
-		$form .= "\n".
-			"<div style=\"display: none;\">\n".
-			"\t<span id=\"pagenum\">[pagenum]</span>\n".
-			"\t<span id=\"limit\">[limit]</span>\n".
-			"\t<span id=\"sizefrom\">[sizefrom]</span>\n".
-			"\t<span id=\"sizeto\">[sizeto]</span>\n".
-			"\t<span id=\"sizeunits\">[sizeunits]</span>\n".
-			"\t<span id=\"sectors\">[sectors]</span>\n".
-			"\t<span id=\"tenure\">[tenure]</span>\n".
-			"\t<span id=\"postcode\">[postcode]</span>\n".
-			"\t<span id=\"areas\">[areas]</span>\n".
-			"\t<span id=\"address\">[address]</span>\n".
-			"\t<span id=\"trigger\">[trigger]</span>\n".
-			"\t<span id=\"pagecount\">[pagecount]</span>\n".
-			"</div>\n";
+		$form .= ''.
+			'<div style="display: none;">'.
+			'<span id="pagenum">[pagenum]</span>'.
+			'<span id="limit">[limit]</span>'.
+			'<span id="sizefrom">[sizefrom]</span>'.
+			'<span id="sizeto">[sizeto]</span>'.
+			'<span id="sizeunits">[sizeunits]</span>'.
+			'<span id="sectors">[sectors]</span>'.
+			'<span id="tenure">[tenure]</span>'.
+			'<span id="postcode">[postcode]</span>'.
+			'<span id="areas">[areas]</span>'.
+			'<span id="address">[address]</span>'.
+			'<span id="trigger">[trigger]</span>'.
+			'<span id="pagecount">[pagecount]</span>'.
+			'</div>';
 
+		// Add hook to initialise controller code
+		$form .= '<script>jQuery(document).ready(function() { cpdSearchOurDatabase.init(); });</script>';
+		
 		// Add options for sizeunits pulldown
 		$sizeunitoptions = cpd_sizeunit_options($sizeunits);
 		$form = str_replace("[sizeunitoptions]", $sizeunitoptions, $form);

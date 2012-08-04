@@ -63,14 +63,17 @@ class CPDCurrentInstructions {
 		$form .= cpd_get_template_contents("current_instructions");
 
 		// Add variables to be passed to JS controller
-		$form .= "\n".
-			"<div style=\"display: none;\">\n".
-			"\t<span id=\"pagenum\">[pagenum]</span>\n".
-			"\t<span id=\"limit\">[limit]</span>\n".
-			"\t<span id=\"trigger\">[trigger]</span>\n".
-			"\t<span id=\"pagecount\">[pagecount]</span>\n".
-			"</div>\n";
+		$form .= ''.
+			'<div style="display: none;">'.
+			'<span id="pagenum">[pagenum]</span>'.
+			'<span id="limit">[limit]</span>'.
+			'<span id="trigger">[trigger]</span>'.
+			'<span id="pagecount">[pagecount]</span>'.
+			'</div>';
 
+		// Add hook to initialise controller code
+		$form .= '<script>jQuery(document).ready(function() { cpdCurrentInstructions.init(); });</script>';
+		
 		// Add sector options
 		$sectoroptions = cpd_sector_options($sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);

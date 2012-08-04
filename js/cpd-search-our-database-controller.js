@@ -1,12 +1,12 @@
 // Main controller logic for initialising and handling the search form activity
 
 function CPDSearchOurDatabase() {
-	self = new CPDCommonSearchController();
+	var self = new CPDCommonSearchController();
 
 	self.searchSuccess = function(data) {
 		// Check for failure
 		if(!data.success) {
-			return self.search_error(null, data.error, data.error);
+			return self.searchError(null, data.error, data.error);
 		}
 
 		// Handle no results scenario
@@ -90,7 +90,7 @@ function CPDSearchOurDatabase() {
 		var page = Number(jQuery("span#pagenum").text()).valueOf() - 1;
 		jQuery('span#pagenum').text(page)
 		var limit = jQuery("select.limit option:selected").val();
-		self.search_database();
+		self.searchDatabase();
 	};
 
 	self.next_page = function() {
@@ -98,25 +98,25 @@ function CPDSearchOurDatabase() {
 		var page = Number(jQuery("span#pagenum").text()).valueOf() + 1;
 		jQuery('span#pagenum').text(page)
 		var limit = jQuery("select.limit option:selected").val();
-		self.search_database();
+		self.searchDatabase();
 	};
 	
 	self.per_page_changed = function(data) {
 		var limit = jQuery("select.limit option:selected").val();
 		jQuery('span#limit').text(limit)
 		jQuery('span#pagenum').text("1")
-		self.search_database();
+		self.searchDatabase();
 	}
 
-	self.submit_form = function() {
+	self.submitForm = function() {
 		// Revert to first page
 		jQuery('span#pagenum').html("1")
 	
 		// Run search
-		self.search_database();
+		self.searchDatabase();
 	};
 
-	self.search_database = function() {
+	self.searchDatabase = function() {
 		// Display 'searching...' dialog
 		jQuery('#cpdsearching').show();
 		//jQuery('#cpdsearching').dialog("open");
@@ -170,18 +170,11 @@ function CPDSearchOurDatabase() {
 	};
 	
 	self.init = function() {
-		// Activate submit button for search form
-		jQuery("#submit").click(self.submit_form);
-		
 		// Clear 'loading...' dialog
 		jQuery("#cpdloading").hide();
 
-		// Start with initial page of results, if so configured		
-		var trigger = jQuery("span#trigger").html() == "yes";
-		
-		if(trigger && jQuery(".search-our-database").length > 0) {			
-			return self.search_database();
-		}
+		// Activate submit button for search form
+		jQuery("#cpdsearchform #submit").click(self.submitForm);
 		
 		// Display the search form
 		jQuery("#cpdsearchform").show();
@@ -192,7 +185,8 @@ function CPDSearchOurDatabase() {
 
 cpdSearchOurDatabase = new CPDSearchOurDatabase();
 
-jQuery(document).ready(function() {
-	cpdSearchOurDatabase.init();
-});
+// Initialised during load of form instead...
+//jQuery(document).ready(function() {
+//	cpdSearchOurDatabase.init();
+//});
 

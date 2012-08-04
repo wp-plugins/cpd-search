@@ -1,7 +1,7 @@
 // Main controller logic for initialising and handling the search form activity
 
 function CPDCurrentInstructions() {
-	self = CPDCommonSearchController();
+	var self = CPDCommonSearchController();
 
 	self.searchError = function(xhr, status, error) {
 		// Put an error message in the results dialog
@@ -10,7 +10,6 @@ function CPDCurrentInstructions() {
 		
 		// Clear 'searching...' dialog
 		jQuery("#cpdsearching").hide();
-		jQuery('#cpdsearchform').show();
 	};
 
 	self.searchSuccess = function(data) {
@@ -59,9 +58,8 @@ function CPDCurrentInstructions() {
 		jQuery(".navbarprevpage").click(self.prev_page);
 		jQuery(".navbarnextpage").click(self.next_page);
 		
-		// Clear loading dialog and hide form
+		// Clear loading dialog
 		jQuery('#cpdsearching').hide();
-		jQuery('#cpdsearchform').show();
 	};
 
 	self.update_hash = function() {
@@ -76,7 +74,7 @@ function CPDCurrentInstructions() {
 
 		jQuery('#cpdsearching').show();
 		self.update_hash();
-		self.search_database();
+		self.searchDatabase();
 	};
 
 	self.prev_page = function() {
@@ -86,7 +84,7 @@ function CPDCurrentInstructions() {
 		jQuery('span#pagenum').text(page);
 
 		jQuery('#cpdsearching').show();
-		self.search_database();
+		self.searchDatabase();
 	};
 
 	self.next_page = function() {
@@ -96,7 +94,7 @@ function CPDCurrentInstructions() {
 		jQuery('span#pagenum').text(page)
 
 		jQuery('#cpdsearching').show();
-		self.search_database();
+		self.searchDatabase();
 	};
 
 	self.per_page_changed = function(data) {
@@ -104,10 +102,10 @@ function CPDCurrentInstructions() {
 		jQuery('span#limit').text(limit)
 		jQuery('span#pagenum').text("1")
 		jQuery('#cpdsearching').show();
-		self.search_database();
+		self.searchDatabase();
 	};
 
-	self.search_database = function() {
+	self.searchDatabase = function() {
 		// Determine start result number and page length
 		var pagenum = Math.floor(jQuery('span#pagenum').html());
 		var limit = Math.floor(jQuery("span#limit").html());
@@ -150,14 +148,11 @@ function CPDCurrentInstructions() {
 		// Hide the loading dialog
 		jQuery("#cpdloading").hide();
 
-		// Hook up inputs
+		// Hook up input that changes the sector
 		jQuery("select.sectors").change(self.sector_changed);
 		
-		if (jQuery(".current-instructions").length > 0){				
-			
-			// Perform initial search
-			cpdCurrentInstructions.search_database();
-		}
+		// Load the initial results view
+		self.searchDatabase();
 	};
 	
 	return self;
@@ -165,6 +160,7 @@ function CPDCurrentInstructions() {
 
 cpdCurrentInstructions = new CPDCurrentInstructions();
 
-jQuery(document).ready(function() {
-	cpdCurrentInstructions.init();
-});
+// Initialiased during load of form instead
+//jQuery(document).ready(function() {
+//	cpdCurrentInstructions.init();
+//});
