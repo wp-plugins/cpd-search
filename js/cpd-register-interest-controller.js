@@ -19,9 +19,16 @@ function CPDRegisterInterest() {
 	};
 	
 	self.registerInterestSuccess = function(data) {
-		if(!data.success) {
-			self.registerInterestError(data, data.error, data.error);
-			return;
+		// Check for failure
+		if(!data) {
+			return self.registerInterestError(null, "Connection failed", "Server down. Please try again later");
+		}
+		if(data.error && data.error == "AccessDeniedExceptionMsg") {
+			// Show registration form
+			return jQuery('#cpdregistrationform').dialog("open");
+		}
+		if(data.error) {
+			return self.registerInterestError(null, data.error, data.error);
 		}
 		
 		// Remove the propref from the registering list
@@ -40,14 +47,17 @@ function CPDRegisterInterest() {
 		// Update basket count and show it
 		jQuery("#basketcount").text(self.registered_interest_refs.length);
 		jQuery("#basket").show();
+		jQuery(".loginlink").hide();
+		jQuery(".logoutlink").show();
+		jQuery(".registrationlink").hide();
 	};
 	self.registerInterestError = function(jqXHR, textStatus, errorThrown) {
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("InvalidTokenException") > -1) {
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "AccessDeniedExceptionMsg") {
 			// Show registration form
 			jQuery('#cpdregistrationform').dialog("open");
 			return;
 		}
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("UserAlreadyExistsException") > -1) {
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "UserAlreadyExistsExceptionMsg") {
 			// Show login form
 			jQuery('#cpdregistrationform').dialog("close");
 			jQuery('#cpdloginform').dialog("open");

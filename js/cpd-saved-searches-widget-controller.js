@@ -146,7 +146,7 @@ function CPDSavedSearchesWidget() {
 	};
 
 	self.removeSearch = function(data) {
-		var id = jQuery(this).attr("id");
+		var id = jQuery(this).parents('table').attr('id');		
 		
 		var postdata = {
 			'action':'cpd_saved_searches_widget_remove_item_widget_ajax',
@@ -167,7 +167,16 @@ function CPDSavedSearchesWidget() {
 		
 		jQuery.ajax(ajaxopts);
 	};
-
+	
+	self.load_item = function()
+	{
+		jQuery("#cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar .savesearchresultholdingtable1_sidebar").each(function(){
+			jQuery(this).show();
+		});
+		self.number_item();
+		self.hide_show();
+	}
+	
 	self.number_item = function() {
 		number = 0;
 		jQuery(".savesearchresultholdingtable1_sidebar").each(function() {
@@ -208,7 +217,7 @@ function CPDSavedSearchesWidget() {
 	self.check_registration_phone = /^[0-9-]{10,20}$/;
 	self.check_password =  /^[A-Za-z0-9!@#$%^&amp;*()_]{6,20}$/;
 
-	self.registrationSuccess = function(data) {				
+	self.registrationSuccess = function(data) {
 		jQuery("#cpdsaveasearch #cpdregistering").hide();
 		jQuery('#cpdsaveasearch .msg').hide();
 		// Check for failure
@@ -216,12 +225,14 @@ function CPDSavedSearchesWidget() {
 			return self.registrationError(data, data.error, data.error);
 		}
 
-		// Hide registration form, show 'thankyou etc' part		
+		// Hide registration form, show 'thankyou etc' part
 		jQuery('#cpdsaveasearch .msg').html('Thank you. You have now been registered.');
 		jQuery('#cpdsaveasearch .msg').show();
 		
 		jQuery("#cpdsaveasearch #register").hide();
-
+		jQuery(".loginlink").hide();
+		jQuery(".logoutlink").show();
+		jQuery(".registrationlink").hide();
 		// Process nearly registered interests
 		cpdRegisterInterest.processQueue();
 	};
@@ -229,7 +240,7 @@ function CPDSavedSearchesWidget() {
 	self.registrationError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdsaveasearch .msg').hide();
 		jQuery("#cpdsaveasearch #cpdregistering").hide();
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("UserAlreadyExistsException") > -1) {
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "UserAlreadyExistsExceptionMsg") {
 			// Show login form
 			jQuery('#cpdsaveasearch .msg').html("No need to register. There is already an account for this e-mail address. Please try logging in with your existing credentials, or request a password reset if you have forgotten them.");
 			jQuery('#cpdsaveasearch .msg').show();
@@ -245,11 +256,11 @@ function CPDSavedSearchesWidget() {
 		jQuery('#cpdsaveasearch .msg').show();
 	};
 	
-	self.registration = function() {		
+	self.registration = function() {
 	
 		// Validation checks
 		var name = jQuery('#cpdsaveasearch #name').val();
-		var email = jQuery('#cpdsaveasearch #email').val();		
+		var email = jQuery('#cpdsaveasearch #email').val();
 		var phone = jQuery('#cpdsaveasearch #phone').val();
 		
 		if(!self.check_registration_name.test(name)) {
@@ -298,6 +309,8 @@ function CPDSavedSearchesWidget() {
 				},
 			}
 		});
+		
+		self.load_item();
 		
 		jQuery(".savesearchtopcolumnright_sidebar .btn_remove").live('click',self.removeSearch);
 		

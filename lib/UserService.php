@@ -19,6 +19,18 @@ class UserType {
   public $RegistrationDate; // dateTime
 }
 
+class UsersHistoryListType {
+  public $UsersHistory; // UsersHistoryType
+}
+
+class UsersHistoryType {
+  public $ID; // int
+  public $UserID; // int
+  public $EntryDate; // dateTime
+  public $Action; // string
+  public $Data; // string
+}
+
 class RegisterUserType {
   public $Name; // string
   public $Email; // string
@@ -30,11 +42,13 @@ class RegisterUserType {
 
 class VerifyUserType {
   public $Token; // string
+  public $ServiceContext; // string
 }
 
 class PasswordResetType {
   public $Email; // string
   public $Agent; // string
+  public $ServiceContext; // string
 }
 
 class PasswordChangeType {
@@ -46,6 +60,7 @@ class PasswordChangeType {
 class AuthenticateUserType {
   public $Email; // string
   public $Password; // string
+  public $ServiceContext; // string
   public $Agent; // string
 }
 
@@ -54,6 +69,16 @@ class FetchPreferencesType {
 }
 
 class UpdatePreferencesType {
+  public $Token; // string
+  public $User; // UserType
+}
+
+class CreateUserType {
+  public $Token; // string
+  public $User; // UserType
+}
+
+class UpdateUserType {
   public $Token; // string
   public $User; // UserType
 }
@@ -72,6 +97,21 @@ class SearchUsersCriteriaType {
   public $Keyword; // string
   public $SortField; // string
   public $SortOrder; // SortOrderType
+}
+
+class SearchUsersHistoryType {
+  public $Token; // string
+  public $Criteria; // UsersHistoryCriteriaType
+}
+
+class UsersHistoryCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $SortField; // SearchUsersSortFieldType
+  public $SortOrder; // SortOrderType
+  public $UserID; // int
+  public $StartTime; // dateTime
+  public $EndTime; // dateTime
 }
 
 class RegisterUserResponseType {
@@ -104,15 +144,50 @@ class UpdatePreferencesResponseType {
   public $User; // UserType
 }
 
+class CreateUserResponseType {
+  public $User; // UserType
+}
+
+class UpdateUserResponseType {
+  public $User; // UserType
+}
+
 class SearchUsersResponseType {
   public $ResultCount; // int
   public $Users; // UsersType
 }
 
+class SearchUsersHistoryResponseType {
+  public $ResultCount; // int
+  public $UsersHistoryList; // UsersHistoryListType
+}
+
+class UserNotFoundExceptionType {
+  public $Detail; // string
+}
+
+class UserUnconfirmedExceptionType {
+  public $Detail; // string
+}
+
+class AuthenticateUserExceptionType {
+  public $Detail; // string
+}
+
+class InvalidUserTokenExceptionType {
+  public $Detail; // string
+}
+
 class UserAlreadyExistsExceptionType {
+  public $Detail; // string
 }
 
 class UserAlreadyConfirmedExceptionType {
+  public $Detail; // string
+}
+
+class UserUnchangedExceptionType {
+  public $Detail; // string
 }
 
 
@@ -131,6 +206,8 @@ class UserService extends SoapClient {
                                     'UserIDsType' => 'UserIDsType',
                                     'UsersType' => 'UsersType',
                                     'UserType' => 'UserType',
+                                    'UsersHistoryListType' => 'UsersHistoryListType',
+                                    'UsersHistoryType' => 'UsersHistoryType',
                                     'RegisterUserType' => 'RegisterUserType',
                                     'VerifyUserType' => 'VerifyUserType',
                                     'PasswordResetType' => 'PasswordResetType',
@@ -138,8 +215,12 @@ class UserService extends SoapClient {
                                     'AuthenticateUserType' => 'AuthenticateUserType',
                                     'FetchPreferencesType' => 'FetchPreferencesType',
                                     'UpdatePreferencesType' => 'UpdatePreferencesType',
+                                    'CreateUserType' => 'CreateUserType',
+                                    'UpdateUserType' => 'UpdateUserType',
                                     'SearchUsersType' => 'SearchUsersType',
                                     'SearchUsersCriteriaType' => 'SearchUsersCriteriaType',
+                                    'SearchUsersHistoryType' => 'SearchUsersHistoryType',
+                                    'UsersHistoryCriteriaType' => 'UsersHistoryCriteriaType',
                                     'RegisterUserResponseType' => 'RegisterUserResponseType',
                                     'VerifyUserResponseType' => 'VerifyUserResponseType',
                                     'PasswordResetResponseType' => 'PasswordResetResponseType',
@@ -147,9 +228,17 @@ class UserService extends SoapClient {
                                     'AuthenticateUserResponseType' => 'AuthenticateUserResponseType',
                                     'FetchPreferencesResponseType' => 'FetchPreferencesResponseType',
                                     'UpdatePreferencesResponseType' => 'UpdatePreferencesResponseType',
+                                    'CreateUserResponseType' => 'CreateUserResponseType',
+                                    'UpdateUserResponseType' => 'UpdateUserResponseType',
                                     'SearchUsersResponseType' => 'SearchUsersResponseType',
+                                    'SearchUsersHistoryResponseType' => 'SearchUsersHistoryResponseType',
+                                    'UserNotFoundExceptionType' => 'UserNotFoundExceptionType',
+                                    'UserUnconfirmedExceptionType' => 'UserUnconfirmedExceptionType',
+                                    'AuthenticateUserExceptionType' => 'AuthenticateUserExceptionType',
+                                    'InvalidUserTokenExceptionType' => 'InvalidUserTokenExceptionType',
                                     'UserAlreadyExistsExceptionType' => 'UserAlreadyExistsExceptionType',
                                     'UserAlreadyConfirmedExceptionType' => 'UserAlreadyConfirmedExceptionType',
+                                    'UserUnchangedExceptionType' => 'UserUnchangedExceptionType',
                                    );
 
   public function UserService($wsdl = "https://staging.cpd.co.uk/soap/services/UserService?wsdl", $options = array()) {
@@ -262,11 +351,53 @@ class UserService extends SoapClient {
   /**
    *  
    *
+   * @param CreateUserType $searchUsersRequest
+   * @return CreateUserResponseType
+   */
+  public function CreateUser(CreateUserType $searchUsersRequest) {
+    return $this->__soapCall('CreateUser', array($searchUsersRequest),       array(
+            'uri' => 'http://user.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param UpdateUserType $searchUsersRequest
+   * @return UpdateUserResponseType
+   */
+  public function UpdateUser(UpdateUserType $searchUsersRequest) {
+    return $this->__soapCall('UpdateUser', array($searchUsersRequest),       array(
+            'uri' => 'http://user.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
    * @param SearchUsersType $searchUsersRequest
    * @return SearchUsersResponseType
    */
   public function SearchUsers(SearchUsersType $searchUsersRequest) {
     return $this->__soapCall('SearchUsers', array($searchUsersRequest),       array(
+            'uri' => 'http://user.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchUsersHistoryType $parameters
+   * @return SearchUsersHistoryResponseType
+   */
+  public function SearchUsersHistory(SearchUsersHistoryType $parameters) {
+    return $this->__soapCall('SearchUsersHistory', array($parameters),       array(
             'uri' => 'http://user.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

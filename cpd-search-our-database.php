@@ -1,19 +1,23 @@
 <?php
 
-require_once(dirname(__FILE__) . "/cpd-common.php");
-require_once(dirname(__FILE__) . "/cpd-register-interest.php");
-require_once(dirname(__FILE__) . "/cpd-view-property-image.php");
-require_once(dirname(__FILE__) . "/cpd-view-property-pdf.php");
+require_once(dirname(__FILE__) . "/cpd-common-search.php");
 
-class CPDSearchOurDatabase {
+class CPDSearchOurDatabase extends CPDCommonSearch {
 	function init() {
 		wp_enqueue_script('cpd-common-search-controller', cpd_plugin_dir_url(__FILE__) ."js/cpd-common-search-controller.js");
 		wp_enqueue_script('cpd-search-our-database-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-search-our-database-controller.js");
 		wp_enqueue_script('cpd-view-property-pdf-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-pdf-controller.js");
+		wp_enqueue_script('cpd-view-property-image-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-image-controller.js");
+		wp_enqueue_script('cpd-view-property-image-lightbox-controller', cpd_plugin_dir_url(__FILE__) . "js/lightbox/js/jquery.lightbox-0.5.js");
+		wp_enqueue_style('cpd-view-property-image-lightbox-style', cpd_plugin_dir_url(__FILE__) . '/js/lightbox/css/jquery.lightbox-0.5.css');
 		wp_localize_script('cpd-search-our-database-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
 		add_shortcode('cpd_search_our_database', array('CPDSearchOurDatabase', 'search_form'));
 		add_action('wp_ajax_cpd_search_our_database', array('CPDSearchOurDatabase', 'search_ajax'));
 		add_action('wp_ajax_nopriv_cpd_search_our_database', array('CPDSearchOurDatabase', 'search_ajax'));
+		
+		session_start();
+		
+		cpd_check_agent_sectors();
 	}
 
 	function search_form() {
@@ -22,13 +26,13 @@ class CPDSearchOurDatabase {
 
 		$start = $_SESSION['cpd_search_our_database_start'];
 		$limit = $_SESSION['cpd_search_our_database_limit'];
-		$sectors =  $_SESSION['cpd_search_our_database_sectors'];
-		$address =  $_SESSION['cpd_search_our_database_address'];
-		$areas =  $_SESSION['cpd_search_our_database_areas'];
-		$sizefrom =  $_SESSION['cpd_search_our_database_sizefrom'];
-		$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
-		$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
-		$tenure =  $_SESSION['cpd_search_our_database_tenure'];
+		$sectors = $_SESSION['cpd_search_our_database_sectors'];
+		$address = $_SESSION['cpd_search_our_database_address'];
+		$areas = $_SESSION['cpd_search_our_database_areas'];
+		$sizefrom = $_SESSION['cpd_search_our_database_sizefrom'];
+		$sizeto = $_SESSION['cpd_search_our_database_sizeto'];
+		$sizeunits = $_SESSION['cpd_search_our_database_sizeunits'];
+		$tenure = $_SESSION['cpd_search_our_database_tenure'];
 		$postcode = $_SESSION['cpd_search_our_database_postcode'];
 	
 		// Read in necessary form template sections from plugin options
@@ -37,7 +41,11 @@ class CPDSearchOurDatabase {
 		$form .= cpd_get_template_contents("user_login");
 		$form .= cpd_get_template_contents("user_password_reset");
 		$form .= cpd_get_template_contents("search_our_database");
-
+		
+		$search_widget = 0;
+		if(isset($_REQUEST['search_widget']))
+			$search_widget = 1;
+		
 		// Add variables to be passed to JS controller
 		$form .= ''.
 			'<div style="display: none;">'.
@@ -53,17 +61,20 @@ class CPDSearchOurDatabase {
 			'<span id="address">[address]</span>'.
 			'<span id="trigger">[trigger]</span>'.
 			'<span id="pagecount">[pagecount]</span>'.
+			'<span id="search_widget">'.$search_widget.'</span>'.
 			'</div>';
 
 		// Add hook to initialise controller code
 		$form .= '<script>jQuery(document).ready(function() { cpdSearchOurDatabase.init(); });</script>';
-		
+
 		// Add options for sizeunits pulldown
 		$sizeunitoptions = cpd_sizeunit_options($sizeunits);
 		$form = str_replace("[sizeunitoptions]", $sizeunitoptions, $form);
 
-		// Add options for sector pulldown
-		$sectoroptions = cpd_sector_options($sectors);
+		// Add sector options
+		$options = get_option('cpd-search-options');
+		$sod_sectors = explode(",", $options['cpd_sod_sectors']);
+		$sectoroptions = cpd_sector_options($sod_sectors, $sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
 		// Add tenure options
@@ -98,6 +109,9 @@ class CPDSearchOurDatabase {
 		// Add theme/plugin base URLs
 		$form = str_replace("[pluginurl]", plugins_url(), $form);
 		
+		// Add link to client's T&C URL
+		$form = str_replace("[termsurl]", $options['cpd_terms_url'], $form);
+		
 		// Determine whether to trigger search or not
 		$trigger = false;
 		if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -118,14 +132,14 @@ class CPDSearchOurDatabase {
 		self::gather_inputs();
 		$start = $_SESSION['cpd_search_our_database_start'];
 		$limit = $_SESSION['cpd_search_our_database_limit'];
-		$sectors =  $_SESSION['cpd_search_our_database_sectors'];
-		$address =  $_SESSION['cpd_search_our_database_address'];
-		$areas =  $_SESSION['cpd_search_our_database_areas'];
-		$sizefrom =  $_SESSION['cpd_search_our_database_sizefrom'];
-		$sizeto =  $_SESSION['cpd_search_our_database_sizeto'];
-		$sizeunits =  $_SESSION['cpd_search_our_database_sizeunits'];
-		$tenure =  $_SESSION['cpd_search_our_database_tenure'];
-		$postcode =  $_SESSION['cpd_search_our_database_postcode'];
+		$sectors = $_SESSION['cpd_search_our_database_sectors'];
+		$address = $_SESSION['cpd_search_our_database_address'];
+		$areas = $_SESSION['cpd_search_our_database_areas'];
+		$sizefrom = $_SESSION['cpd_search_our_database_sizefrom'];
+		$sizeto = $_SESSION['cpd_search_our_database_sizeto'];
+		$sizeunits = $_SESSION['cpd_search_our_database_sizeunits'];
+		$tenure = $_SESSION['cpd_search_our_database_tenure'];
+		$postcode = $_SESSION['cpd_search_our_database_postcode'];
 	
 		// Send our search request to the server
 		$searchCriteria = new SearchCriteriaType();
@@ -167,11 +181,15 @@ class CPDSearchOurDatabase {
 		try {
 			$options = get_option('cpd-search-options');
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$searchResponse = $client->SearchProperty($searchRequest);
 		}
 		catch(Exception $e) {
+			if($e->getMessage() == "The security token could not be authenticated or authorized") {
+				cpd_search_discard_token();
+				return self::search_ajax();
+			}
 			$response = array(
 				'success' => false,
 				'error' => $e->getMessage()
@@ -185,44 +203,8 @@ class CPDSearchOurDatabase {
 		// Filter results to avoid sending sensitive fields over the wire
 		$results = array();
 		if(isset($searchResponse->PropertyList->Property)) {
-			// Workaround for PITA in PHP SOAP parser...
-			$propList = $searchResponse->PropertyList->Property;
-			if($propList instanceof PropertyType) {
-				$propList = array($propList);
-			}
-			foreach($propList as $record) {
-				$row = array();
-				$row['PropertyID'] = $record->PropertyID;
-				$row['SectorDescription'] = $record->SectorDescription;
-				$row['SizeDescription'] = $record->SizeDescription;
-				$row['TenureDescription'] = $record->TenureDescription;
-				$row['BriefSummary'] = $record->BriefSummary;
-				$row['Address'] = $record->Address;
-				$row['Latitude'] = $record->Latitude;
-				$row['Longitude'] = $record->Longitude;
-				$row['RegionName'] = $record->RegionName;
-			
-				// Add thumb URL, only if one is available
-				if(isset($record->PropertyMedia)) {
-					$mediaList = $record->PropertyMedia;
-					if($mediaList instanceof PropertyMediaType) {
-						$mediaList = array($propList);
-					}
-					foreach($mediaList as $media) {
-						if($media->Position > 1) {
-							continue;
-						}
-						if($media->Type == "photo") {
-							$row['ThumbURL'] = $media->ThumbURL;
-							continue;
-						}
-						if($media->Type == "pdf" && $record->AgentRef == $options['cpd_agentref']) {
-							$row['PDFMediaID'] = $media->MediaID;
-							continue;
-						}
-					}
-				}
-
+			foreach($searchResponse->PropertyList->Property as $record) {
+				$row = self::rowFromDB($record);
 				$results[] = $row;
 			}
 		}

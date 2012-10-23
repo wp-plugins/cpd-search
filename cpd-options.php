@@ -4,53 +4,48 @@ require_once(dirname(__FILE__) . "/cpd-area-options.php");
 
 $soapopts = array('trace' => 1, 'exceptions' => 1, 'features' => SOAP_SINGLE_ELEMENT_ARRAYS);
 
+$cpd_server_options = array(
+	"Production" => "https://soap.cpd.co.uk/services/",
+	"Demo" => "https://demo.cpd.co.uk/soap/services/",
+	"Staging" => "https://staging.cpd.co.uk/soap/services/",
+	"Local development" => "https://staging.cpd.local/soap/services/",
+);
+
 $results_per_page_options = array(
 	"5", "10", "20", "25", "50", "100"
 );
 
-function cpd_sector_options($sectors, $all = false) { 
+$cpd_tenure_options = array(
+	"" => "Leasehold and Freehold",
+	"F" => "Freehold",
+	"L" => "Leasehold",
+);
+
+$cpd_sizeunit_options = array(
+	"1" => "sq m",
+	"2" => "sq ft",
+	"3" => "acres",
+	"4" => "hectares",
+);
+
+function cpd_sector_options($sectors, $sectors_chosen) { 
 	if(!is_array($sectors)) {
 		$sectors = array();
 	}
+	if(!is_array($sectors_chosen)) {
+		$sectors_chosen = array();
+	}
 
 	// Build sectors options
-	// [TODO] Should gather this from a GetSectors SOAP API call
-	$sector_options = array(
-		"O" => "Offices",
-		"S" => "Shops",
-		"R" => "Restaurant/Takeaway",
-		"E" => "Education",
-		"H" => "Medical",
-	);
-	if($all) {
-		$sector_options = array(
-			"O" => "Offices",
-			"SO" => "Serviced Office",
-			"S" => "Shops",
-			"I" => "Industrial",
-			"BU" => "Business Units",
-			"R" => "Restaurant/Takeaway",
-			"PU" => "Pubs",
-			"L" => "Leisure",
-			"W" => "Retail Warehousing",
-			"X" => "Showrooms",
-			"M" => "Motor Related",
-			"C" => "Mixed/Commercial",
-			"H" => "Medical",
-			"G" => "Studio/Gallery",
-			"AC" => "Arts/Crafts",
-			"U" => "Live/Work Unit",
-			"E" => "Education",
-			"A" => "Storage",
-			"B" => "Land/Site",
-			"Z" => "Hall/Misc",
-			"GC" => "Garden Centers",
-		);
-	}
-	foreach($sector_options as $key => $value) {
-		$selected = (in_array($key, $sectors) ? "selected=\"selected\"" : "");
+	$sector_options = $_SESSION['cpd_agent_sectors'];
+	$options = get_option('cpd-search-options');
+	$sectoroptions = "";
+	foreach($sectors as $key) {
+		$value = $sector_options[$key];
+		$selected = (in_array($key, $sectors_chosen) ? "selected=\"selected\"" : "");
 		$sectoroptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
 	}
+	
 	return $sectoroptions;
 }
 
@@ -71,14 +66,9 @@ function cpd_area_options($areas) {
 
 function cpd_sizeunit_options($sizeunits) {
 	// Add options for sizeunits pulldown
-	$sizeunit_options = array(
-		"1" => "sq m",
-		"2" => "sq ft",
-		"3" => "acres",
-		"4" => "hectares",
-	);
+	global $cpd_sizeunit_options;
 	$sizeunitoptions = "";
-	foreach($sizeunit_options as $key => $value) {
+	foreach($cpd_sizeunit_options as $key => $value) {
 		$selected = ($key == $sizeunits ? "selected=\"selected\"" : "");
 		$sizeunitoptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
 	}
@@ -87,13 +77,9 @@ function cpd_sizeunit_options($sizeunits) {
 
 function cpd_tenure_options($tenure) {
 	// Add options for tenure pulldown
-	$tenure_options = array(
-		"" => "Leasehold and Freehold",
-		"F" => "Freehold",
-		"L" => "Leasehold",
-	);
+	global $cpd_tenure_options;
 	$tenureoptions = "";
-	foreach($tenure_options as $key => $value) {
+	foreach($cpd_tenure_options as $key => $value) {
 		$selected = ($key == $tenure ? "selected=\"selected\"" : "");
 		$tenureoptions .= "<option value=\"".$key."\" ".$selected.">".$value."</option>\n";
 	}
@@ -113,15 +99,10 @@ function cpd_perpage_options($limit) {
 
 function cpd_search_options_page() {
 	global $results_per_page_options;
+	global $cpd_server_options;
 
-	$server_options = array(
-		"Production" => "https://soap.cpd.co.uk/services/",
-		"Demo" => "https://demo.cpd.co.uk/soap/services/",
-		"Staging" => "https://staging.cpd.co.uk/soap/services/",
-		"Local development" => "https://staging.cpd.local/soap/services/",
-	);
 	if (!current_user_can('manage_options')) {
-		wp_die( __('You do not have sufficient permissions to access this page.') );
+		wp_die(__('You do not have sufficient permissions to access this page.') );
 	}
 
 	if (isset($_POST['submit'])) {
@@ -153,7 +134,7 @@ p.error {
 
 <form method="post" action="">
 <?php
-if ( function_exists('wp_nonce_field') )
+if(function_exists('wp_nonce_field') )
 	wp_nonce_field('plugin-name-action_cpd-options');
 ?>
 
@@ -165,20 +146,19 @@ if ( function_exists('wp_nonce_field') )
 
 <h3>Member Credentials</h3>
 
-<p>In order to use this plugin, you will need an account with <a href="http://www.cpd.co.uk/" target="_blank">Commercial Property Database Ltd</a>. If you are an existing CPD member agent, or are developing a site for a member agent, please provide your member agent credentials. If you are not an existing member, or are evaluating the plug-in for use by a potential member agent, please <a href="http://www.cpd.co.uk/join-now/">join here</a>.</p>
+<p>In order to use this plugin, you will need an application token, which must be provided by  <a href="http://www.cpd.co.uk/" target="_blank">Commercial Property Database Ltd</a>. If you are an existing CPD member agent, or are developing a site for a member agent, please contact CPD to obtain your application token. If you are not an existing member, or are evaluating the plug-in for use by a potential member agent, please <a href="http://www.cpd.co.uk/join-now/">join here</a>.</p>
 
 <table class="form-table">
   <tr valign="top">
-    <th scope="row">Member agent reference</th>
+    <th scope="row">Agent reference</th>
     <td>
       <input type="text" name="cpd_agentref" value="<?php echo $options['cpd_agentref']; ?>" />
     </td>
   </tr>
-
   <tr valign="top">
-    <th scope="row">Password</th>
+    <th scope="row">Application token</th>
     <td>
-      <input type="password" name="cpd_password" value="<?php echo $options['cpd_password']; ?>" />
+      <input type="text" name="cpd_application_token" value="<?php echo $options['cpd_application_token']; ?>" />
     </td>
   </tr>
 </table>
@@ -193,8 +173,8 @@ if ( function_exists('wp_nonce_field') )
     <td>
       <select name="cpd_soap_base_url">
 <?php
-      foreach($server_options as $value => $key) {
-	$selected = ($key == $options['cpd_soap_base_url'] ? "selected='selected'" : "");
+      foreach($cpd_server_options as $value => $key) {
+        $selected = ($key == $options['cpd_soap_base_url'] ? "selected='selected'" : "");
 ?>
         <option value="<?php echo $key; ?>" <?php echo $selected; ?>><?php echo $value; ?></option>
 <?php
@@ -269,6 +249,58 @@ if ( function_exists('wp_nonce_field') )
 
 <table class="form-table">
   <tr valign="top">
+    <th scope="row">Search sectors</th>
+    <td>
+      <table>
+        <tr>
+          <th>Sector</th>
+          <th>Current Instructions</th>
+          <th>Search Our Database</th>
+        </tr>
+<?php
+        $agent_sectors = $_SESSION['cpd_agent_sectors'];
+        $ci_sectors = explode(",", $options['cpd_ci_sectors']);
+        $sod_sectors = explode(",", $options['cpd_sod_sectors']);
+        foreach($agent_sectors as $sectorcode => $sectordescription) {
+            $ci_selected = "";
+            foreach($ci_sectors as $searchcode) {
+                if($searchcode == $sectorcode) {
+                    $ci_selected = ' checked="checked"';
+                    break;
+                }
+            }
+            $sod_selected = "";
+            foreach($sod_sectors as $searchcode) {
+                if($searchcode == $sectorcode) {
+                    $sod_selected = ' checked="checked"';
+                    break;
+                }
+            }
+?>
+        <tr>
+          <td>
+            <div>
+              <?php echo $sectordescription ?>
+            </div>
+          </td>
+          <td>
+            <div>
+              <input type="checkbox" name="cpd_ci_sector[<?php echo $sectorcode ?>]" value="<?php echo $sectordescription ?>" <?php echo $ci_selected; ?>/>
+            </div>
+          </td>
+          <td>
+            <div>
+              <input type="checkbox" name="cpd_sod_sector[<?php echo $sectorcode ?>]" value="<?php echo $sectordescription ?>" <?php echo $sod_selected; ?>/>
+            </div>
+          </td>
+        </tr>
+<?php
+        }
+?>
+      </table>
+    </td>
+  </tr>
+  <tr valign="top">
     <th scope="row">Default results per page</th>
     <td>
       <select name="cpd_search_results_per_page">
@@ -284,9 +316,21 @@ if ( function_exists('wp_nonce_field') )
     </td>
   </tr>
   <tr valign="top">
-    <th scope="row">Service context (**)</th>
+    <th scope="row">Allow unregistered access to PDFs?</th>
     <td>
-      <input name="cpd_service_context" value="<?php echo $options['cpd_service_context']; ?>"" />
+      <input type="checkbox" name="cpd_unregistered_pdfs" value="Y" <?php if($options['cpd_unregistered_pdfs']) { ?>checked="checked"<?php } ?> />
+    </td>
+  </tr>
+  <tr valign="top">
+    <th scope="row">Terms &amp; Conditions URL</th>
+    <td>
+      <input name="cpd_terms_url" value="<?php echo $options['cpd_terms_url']; ?>" />
+    </td>
+  </tr>
+  <tr valign="top">
+    <th scope="row">Service context (*)</th>
+    <td>
+      <input name="cpd_service_context" value="<?php echo $options['cpd_service_context']; ?>" />
     </td>
   </tr>
   <tr valign="top">
@@ -319,22 +363,33 @@ function cpd_search_options_posted() {
 	// Update options as registered
 	$options = get_option('cpd-search-options');
 	$options['cpd_agentref'] = $_REQUEST['cpd_agentref'];
-	$options['cpd_password'] = $_REQUEST['cpd_password'];
+	$options['cpd_application_token'] = $_REQUEST['cpd_application_token'];
 	$options['cpd_soap_base_url'] = $_REQUEST['cpd_soap_base_url'];
 	$options['cpd_search_results_per_page'] = $_REQUEST['cpd_search_results_per_page'] * 1;
 	$options['cpd_map_widget_width'] = $_REQUEST['cpd_map_widget_width'] * 1;
 	$options['cpd_map_widget_height'] = $_REQUEST['cpd_map_widget_height'] * 1;
 	$options['cpd_service_context'] = $_REQUEST['cpd_service_context'];
 	$options['cpd_development_mode'] = $_REQUEST['cpd_development_mode'] == "Y";
-	
-	global $cpd_templates;
-	foreach($cpd_templates as $id => $name) {
-		$options["cpd_".$id."_ui"] = stripslashes($_REQUEST["cpd_".$id."_ui"]);
-		if(trim($options["cpd_".$id."_ui"]) == "") {
-			$form = file_get_contents(dirname(__FILE__) . "/inc/".$id."_ui.html");
-			$options["cpd_".$id."_ui"] = $form;
+	$options['cpd_unregistered_pdfs'] = $_REQUEST['cpd_unregistered_pdfs'] == "Y";
+	$options['cpd_terms_url'] = $_REQUEST['cpd_terms_url'];
+
+	$ci_sectors = array();
+	$sector_options = $_SESSION['cpd_agent_sectors'];
+	foreach($sector_options as $key => $value) {
+		if(isset($_REQUEST['cpd_ci_sector'][$key])) {
+			$ci_sectors[] = $key;
 		}
 	}
+	$options['cpd_ci_sectors'] = implode(",", $ci_sectors);
+
+	$sod_sectors = array();
+	$sector_options = $_SESSION['cpd_agent_sectors'];
+	foreach($sector_options as $key => $value) {
+		if(isset($_REQUEST['cpd_sod_sector'][$key])) {
+			$sod_sectors[] = $key;
+		}
+	}
+	$options['cpd_sod_sectors'] = implode(",", $sod_sectors);
 
 	update_option('cpd-search-options', $options);
 
@@ -351,15 +406,15 @@ function cpd_search_server_check() {
 	// Check details, and report success/failure of connection
 	$options = get_option('cpd-search-options');
 	$client = new SoapClient($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-	$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+	$headers = wss_security_headers($options['cpd_application_token'], "");
 	$client->__setSOAPHeaders($headers);
 
 	// Confirm the connection works by requesting schema version
 	try {
-		$versionResponse = $client->GetDBSchemaVersion();
+		$testResponse = $client->GetSectors();
 		?>
 		<div class="updated">
-		<p>Server connection successful: Database version is <?php echo $versionResponse->Version ?>
+		<p>Server connection successful.</p>
 		</div>
 		<?php
 	}
@@ -373,7 +428,7 @@ function cpd_search_server_check() {
 }
 
 // Hooks to allow CPD search configuration settings and options to be set
-add_action( 'admin_init', 'cpd_search_admin_init');
-add_action( 'admin_menu', 'cpd_search_admin_menu');
+add_action('admin_init', 'cpd_search_admin_init');
+add_action('admin_menu', 'cpd_search_admin_menu');
 
 ?>

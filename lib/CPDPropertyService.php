@@ -258,6 +258,11 @@ class CPDPostcodePrefixType {
   public $CPDAreaID; // string
 }
 
+class GetSectorsType {
+  public $AllSectors; // boolean
+  public $SectorsWithInstructions; // boolean
+}
+
 class SearchPropertyType {
   public $SearchCriteria; // SearchCriteriaType
 }
@@ -331,9 +336,23 @@ class ViewingPropertyType {
   public $ServiceContext; // string
 }
 
+class ViewPropertyType {
+  public $PropertyID; // int
+  public $ServiceContext; // string
+  public $RegistrationNotRequired; // boolean
+}
+
 class ViewingMediaType {
   public $MediaID; // int
   public $ServiceContext; // string
+}
+
+class ViewMediaType {
+  public $PropertyID; // int
+  public $MediaType; // string
+  public $Position; // int
+  public $ServiceContext; // string
+  public $RegistrationNotRequired; // boolean
 }
 
 class CreatePropertyType {
@@ -342,6 +361,10 @@ class CreatePropertyType {
 
 class UpdatePropertyType {
   public $Property; // PropertyType
+}
+
+class DuplicatePropertyType {
+  public $PropertyID; // int
 }
 
 class DeletePropertyType {
@@ -422,10 +445,6 @@ class RemoveCPDPostcodePrefixType {
   public $PostcodePrefix; // CPDPostcodePrefixType
 }
 
-class GetDBSchemaVersionResponseType {
-  public $Version; // int
-}
-
 class GetSectorsResponseType {
   public $ResultCount; // int
   public $SectorList; // SectorListType
@@ -443,13 +462,25 @@ class SearchPropertyHistoryResponseType {
 
 class RegisterInterestResponseType {
   public $RegisteredInterest; // RegisteredInterest
+  public $UnconfirmedUserWarning; // boolean
 }
 
 class ViewingPropertyResponseType {
   public $PropertyView; // PropertyView
+  public $Property; // PropertyType
+}
+
+class ViewPropertyResponseType {
+  public $PropertyView; // PropertyView
+  public $Property; // PropertyType
 }
 
 class ViewingMediaResponseType {
+  public $PropertyMediaView; // PropertyMediaView
+  public $PropertyMedia; // PropertyMediaType
+}
+
+class ViewMediaResponseType {
   public $PropertyMediaView; // PropertyMediaView
   public $PropertyMedia; // PropertyMediaType
 }
@@ -459,6 +490,10 @@ class CreatePropertyResponseType {
 }
 
 class UpdatePropertyResponseType {
+  public $Property; // PropertyType
+}
+
+class DuplicatePropertyResponseType {
   public $Property; // PropertyType
 }
 
@@ -528,13 +563,24 @@ class PropertyHistoryListType {
   public $PropertyHistory; // PropertyHistoryType
 }
 
+class AccessDeniedExceptionType {
+  public $Detail; // string
+}
+
+class UnconfirmedUserExceptionType {
+  public $Detail; // string
+}
+
 class InvalidMediaTypeExceptionType {
+  public $Detail; // string
 }
 
 class PostcodeNotFoundExceptionType {
+  public $Detail; // string
 }
 
 class CPDPostcodePrefixNotFoundExceptionType {
+  public $Detail; // string
 }
 
 
@@ -581,6 +627,7 @@ class CPDPropertyService extends SoapClient {
                                     'RegisteredInterest' => 'RegisteredInterest',
                                     'CPDAreaType' => 'CPDAreaType',
                                     'CPDPostcodePrefixType' => 'CPDPostcodePrefixType',
+                                    'GetSectorsType' => 'GetSectorsType',
                                     'SearchPropertyType' => 'SearchPropertyType',
                                     'SearchCriteriaType' => 'SearchCriteriaType',
                                     'SearchPropertiesSortFieldType' => 'SearchPropertiesSortFieldType',
@@ -589,9 +636,12 @@ class CPDPropertyService extends SoapClient {
                                     'PostcodesType' => 'PostcodesType',
                                     'RegisterInterestType' => 'RegisterInterestType',
                                     'ViewingPropertyType' => 'ViewingPropertyType',
+                                    'ViewPropertyType' => 'ViewPropertyType',
                                     'ViewingMediaType' => 'ViewingMediaType',
+                                    'ViewMediaType' => 'ViewMediaType',
                                     'CreatePropertyType' => 'CreatePropertyType',
                                     'UpdatePropertyType' => 'UpdatePropertyType',
+                                    'DuplicatePropertyType' => 'DuplicatePropertyType',
                                     'DeletePropertyType' => 'DeletePropertyType',
                                     'ArchivePropertyType' => 'ArchivePropertyType',
                                     'RestorePropertyType' => 'RestorePropertyType',
@@ -609,15 +659,17 @@ class CPDPropertyService extends SoapClient {
                                     'SearchCPDPostcodePrefixesType' => 'SearchCPDPostcodePrefixesType',
                                     'CreateCPDPostcodePrefixType' => 'CreateCPDPostcodePrefixType',
                                     'RemoveCPDPostcodePrefixType' => 'RemoveCPDPostcodePrefixType',
-                                    'GetDBSchemaVersionResponseType' => 'GetDBSchemaVersionResponseType',
                                     'GetSectorsResponseType' => 'GetSectorsResponseType',
                                     'SearchPropertyResponseType' => 'SearchPropertyResponseType',
                                     'SearchPropertyHistoryResponseType' => 'SearchPropertyHistoryResponseType',
                                     'RegisterInterestResponseType' => 'RegisterInterestResponseType',
                                     'ViewingPropertyResponseType' => 'ViewingPropertyResponseType',
+                                    'ViewPropertyResponseType' => 'ViewPropertyResponseType',
                                     'ViewingMediaResponseType' => 'ViewingMediaResponseType',
+                                    'ViewMediaResponseType' => 'ViewMediaResponseType',
                                     'CreatePropertyResponseType' => 'CreatePropertyResponseType',
                                     'UpdatePropertyResponseType' => 'UpdatePropertyResponseType',
+                                    'DuplicatePropertyResponseType' => 'DuplicatePropertyResponseType',
                                     'ArchivePropertyResponseType' => 'ArchivePropertyResponseType',
                                     'RestorePropertyResponseType' => 'RestorePropertyResponseType',
                                     'DeletePropertyResponseType' => 'DeletePropertyResponseType',
@@ -636,6 +688,8 @@ class CPDPropertyService extends SoapClient {
                                     'SectorListType' => 'SectorListType',
                                     'PropertyMediaListType' => 'PropertyMediaListType',
                                     'PropertyHistoryListType' => 'PropertyHistoryListType',
+                                    'AccessDeniedExceptionType' => 'AccessDeniedExceptionType',
+                                    'UnconfirmedUserExceptionType' => 'UnconfirmedUserExceptionType',
                                     'InvalidMediaTypeExceptionType' => 'InvalidMediaTypeExceptionType',
                                     'PostcodeNotFoundExceptionType' => 'PostcodeNotFoundExceptionType',
                                     'CPDPostcodePrefixNotFoundExceptionType' => 'CPDPostcodePrefixNotFoundExceptionType',
@@ -653,25 +707,11 @@ class CPDPropertyService extends SoapClient {
   /**
    *  
    *
-   * @param  
-   * @return GetDBSchemaVersionResponseType
-   */
-  public function GetDBSchemaVersion() {
-    return $this->__soapCall('GetDBSchemaVersion', array(),       array(
-            'uri' => 'http://property.webservice.cpd.co.uk/',
-            'soapaction' => ''
-           )
-      );
-  }
-
-  /**
-   *  
-   *
-   * @param  
+   * @param GetSectorsType $request
    * @return GetSectorsResponseType
    */
-  public function GetSectors() {
-    return $this->__soapCall('GetSectors', array(),       array(
+  public function GetSectors(GetSectorsType $request) {
+    return $this->__soapCall('GetSectors', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -737,11 +777,39 @@ class CPDPropertyService extends SoapClient {
   /**
    *  
    *
+   * @param ViewPropertyType $request
+   * @return ViewPropertyResponseType
+   */
+  public function ViewProperty(ViewPropertyType $request) {
+    return $this->__soapCall('ViewProperty', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
    * @param ViewingMediaType $request
    * @return ViewingMediaResponseType
    */
   public function ViewingMedia(ViewingMediaType $request) {
     return $this->__soapCall('ViewingMedia', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param ViewMediaType $request
+   * @return ViewMediaResponseType
+   */
+  public function ViewMedia(ViewMediaType $request) {
+    return $this->__soapCall('ViewMedia', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -770,6 +838,20 @@ class CPDPropertyService extends SoapClient {
    */
   public function UpdateProperty(UpdatePropertyType $request) {
     return $this->__soapCall('UpdateProperty', array($request),       array(
+            'uri' => 'http://property.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param DuplicatePropertyType $request
+   * @return DuplicatePropertyResponseType
+   */
+  public function DuplicateProperty(DuplicatePropertyType $request) {
+    return $this->__soapCall('DuplicateProperty', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -877,10 +959,10 @@ class CPDPropertyService extends SoapClient {
   /**
    *  
    *
-   * @param RemoveMedia $request
+   * @param RemoveMediaType $request
    * @return RemoveMediaResponseType
    */
-  public function RemoveMedia(RemoveMedia $request) {
+  public function RemoveMedia(RemoveMediaType $request) {
     return $this->__soapCall('RemoveMedia', array($request),       array(
             'uri' => 'http://property.webservice.cpd.co.uk/',
             'soapaction' => ''

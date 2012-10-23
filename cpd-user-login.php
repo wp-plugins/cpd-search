@@ -6,6 +6,8 @@ class CPDUserLogin {
 	function init() {
 		add_action('wp_ajax_cpd_user_login', array('CPDUserLogin', 'ajax'));
 		add_action('wp_ajax_nopriv_cpd_user_login', array('CPDUserLogin', 'ajax'));
+		add_action('wp_ajax_cpd_user_logout', array('CPDUserLogin', 'logoutajax'));
+		add_action('wp_ajax_nopriv_cpd_user_logout', array('CPDUserLogin', 'logoutajax'));
 	}
 	
 	function ajax() {
@@ -37,8 +39,7 @@ class CPDUserLogin {
 		}
 	
 		// Store token as a cookie
-		setcookie("cpd_token", $authenticationResponse->Token);
-		setcookie("cpd_token_type", "user");
+		cpd_search_set_user_token($authenticationResponse->Token);
 
 		// Return response as JSON
 		$response = array(
@@ -51,6 +52,31 @@ class CPDUserLogin {
 		header( "Content-Type: application/json" );
 		echo json_encode($response);
 		exit;
+	}
+	
+	function logoutajax() {
+		global $soapopts;
+		$options = get_option('cpd-search-options');
+		try {
+			cpd_search_discard_token();
+			
+			// Return response as JSON
+			$response = array(
+				'success' => true
+			);
+			header( "Content-Type: application/json" );
+			echo json_encode($response);
+			exit;
+		}
+		catch(Exception $e) {
+			$response = array(
+				'success' => false,
+				'error' => $e->getMessage()
+			);
+			header( "Content-Type: application/json" );
+			echo json_encode($response);
+			exit;
+		}	
 	}
 }
 

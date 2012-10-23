@@ -5,8 +5,8 @@ function CPDCurrentInstructions() {
 
 	self.searchError = function(xhr, status, error) {
 		// Put an error message in the results dialog
-		jQuery("#cpdsearcherror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
-		jQuery("#cpdsearcherror").show();
+		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
+		jQuery("#cpderror").dialog("open");
 		
 		// Clear 'searching...' dialog
 		jQuery("#cpdsearching").hide();
@@ -14,19 +14,19 @@ function CPDCurrentInstructions() {
 
 	self.searchSuccess = function(data) {
 		// Check for failure
-		if(!data.success) {
-			return self.searchError(null, data.error, data.error);
+		if(!data) {
+			return self.searchError(null, "Connection failed", "Server down. Please try again later");
 		}
-
+		
+		// Clear loading dialog and results panel
+		jQuery('#cpdsearching').hide();
+		jQuery('#cpdsearchresults').empty();
+		
 		// Handle no results scenario
 		if(data.total < 1) {
-			alert("No results found.");
-			return;
+			return self.searchError(null, "No results found.", "No properties currently available in this sector.");
 		}
-
-		// Clear results panel
-		jQuery('#cpdsearchresults').empty();
-
+		
 		// Count pages
 		var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
 		var limit = Number(jQuery('span#limit').text()).valueOf();
@@ -57,9 +57,6 @@ function CPDCurrentInstructions() {
 		jQuery("select.limit").change(self.per_page_changed);
 		jQuery(".navbarprevpage").click(self.prev_page);
 		jQuery(".navbarnextpage").click(self.next_page);
-		
-		// Clear loading dialog
-		jQuery('#cpdsearching').hide();
 	};
 
 	self.update_hash = function() {
@@ -71,6 +68,8 @@ function CPDCurrentInstructions() {
 
 	self.sector_changed = function() {
 		var type = jQuery("select.sectors option:selected").val();
+
+		jQuery('span#pagenum').text('1');
 
 		jQuery('#cpdsearching').show();
 		self.update_hash();
@@ -144,13 +143,16 @@ function CPDCurrentInstructions() {
 	self.init = function() {
 		// Show the search form
 		jQuery("#cpdsearchform").show();
-		
+
 		// Hide the loading dialog
 		jQuery("#cpdloading").hide();
 
 		// Hook up input that changes the sector
 		jQuery("select.sectors").change(self.sector_changed);
-		
+
+		// Determine whether user is registered or not
+		CPD.userRegistered = jQuery("span#registered").html() == '1';
+
 		// Load the initial results view
 		self.searchDatabase();
 	};
@@ -160,7 +162,3 @@ function CPDCurrentInstructions() {
 
 cpdCurrentInstructions = new CPDCurrentInstructions();
 
-// Initialiased during load of form instead
-//jQuery(document).ready(function() {
-//	cpdCurrentInstructions.init();
-//});

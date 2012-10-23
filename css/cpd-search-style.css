@@ -341,7 +341,7 @@ div.searchform {
 }
 
 #searchformholdingcontainer {
-	vertical-align: baseline;
+	vertical-align: top;
 	padding-top: 10px
 	padding-bottom: 10px;
 	border: dashed 1px #cccccc;
@@ -356,7 +356,6 @@ div.searchform {
 	margin-top: 10px;
 	margin-left: 10px;
 	margin-bottom: 30px;
-	width: 350px;
 	padding: 5px;
 }
 
@@ -438,7 +437,7 @@ td.formcolumnright {
 #searchformholdingcontainer_sidebar {
 	position: float;
 	float: left;
-	vertical-align: baseline;
+	vertical-align: top;
 	padding-top: 5px
 	padding-bottom: 5px;
 	border: solid 1px #cccccc;
@@ -453,7 +452,6 @@ td.formcolumnright {
 	margin-top: 10px;
 	margin-left: 0px;
 	margin-bottom: 0px;
-	width:100%;
 		background-image: linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
 	background-image: -o-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
 	background-image: -moz-linear-gradient(bottom, rgb(205,209,207) 100%, rgb(230,223,218) 61%);
@@ -529,16 +527,34 @@ td.formcolumnright_sidebar {
 	color: #666666;
 }
 
-.buttonactive {
-	padding: 0.4em;
+.buttoninactive {
+	padding: 0.2em;
 	border: solid 1px #cccccc;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-top-left-radius: 10px 10px;
-	border-top-right-radius: 10px 10px;
-	border-bottom-right-radius: 10px 10px;
-	border-bottom-left-radius: 10px 10px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-top-left-radius: 6px 6px;
+	border-top-right-radius: 6px 6px;
+	border-bottom-right-radius: 6px 6px;
+	border-bottom-left-radius: 6px 6px;
+	background: #cccccc;
+	margin-right: 0.6em;
+	width:100%;
+	font: #333333;
+	font-size: 1.4em;
+	text-align: center;
+}
+
+.buttonactive {
+	padding: 0.2em;
+	border: solid 1px #cccccc;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-top-left-radius: 6px 6px;
+	border-top-right-radius: 6px 6px;
+	border-bottom-right-radius: 6px 6px;
+	border-bottom-left-radius: 6px 6px;
 	background: #cccccc;
 	margin-right: 0.6em;
 	width:100%;
@@ -548,15 +564,15 @@ td.formcolumnright_sidebar {
 }
 
 .buttonused {
-	padding: 0.4em;
+	padding: 0.2em;
 	border: solid 1px #cccccc;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-top-left-radius: 10px 10px;
-	border-top-right-radius: 10px 10px;
-	border-bottom-right-radius: 10px 10px;
-	border-bottom-left-radius: 10px 10px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-top-left-radius: 6px 6px;
+	border-top-right-radius: 6px 6px;
+	border-bottom-right-radius: 6px 6px;
+	border-bottom-left-radius: 6px 6px;
 	background: #efefef;
 	margin-right: 0.6em;
 	width:100%;
@@ -566,15 +582,15 @@ td.formcolumnright_sidebar {
 }
 
 .buttonunused {
-	padding: 0.4em;
+	padding: 0.2em;
 	border: solid 1px #cccccc;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	border-top-left-radius: 10px 10px;
-	border-top-right-radius: 10px 10px;
-	border-bottom-right-radius: 10px 10px;
-	border-bottom-left-radius: 10px 10px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-top-left-radius: 6px 6px;
+	border-top-right-radius: 6px 6px;
+	border-bottom-right-radius: 6px 6px;
+	border-bottom-left-radius: 6px 6px;
 	background: #ffffff;
 	margin-right: 0.6em;
 	width:100%;
@@ -596,6 +612,7 @@ td.formcolumnright_sidebar {
 .buttonpdf {
 	cursor:pointer;
 	text-align: right;
+	
 }
 
 .button {
@@ -887,7 +904,7 @@ td.formcolumnright_sidebar {
 #clipboardholdingcontainer_sidebar {
 	position: float;
 	float: left;
-	vertical-align: baseline;
+	vertical-align: top;
 	padding-top: 5px
 	padding-bottom: 30px;
 	border: solid 1px #cccccc;
@@ -1080,7 +1097,7 @@ td.savedsearchesdetailstextbold {
 #cpdsavesearch_sidebar #savesearchholdingcontainer_sidebar {
 	position: float;
 	float: left;
-	vertical-align: baseline;
+	vertical-align: top;
 	padding-top: 5px
 	padding-bottom: 5px;
 	border: solid 1px #cccccc;
@@ -1330,8 +1347,9 @@ td.savesearchtopcolumnmiddle_sidebar search_name {
 	margin-left:5px;
 }
 
-#cpdsearchresults {
+#cpdsearchresults .photo img {
 	margin-right: 1em;
+	vertical-align: top;
 }
 
 input.navbarpagenum

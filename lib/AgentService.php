@@ -21,12 +21,14 @@ class AgentType {
   public $Fax; // string
   public $Url; // anyURI
   public $Services; // ServicesType
+  public $Sectors; // AgentSectorsType
   public $Type; // string
   public $DaysSearchable; // int
   public $SodEmail; // string
   public $SodDays; // int
   public $AutomatchPeriod; // int
   public $AutomatchEmail; // string
+  public $SenderEmail; // string
   public $Discount; // int
   public $UpdateCharge; // float
   public $UserVerificationURL; // string
@@ -54,6 +56,10 @@ class AccountType {
   public $Name; // string
 }
 
+class TransactionIDsType {
+  public $ID; // int
+}
+
 class TransactionsType {
   public $Transaction; // TransactionType
 }
@@ -66,6 +72,48 @@ class TransactionType {
   public $ToAccountID; // int
   public $Amount; // float
   public $Cleared; // boolean
+}
+
+class AgentsHistoryListType {
+  public $AgentsHistory; // AgentsHistoryType
+}
+
+class AgentsHistoryType {
+  public $ID; // int
+  public $AgentID; // int
+  public $UserID; // int
+  public $EntryDate; // dateTime
+  public $Action; // string
+  public $Data; // string
+}
+
+class AgentSectorsType {
+  public $Sector; // string
+}
+
+class AgentSectorType {
+  const O = 'O';
+  const SO = 'SO';
+  const S = 'S';
+  const I = 'I';
+  const BU = 'BU';
+  const R = 'R';
+  const PU = 'PU';
+  const L = 'L';
+  const W = 'W';
+  const X = 'X';
+  const M = 'M';
+  const C = 'C';
+  const H = 'H';
+  const G = 'G';
+  const AC = 'AC';
+  const U = 'U';
+  const A = 'A';
+  const E = 'E';
+  const B = 'B';
+  const Z = 'Z';
+  const GC = 'GC';
+  const others = 'others';
 }
 
 class ServicesType {
@@ -82,6 +130,7 @@ class EmailType {
 class AuthenticateAgentType {
   public $AgentRef; // string
   public $Password; // string
+  public $ServiceContext; // string
 }
 
 class SearchAgentsType {
@@ -93,6 +142,7 @@ class SearchAgentsCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $DetailLevel; // DetailLevelType
+  public $IncludeSectors; // boolean
   public $AreaID; // int
   public $PortalID; // int
   public $Owner; // string
@@ -109,6 +159,19 @@ class SearchAgentsCriteriaType {
   public $Keyword; // string
   public $SortField; // string
   public $SortOrder; // SortOrderType
+}
+
+class SearchAgentsHistoryType {
+  public $Token; // string
+  public $Criteria; // AgentsHistoryCriteriaType
+}
+
+class AgentsHistoryCriteriaType {
+  public $Start; // int
+  public $Limit; // int
+  public $SortField; // SearchAgentsSortFieldType
+  public $SortOrder; // SortOrderType
+  public $AgentID; // int
 }
 
 class CreateAgentType {
@@ -136,9 +199,22 @@ class AgentTokensSearchCriteriaType {
   public $Start; // int
   public $Limit; // int
   public $UID; // int
+  public $AgentID; // int
   public $Keyword; // string
   public $SortField; // string
   public $SortOrder; // SortOrderType
+}
+
+class CreateAgentTokenType {
+  public $Token; // string
+  public $AgentID; // int
+  public $Context; // string
+  public $ExpiryDate; // dateTime
+}
+
+class RemoveAgentTokenType {
+  public $Token; // string
+  public $AgentToken; // string
 }
 
 class ListAgentServicesType {
@@ -177,9 +253,14 @@ class CreateTransactionType {
   public $Transaction; // TransactionType
 }
 
-class DeleteTransactionType {
+class UpdateTransactionType {
   public $Token; // string
-  public $TransactionID; // int
+  public $Transaction; // TransactionType
+}
+
+class DeleteTransactionsType {
+  public $Token; // string
+  public $ID; // int
 }
 
 class AuthenticateAgentResponseType {
@@ -190,6 +271,11 @@ class AuthenticateAgentResponseType {
 class SearchAgentsResponseType {
   public $ResultCount; // int
   public $Agents; // AgentsType
+}
+
+class SearchAgentsHistoryResponseType {
+  public $ResultCount; // int
+  public $AgentsHistoryList; // AgentsHistoryListType
 }
 
 class CreateAgentResponseType {
@@ -208,6 +294,13 @@ class SearchAgentTokensResponseType {
   public $AgentTokens; // AgentTokensType
 }
 
+class CreateAgentTokenResponseType {
+  public $AgentToken; // AgentTokenType
+}
+
+class RemoveAgentTokenResponseType {
+}
+
 class AreasType {
   public $Area; // string
 }
@@ -216,6 +309,7 @@ class AgentTokenType {
   public $UID; // int
   public $Token; // string
   public $Type; // string
+  public $Context; // string
   public $CreatedDate; // dateTime
   public $LastUsed; // dateTime
   public $ExpiryDate; // dateTime
@@ -255,7 +349,31 @@ class CreateTransactionResponseType {
   public $Transaction; // TransactionType
 }
 
-class DeleteTransactionResponseType {
+class UpdateTransactionResponseType {
+  public $Transaction; // TransactionType
+}
+
+class DeleteTransactionsResponseType {
+}
+
+class AuthenticateAgentExceptionType {
+  public $Detail; // string
+}
+
+class InvalidAgentTokenExceptionType {
+  public $Detail; // string
+}
+
+class UnconfirmedAgentExceptionType {
+  public $Detail; // string
+}
+
+class AgentAlreadyExistsExceptionType {
+  public $Detail; // string
+}
+
+class AgentUnchangedExceptionType {
+  public $Detail; // string
 }
 
 
@@ -277,32 +395,45 @@ class AgentService extends SoapClient {
                                     'AccountIDsType' => 'AccountIDsType',
                                     'AccountsType' => 'AccountsType',
                                     'AccountType' => 'AccountType',
+                                    'TransactionIDsType' => 'TransactionIDsType',
                                     'TransactionsType' => 'TransactionsType',
                                     'TransactionType' => 'TransactionType',
+                                    'AgentsHistoryListType' => 'AgentsHistoryListType',
+                                    'AgentsHistoryType' => 'AgentsHistoryType',
+                                    'AgentSectorsType' => 'AgentSectorsType',
+                                    'AgentSectorType' => 'AgentSectorType',
                                     'ServicesType' => 'ServicesType',
                                     'ReferencesType' => 'ReferencesType',
                                     'EmailType' => 'EmailType',
                                     'AuthenticateAgentType' => 'AuthenticateAgentType',
                                     'SearchAgentsType' => 'SearchAgentsType',
                                     'SearchAgentsCriteriaType' => 'SearchAgentsCriteriaType',
+                                    'SearchAgentsHistoryType' => 'SearchAgentsHistoryType',
+                                    'AgentsHistoryCriteriaType' => 'AgentsHistoryCriteriaType',
                                     'CreateAgentType' => 'CreateAgentType',
                                     'UpdateAgentType' => 'UpdateAgentType',
                                     'ResetAgentPasswordType' => 'ResetAgentPasswordType',
                                     'SearchAgentTokensType' => 'SearchAgentTokensType',
                                     'AgentTokensSearchCriteriaType' => 'AgentTokensSearchCriteriaType',
+                                    'CreateAgentTokenType' => 'CreateAgentTokenType',
+                                    'RemoveAgentTokenType' => 'RemoveAgentTokenType',
                                     'ListAgentServicesType' => 'ListAgentServicesType',
                                     'SearchAgentAccountsType' => 'SearchAgentAccountsType',
                                     'AccountsCriteriaType' => 'AccountsCriteriaType',
                                     'SearchAgentTransactionsType' => 'SearchAgentTransactionsType',
                                     'TransactionsCriteriaType' => 'TransactionsCriteriaType',
                                     'CreateTransactionType' => 'CreateTransactionType',
-                                    'DeleteTransactionType' => 'DeleteTransactionType',
+                                    'UpdateTransactionType' => 'UpdateTransactionType',
+                                    'DeleteTransactionsType' => 'DeleteTransactionsType',
                                     'AuthenticateAgentResponseType' => 'AuthenticateAgentResponseType',
                                     'SearchAgentsResponseType' => 'SearchAgentsResponseType',
+                                    'SearchAgentsHistoryResponseType' => 'SearchAgentsHistoryResponseType',
                                     'CreateAgentResponseType' => 'CreateAgentResponseType',
                                     'UpdateAgentResponseType' => 'UpdateAgentResponseType',
                                     'ResetAgentPasswordResponseType' => 'ResetAgentPasswordResponseType',
                                     'SearchAgentTokensResponseType' => 'SearchAgentTokensResponseType',
+                                    'CreateAgentTokenResponseType' => 'CreateAgentTokenResponseType',
+                                    'RemoveAgentTokenResponseType' => 'RemoveAgentTokenResponseType',
                                     'AreasType' => 'AreasType',
                                     'AgentTokenType' => 'AgentTokenType',
                                     'AgentTokensType' => 'AgentTokensType',
@@ -312,7 +443,13 @@ class AgentService extends SoapClient {
                                     'SearchAgentAccountsResponseType' => 'SearchAgentAccountsResponseType',
                                     'SearchAgentTransactionsResponseType' => 'SearchAgentTransactionsResponseType',
                                     'CreateTransactionResponseType' => 'CreateTransactionResponseType',
-                                    'DeleteTransactionResponseType' => 'DeleteTransactionResponseType',
+                                    'UpdateTransactionResponseType' => 'UpdateTransactionResponseType',
+                                    'DeleteTransactionsResponseType' => 'DeleteTransactionsResponseType',
+                                    'AuthenticateAgentExceptionType' => 'AuthenticateAgentExceptionType',
+                                    'InvalidAgentTokenExceptionType' => 'InvalidAgentTokenExceptionType',
+                                    'UnconfirmedAgentExceptionType' => 'UnconfirmedAgentExceptionType',
+                                    'AgentAlreadyExistsExceptionType' => 'AgentAlreadyExistsExceptionType',
+                                    'AgentUnchangedExceptionType' => 'AgentUnchangedExceptionType',
                                    );
 
   public function AgentService($wsdl = "https://staging.cpd.co.uk/soap/services/AgentService?wsdl", $options = array()) {
@@ -346,6 +483,20 @@ class AgentService extends SoapClient {
    */
   public function SearchAgents(SearchAgentsType $parameters) {
     return $this->__soapCall('SearchAgents', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param SearchAgentsHistoryType $parameters
+   * @return SearchAgentsHistoryResponseType
+   */
+  public function SearchAgentsHistory(SearchAgentsHistoryType $parameters) {
+    return $this->__soapCall('SearchAgentsHistory', array($parameters),       array(
             'uri' => 'http://agent.webservice.cpd.co.uk/',
             'soapaction' => ''
            )
@@ -411,6 +562,34 @@ class AgentService extends SoapClient {
   /**
    *  
    *
+   * @param CreateAgentTokenType $parameters
+   * @return CreateAgentTokenResponseType
+   */
+  public function CreateAgentToken(CreateAgentTokenType $parameters) {
+    return $this->__soapCall('CreateAgentToken', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param RemoveAgentTokenType $parameters
+   * @return RemoveAgentTokenResponseType
+   */
+  public function RemoveAgentToken(RemoveAgentTokenType $parameters) {
+    return $this->__soapCall('RemoveAgentToken', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
    * @param ListAgentServicesType $parameters
    * @return ListAgentServicesResponseType
    */
@@ -467,11 +646,25 @@ class AgentService extends SoapClient {
   /**
    *  
    *
-   * @param DeleteTransactionType $parameters
-   * @return DeleteTransactionResponseType
+   * @param UpdateTransactionType $parameters
+   * @return UpdateTransactionResponseType
    */
-  public function DeleteTransaction(DeleteTransactionType $parameters) {
-    return $this->__soapCall('DeleteTransaction', array($parameters),       array(
+  public function UpdateTransaction(UpdateTransactionType $parameters) {
+    return $this->__soapCall('UpdateTransaction', array($parameters),       array(
+            'uri' => 'http://agent.webservice.cpd.co.uk/',
+            'soapaction' => ''
+           )
+      );
+  }
+
+  /**
+   *  
+   *
+   * @param DeleteTransactionsType $parameters
+   * @return DeleteTransactionsResponseType
+   */
+  public function DeleteTransactions(DeleteTransactionsType $parameters) {
+    return $this->__soapCall('DeleteTransactions', array($parameters),       array(
             'uri' => 'http://agent.webservice.cpd.co.uk/',
             'soapaction' => ''
            )

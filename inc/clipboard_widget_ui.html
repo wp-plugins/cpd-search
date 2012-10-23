@@ -1,89 +1,38 @@
-<table id="clipboardwidgetmodelrow" style="display: none;">
-	<tbody>
-		<tr>
-			<td class="clipboardtopcolumnleft_sidebar">
-				<input type="checkbox" name="cbx_clipboard[]" value="Y" class="cbx_clipboard" id="cbx_clipboard" />
-			</td>
-			<td class="clipboardtopcolumnmiddle_sidebar name" >
-				[Address]
-			</td>
-			<td class="clipboardtopcolumnright_sidebar">
-				<img src="[pluginurl]/images/btn_close.png" class="btn_close" />
-			</td>
-		</tr>
-		<tr>
-			<td class="clipboardtopcolumnleft_sidebar">
-			</td>
-			<td>
-				<table>
-					<tr>
-						<td class="clipboarddetailstextbold">
-							Postcode:
-						</td>
-						<td class="clipboardmiddlecolumnmiddle1_sidebar postcode">
-							[Postcode]
-						</td>
-					</tr>
-					<tr>
-						<td class="clipboarddetailstextbold">
-							Location:
-						</td>
-						<td class="clipboardmiddlecolumnright_sidebar location">
-							[Location]
-						</td>
-					</tr>
-				</table>
-				<table>
-					<tr>
-						<td class="clipboarddetailstextbold">
-							Tenure:
-						</td>
-						<td class="clipboardmiddlecolumnmiddle1_sidebar tenure">
-							[TenureDescription]
-						</td>
-					</tr>
-					<tr>
-						<td class="clipboarddetailstextbold">
-							Size:
-						</td>
-						<td class="clipboardmiddlecolumnright_sidebar size">
-							[SizeDescription]
-						</td>
-					</tr>
-				</table>
-			</td>
-			<td class="clipboardtopcolumnright_sidebar">
-			</td>
-		</tr>
-	</tbody>
-</table>
-
-<div class="clipboardseperator"></div>
-
-<div id="cpdclipboard_sidebar" style="display: block;">
-	<div id="clipboardholdingcontainer_sidebar" class="div-sidebar">
+<div id="cpdclipboard" style="display: none;">
+	<div id="clipboardholdingcontainer" class="div-sidebar">
 		<form action="[actionurl]" method="post" id="form-sidebar">
 			<div id="clipboardheadersidebar">
 				Clipboard
 			</div>
-			<table class="clipboardtoptable_sidebar">
+			<table class="clipboardtoptable">
 				<tbody>
 					<tr>
-						<td class="clipboardtopcolumnleft_sidebar">
-							<input type="checkbox" name="cbx_clipboard_all" id="cbx_clipboard_all" />
+						<td class="clipboardtopcolumnleft">
+							<input type="checkbox" id="cpd_clipboard_select_all" />
 						</td>
-						<td class="clipboardtopcolumnmiddlesavedproperties_sidebar">
+						<td class="clipboardtopcolumnmiddlesavedproperties">
 							Select all
 						</td>
-						<td class="clipboardtopcolumnrightsavedproperties_sidebar">
+						<td class="clipboardtopcolumnrightsavedproperties">
 							<span class="savedcount"></span> properties saved
 						</td>
 					</tr>
 			</table>
+			
+			<div id="cpdadding" class="loading" style="display: none;">
+				<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>
+				<span>Adding to clipboard... Please wait a moment.</span>
+			</div>
+
+			<div id="cpdremoving" class="loading" style="display: none;">
+				<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>
+				<span>Removing from clipboard... Please wait a moment.</span>
+			</div>
+
 			<div id="contentbox">
 				[contentbox]
 			</div>
-			<table class="clipboardbottomtable_sidebar">
+			<table class="clipboardbottomtable">
 				<tbody>
 					<tr>
 						<td colspan="3">
@@ -93,17 +42,17 @@
 						</td>
 					</tr>
 					<tr>
-						<td class="clipboardcontrolscolumnleft_sidebar">
+						<td class="clipboardcontrolscolumnleft">
 							<a href="">
 								<div class="buttonsidebar">eMail</div>
 							</a>
 						</td>
-						<td class="clipboardcontrolscolumnmiddle_sidebar">
+						<td class="clipboardcontrolscolumnmiddle">
 							<a href="">
 								<div class="buttonsidebar">Print</div>
 							</a>
 						</td>
-						<td class="clipboardcontrolscolumnright_sidebar">
+						<td class="clipboardcontrolscolumnright">
 							<a href="">
 								<div class="buttonsidebar">Save</div>
 							</a>
@@ -111,17 +60,17 @@
 					</tr>
 					</tr>
 					<tr>
-						<td class="clipboardcontrolscolumnleft_sidebar">
+						<td class="clipboardcontrolscolumnleft">
 							<a href="#">
 								<div class="buttonsidebar">Twitter</div>
 							</a>
 						</td>
-						<td class="clipboardcontrolscolumnmiddle_sidebar">
+						<td class="clipboardcontrolscolumnmiddle">
 							<a href="#">
 								<div class="buttonsidebar">Facebook</div>
 							</a>
 						</td>
-						<td class="clipboardcontrolscolumnright_sidebar">
+						<td class="clipboardcontrolscolumnright">
 							<a>
 								<div class="buttonsidebar">Post</div>
 							</a>
@@ -133,3 +82,63 @@
 		<div class="widgetbottomspacer"/>
 	</div>
 </div>
+
+<table id="clipboardwidgetmodelrow" style="display: none;">
+	<tbody>
+		<tr>
+			<td class="clipboardtopcolumnleft">
+				<input type="checkbox" name="cpd_clipboard_row[]" value="Y" class="cpd_clipboard_item" />
+			</td>
+			<td class="clipboardtopcolumnmiddle name" >
+				[Address]
+			</td>
+			<td class="clipboardtopcolumnright">
+				<img src="[pluginurl]/images/btn_close.png" class="btn_close" />
+			</td>
+		</tr>
+		<tr>
+			<td class="clipboardtopcolumnleft">
+			</td>
+			<td>
+				<table>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Postcode:
+						</td>
+						<td class="clipboardmiddlecolumnmiddle1 postcode">
+							[Postcode]
+						</td>
+					</tr>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Location:
+						</td>
+						<td class="clipboardmiddlecolumnright location">
+							[Location]
+						</td>
+					</tr>
+				</table>
+				<table>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Tenure:
+						</td>
+						<td class="clipboardmiddlecolumnmiddle1 tenure">
+							[TenureDescription]
+						</td>
+					</tr>
+					<tr>
+						<td class="clipboarddetailstextbold">
+							Size:
+						</td>
+						<td class="clipboardmiddlecolumnright size">
+							[SizeDescription]
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td class="clipboardtopcolumnright">
+			</td>
+		</tr>
+	</tbody>
+</table>

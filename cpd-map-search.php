@@ -18,7 +18,7 @@ class CPDMapSearch {
 		// Create the SOAP client
 		$options = get_option('cpd-search-options');
 		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-		$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+		$headers = cpd_search_wss_security_headers();
 		$client->__setSOAPHeaders($headers);
 
 		// Send our search request to the server
@@ -74,11 +74,6 @@ class CPDMapSearch {
 		// Filter results to avoid sending sensitive fields over the wire
 		$results = array();
 		if(isset($searchResponse->PropertyList->Property)) {
-			// Workaround for PITA in PHP SOAP parser...
-			$propList = $searchResponse->PropertyList->Property;
-			if($propList instanceof PropertyMediaType) {
-				$propList = array($propList);
-			}
 			foreach($propList as $record) {
 				$row = array();
 				$row['PropertyID'] = $record->PropertyID;

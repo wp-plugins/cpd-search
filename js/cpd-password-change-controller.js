@@ -25,7 +25,7 @@ function CPDPasswordChange() {
 	self.passwordChangeError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdchangingpassword').dialog("close");
 	
-		if(jqXHR.error !== undefined && jqXHR.error.indexOf("AuthenticationFailedException") > -1) {
+		if(jqXHR.error !== undefined && jqXHR.error == "AuthenticationFailedExceptionMsg") {
 			// Show passwordChange form
 			jQuery('#cpderror').html("Authentication failure! Please try again.");
 			jQuery('#cpderror').dialog("open");

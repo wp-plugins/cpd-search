@@ -17,13 +17,11 @@ class CPDRegisterInterest {
 		$propref = $_REQUEST['propref'];
 	
 		// Check we have a user token for this request
-		$cpd_token = $_COOKIE['cpd_token'];
-		$cpd_token_type = $_COOKIE['cpd_token_type'];
-		if($cpd_token_type == null || $cpd_token_type != "user") {
+		if(!cpd_search_is_user_registered()) {
 			// Tell the UI controller to show the registration form...
 			$response = array(
 				'success' => false,
-				'error' => "InvalidTokenException: No user token found",
+				'error' => "AccessDeniedExceptionMsg",
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
@@ -34,10 +32,10 @@ class CPDRegisterInterest {
 		$options = get_option('cpd-search-options');
 		$registerInterest = new RegisterInterestType();
 		$registerInterest->PropertyID = $propref;
-		$registerInterest->ServiceContext = $options['cpd_service_context'];
+		$registerInterest->ServiceContext = cpd_search_service_context();
 		try {
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($cpd_token, "");
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$registerResponse = $client->RegisterInterest($registerInterest);
 		}

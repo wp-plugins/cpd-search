@@ -11,6 +11,12 @@
 						[sectoroptions]
 						</select>
 					</td>
+					<td>
+						<div id="cpdsearching" class="searching" style="display: none;">
+							<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>
+							<span>Searching... Please wait a moment.</span>
+						</div>
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -76,8 +82,15 @@
 			<tbody>
 				<tr>
 					<td width="165">
+						<a class="clipboardadd">
+							<div class="buttoninactive">
+								Add to Clipboard
+							</div>
+						</a>
+					</td>
+					<td>
 						<a class="registerinterest">
-							<div class="button">
+							<div class="buttoninactive">
 								Register Interest
 							</div>
 						</a>
@@ -93,25 +106,12 @@
 						</a>
 					</td>
 					<td>
-						<a class="clipboardadd">
-							<div class="button">
-								Add to Clipboard
-							</div>
-						</a>
-					</td>
-					<!--
-					<td>
-						<a>
-							<div class="button">
-								View Full details
-							</div>
-						</a>
-					</td>
-					 -->
-					<td>
 						<a class="buttonpdf" style="display: none;">
-							<img src="[pluginurl]/images/pdf_icon.jpg" alt="pdf" style="margin:0"/>
+							<img src="[pluginurl]/images/pdf_icon.jpg" alt="pdf"/>
 						</a>
+					</td>
+					<td>
+						<div class="fb-like" data-send="false" data-layout="button_count" data-width="50" data-show-faces="false" data-font="verdana"></div>
 					</td>
 				</tr>
 			</tbody>
@@ -131,7 +131,7 @@
 							<a class="navbarprevpage" style="display: none;">
 								<img src="[pluginurl]/images/previous.gif" alt="Previous page"/>
 							</a>
-							<input type="text" class="navbarpagenum" value="[pagenum]"></input>
+							<span class="navbarpagenum">[pagenum]</span>
 							<a class="navbarnextpage" style="display: none;">
 								<img src="[pluginurl]/images/next.gif" alt="Next page"/>
 							</a>
@@ -157,5 +157,9 @@
 			</tr>
 		</tbody>
 	</table>
+</div>
+
+<div id="lightbox-show" style="display:none">
+	<a href=""></a>
 </div>
 

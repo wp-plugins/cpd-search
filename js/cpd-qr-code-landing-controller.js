@@ -63,7 +63,7 @@ function CPDQRCodeLanding() {
 		jQuery('#cpdregistering').hide();
 
 		var data = jqXHR;
-		if(data != null && data.error != null && data.error.indexOf("UserAlreadyExistsException") > -1) {
+		if(data != null && data.error != null && data.error == "UserAlreadyExistsExceptionMsg") {
 			// Show login form
 			jQuery('#cpderror').html("No need to register. There is already an account for this e-mail address. Please try logging in with your existing credentials, or request a password reset if you have forgotten them.");
 			jQuery('#cpderror').show();

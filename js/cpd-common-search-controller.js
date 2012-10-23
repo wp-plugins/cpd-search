@@ -16,26 +16,18 @@ function CPDCommonSearchController() {
 		jQuery(".tenuredesc", row).html(property.TenureDescription);
 		jQuery(".address", row).html(property.Address);
 		jQuery(".summary", row).html(property.BriefSummary);
-		if(property.ThumbURL === undefined) {
+		if(property.ImageThumbURL === undefined) {
 			jQuery(".photo", row).html("(No photo)");
 		}
 		else {
-			jQuery(".photo", row).html("<img src=\"" + property.ThumbURL + "\"/>");
-			jQuery(".photo", row).after("<a id=\"photolink\"></a>");
-			jQuery(".photo", row).appendTo("#" + id + " #photolink");
-			jQuery(".photo", row).click(function() {
-				var propref = this.attributes.getNamedItem("propref").nodeValue;
-				self.viewPropertyImage(id, propref);
-			});
+			jQuery(".photo", row).html("<img src=\"" + property.ImageThumbURL + "\"/>");
 		}
 		
-		if(property.PDFMediaID !== undefined) {
+		if(property.PDFMediaID === undefined) {
+			jQuery(".buttonpdf", row).hide();
+		}
+		else {
 			jQuery(".buttonpdf", row).show();
-			jQuery(".buttonpdf", row).attr("mediaid", property.PDFMediaID);
-			jQuery(".buttonpdf", row).click(function() {
-				var media_id = this.attributes.getNamedItem("mediaid").nodeValue;
-				cpd_view_property_pdf(media_id);
-			});
 		}
 		
 		// Hook up buttonsidebar
@@ -44,37 +36,6 @@ function CPDCommonSearchController() {
 		cpdRegisterInterest.update_buttons(id, propref);
 	};
 	
-	self.viewPropertyImageSuccess = function(data) {
-		id = "property" + data.id;
-		image_url = data.image_url;
-		jQuery('#' + id + ' #photolink').attr('href', image_url);
-		jQuery('#' + id + ' #photolink').lightBox();
-	};
-	self.viewPropertyImageError = function(data) {
-		alert("Unable to load image for property.");
-	};
-	self.viewPropertyImage = function(id, propref) {
-		// Go ask for the full image URL
-		var postdata = {
-			'action':'cpd_viewPropertyImage',
-			'propref': propref,
-		};
-	
-		// Display 'loading...' dialog
-		jQuery('#cpdsearching').show();
-	
-		// Send AJAX search request to server
-		var ajaxopts = {
-			type: 'POST',
-			url: CPDAjax.ajaxurl,
-			data: postdata,
-			success: self.viewPropertyImageSuccess,
-			error: self.viewPropertyImageError,
-			dataType: "json"
-		};
-		jQuery.ajax(ajaxopts);
-	};
-
 	self.addNavigation = function(pagenum, pagecount, total) {
 		var navbar = jQuery('#cpdsearchnavigationmodel');
 		jQuery('.navbarresultcount', navbar).html(total);

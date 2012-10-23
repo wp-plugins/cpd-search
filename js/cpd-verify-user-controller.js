@@ -5,8 +5,11 @@ function CPDVerifyUser() {
 		jQuery('#cpdverifyuser').dialog("close");
 
 		// Check for failure
-		if(!data.success) {
-			return self.verifyTokenError(data, data.error, data.error);
+		if(!data) {
+			return self.verifyTokenError(null, "Connection failed", "Server down. Please try again later");
+		}
+		if(data.error) {
+			return self.verifyTokenError(null, data.error, data.error);
 		}
 
 		// Add visual identification that verification passed
@@ -15,11 +18,7 @@ function CPDVerifyUser() {
 	self.verifyTokenError = function(data) {
 		jQuery('#cpdverifyuser').dialog("close");
 	
-		if(data != null && data.error != null && data.error.indexOf("InvalidTokenException") > -1) {
-			jQuery('#cpdverifyuserfailed').show();
-			return;
-		}
-		if(data != null && data.error != null && data.error.indexOf("UserAlreadyExistsException") > -1) {
+		if(data != null && data.error != null && data.error == "AccessDeniedExceptionMsg") {
 			jQuery('#cpdverifyuserfailed').show();
 			return;
 		}

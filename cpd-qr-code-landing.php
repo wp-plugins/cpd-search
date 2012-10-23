@@ -38,7 +38,7 @@ class CPDQRCodeLanding {
 		$searchRequest->SearchCriteria = $searchCriteria;
 		try {
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$searchResponse = $client->SearchProperty($searchRequest);
 		}
@@ -97,7 +97,7 @@ class CPDQRCodeLanding {
 		// Mark this registration as coming from this agent/application
 		$options = get_option('cpd-search-options');
 		$userRegistration->Agent = $options['cpd_agentref'];
-		$userRegistration->ServiceContext = $options['cpd_service_context'];
+		$userRegistration->ServiceContext = cpd_search_service_context();
 		
 		try {
 			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
@@ -114,8 +114,7 @@ class CPDQRCodeLanding {
 		}
 		
 		// Store token as a cookie
-		setcookie("cpd_token", $registrationResponse->Token);
-		setcookie("cpd_token_type", "user");
+		cpd_search_set_user_token($registrationResponse->Token);
 		
 		// Return response as JSON
 		$response = array(
@@ -134,7 +133,6 @@ class CPDQRCodeLanding {
 		global $soapopts;
 
 		$media_id = $_REQUEST['media_id'];
-		$token = $_COOKIE['cpd_token'];
 		
 		// Perform search
 		$viewMedia = new ViewingMediaType();
@@ -144,7 +142,7 @@ class CPDQRCodeLanding {
 		
 		try {
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($token, "");
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$viewMediaResponse = $client->ViewingMedia($viewMedia);
 		}

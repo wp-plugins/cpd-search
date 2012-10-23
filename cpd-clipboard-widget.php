@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 class CPDClipboardWidget extends WP_Widget {
 	function init() {
@@ -11,7 +11,11 @@ class CPDClipboardWidget extends WP_Widget {
 		add_action('wp_ajax_nopriv_cpd_clipboard_widget_pushpost_ajax', array('CPDClipboardWidget', 'pushpost_ajax'));
 		add_shortcode('publish_property_ref', array('CPDClipboardWidget', 'publish_property_ref'));
 	}
-
+	
+	function load_widgets() {
+		register_widget('CPDClipboardWidget' );
+	}
+	
 	function CPDClipboardWidget() {
 		wp_enqueue_script('cpd-add-clipboard', cpd_plugin_dir_url(__FILE__) . "js/cpd-clipboard-widget-controller.js");
 		
@@ -48,47 +52,20 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 	
 	function load_items() {
-		$content_template = cpd_get_template_contents("clipboard_widget");
-		
-		$form_clipboard = substr($content_template, strpos($content_template,'<div class="clipboardseperator"></div>'));		
-		if(!isset($_SESSION['clipboard_propref_objs']) || count($_SESSION['clipboard_propref_objs']) == 0) {
-			//$item_template = substr($content_template, 0, strpos($content_template,'<div class="clipboardseperator"></div>'));
-			//$form_clipboard = str_replace("[contentbox]", $item_template, $form_clipboard);
-			return $content_template;
-		}
-		
-		$list_propref_obj = $_SESSION['clipboard_propref_objs'];
-		if(count($list_propref_obj) < 1) {
-			return $content_template;
-		}			
-		
-		$list_item_template = '';
-		foreach($list_propref_obj as $obj) {
-			$item_template = substr($content_template,0,strpos($content_template,'<div class="clipboardseperator"></div>'));
-			$item_template = str_replace("[id]", $obj['PropertyID'], $item_template);
-			$item_template = str_replace("clipboardwidgetmodelrow", "clipboard".$obj['PropertyID'], $item_template);			
-			$item_template = str_replace("[Address]", $obj['Address'], $item_template);
-			$item_template = str_replace("[Postcode]", $obj['Postcode'], $item_template);
-			$item_template = str_replace("[Location]", $obj['Location'], $item_template);
-			$item_template = str_replace("[TenureDescription]", $obj['TenureDescription'], $item_template);
-			$item_template = str_replace("[SizeDescription]", $obj['SizeDescription'], $item_template);
-			$item_template = str_replace("[pluginurl]", plugins_url(), $item_template);
-			$list_item_template .= $item_template;
-		}
-		return str_replace("[contentbox]", $list_item_template, $content_template);
+		return cpd_get_template_contents("clipboard_widget");
 	}
 	
 	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
-		$instance['title'] = strip_tags( $new_instance['title'] );
+		$instance['title'] = strip_tags($new_instance['title']);
 		return $instance;
 	}
 	
 	function form($instance) {
-		$defaults = array( 
+		$defaults = array(
 			'title' => __('Clipboard Widget', 'Clipboard Widget')
 		);
-		$instance = wp_parse_args((array)$instance, $defaults );
+		$instance = wp_parse_args((array)$instance, $defaults);
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e('Title:', 'CPD Clipboard Widget'); ?></label>
@@ -101,19 +78,25 @@ class CPDClipboardWidget extends WP_Widget {
 		global $soapopts;
 		
 		// Gather inputs from request/session
-		$propref = trim($_REQUEST['propref']);
-		$home = home_url();
-		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');	
-	
-		if(!isset($_SESSION['clipboard_propref'])) {
-			$list_propref = array();
-			$_SESSION['clipboard_propref'] = $list_propref;
+		$property_id = trim($_REQUEST['propref']);
+		$path_dir_plugin = home_url().cpd_plugin_dir_url('cpd-search');	
+		
+		// Initialise clipboard, if not already done
+		if(!isset($_SESSION['clipboard_property_ids'])) {
+			$list_property_ids = array();
+			$_SESSION['clipboard_property_ids'] = $list_property_ids;
 		}
-	
-		$list_propref = $_SESSION['clipboard_propref'];
+		$list_property_ids = $_SESSION['clipboard_property_ids'];
+		if(!isset($_SESSION['clipboard_property_objs'])) {
+			$list_property_objs = array();
+			$_SESSION['clipboard_property_objs'] = $property_id_obj;
+		}
+		$list_property_objs = $_SESSION['clipboard_property_objs'];
+		
+		// Identify whether item already exists in the clipboard (and report)
 		$status = true;
-		foreach($list_propref as $value) {
-			if(trim($value) == trim($propref)) {
+		foreach($list_property_ids as $value) {
+			if(trim($value) == trim($property_id)) {
 				$status = false;
 				break;
 			}
@@ -127,116 +110,57 @@ class CPDClipboardWidget extends WP_Widget {
 			echo json_encode($response);
 			exit;
 		}
-	
-		$list_propref[] = $propref;
-		$_SESSION['clipboard_propref'] = $list_propref;
-	
+		
+		// Add this propref to the clipboard
+		$list_property_ids[] = $property_id;
+		$_SESSION['clipboard_property_ids'] = $list_property_ids;
+		
+		// Add the object to the clipboard
+		$list_property_objs[] = $results[0];
+		$_SESSION['clipboard_property_objs'] = $list_property_objs;
+		
+		// [TODO] This API method isn't quite ready yet, so clipboard results
+		// are just a 'local' thing for now.
+		
+/*
 		// Send our search request to the server
-		$searchCriteria = new SearchCriteriaType();
-		$searchCriteria->Start = 1;
-		$searchCriteria->Limit = 1;
-		$searchCriteria->DetailLevel = "full";
-		$propertyIDsType = new PropertyIDsType();
-		$propertyIDsType->PropertyID = $propref;
-		$searchCriteria->PropertyIDs = $propertyIDsType;
-	
-		// Perform search
-		$searchRequest = new SearchPropertyType();
-		$searchRequest->SearchCriteria = $searchCriteria;
+		$request = new AddToClipboardType();
+		$request->ClipboardName = "Default";
+		$request->PropertyID = $property_id;
 	
 		try {
 			$options = get_option('cpd-search-options');
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
-			$searchResponse = $client->SearchProperty($searchRequest);
+			$response = $client->AddToClipboard($request);
 		}
 		catch(Exception $e) {
 			$response = array(
 				'success' => false,
-				'error' => $e->getMessage()
+				'error' => $e
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
 			exit;
 		}
-	
-		try
-		{
-			// Filter results to avoid sending sensitive fields over the wire
-			$results = array();
-			if(isset($searchResponse->PropertyList->Property)) {
-				// Workaround for PITA in PHP SOAP parser...
-				$propList = $searchResponse->PropertyList->Property;
-				if($propList instanceof PropertyType) {
-					$propList = array($propList);
-				}
-				foreach($propList as $record) {
-					$row = array();
-					$row['PropertyID'] = $record->PropertyID;
-					$row['SectorDescription'] = $record->SectorDescription;
-					$row['SizeDescription'] = $record->SizeDescription;
-					$row['TenureDescription'] = $record->TenureDescription;
-					$row['BriefSummary'] = $record->BriefSummary;
-					$row['Address'] = $record->Address;
-					$row['Latitude'] = $record->Latitude;
-					$row['Longitude'] = $record->Longitude;
-					$row['RegionName'] = $record->RegionName;
-					$row['Location'] = $record->RegionName;
-					$row['Postcode'] = $record->Postcode;
-					
-					// Add thumb URL, only if one is available
-					if(isset($record->PropertyMedia)) {
-						$mediaList = $record->PropertyMedia;
-						if($propList instanceof PropertyMediaType) {
-							$propList = array($propList);
-						}
-						foreach($mediaList as $media) {
-							if($media->Type == "photo" && $media->Position == 1) {
-								$row['ThumbURL'] = $media->ThumbURL;
-								break;
-							}
-						}
-					}
-					$row['pluginurl'] = $path_dir_plugin;
-					$results[] = $row;
-				}
-			}
-		
-			if(!isset($_SESSION['clipboard_propref_objs'])) {
-				$propref_objs = array();
-				$_SESSION['clipboard_propref_objs'] = $propref_obj;
-			}
-		
-			$propref_objs = $_SESSION['clipboard_propref_objs'];
-			$propref_objs[] = $results[0];
-			$_SESSION['clipboard_propref_objs'] = $propref_objs;
-		
-			// Return response as JSON
-			$response = array(
-				'success' => true,
-				'total' => $searchResponse->ResultCount,
-				'results' => $propref_objs,
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
-			exit;
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e->getMessage()
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
-			exit;
-		}
+*/
+		// Return response as JSON
+		$response = array(
+			'success' => true,
+			'total' => count($list_property_ids)
+		);
+		header( "Content-Type: application/json" );
+		echo json_encode($response);
+		exit;
 	}
 
-	function delete_ajax() {		
-		// Gather inputs from request/session
-		$propref = trim($_REQUEST['propref']);
-		if(!isset($_SESSION['clipboard_propref'])) {
+	function delete_ajax() {
+		// Gather inputs from request
+		$property_id = trim($_REQUEST['propref']);
+		
+		// Handle clipboard being empty
+		if(!isset($_SESSION['clipboard_property_ids'])) {
 			$response = array(
 				'success' => false,
 				'error' => "No items currently added to the clipboard"
@@ -245,27 +169,30 @@ class CPDClipboardWidget extends WP_Widget {
 			echo json_encode($response);
 			exit;
 		}
-	
-		$propref_objs_temp = array();
-		if(isset($_SESSION['clipboard_propref_objs'])) {
-			$propref_objs = $_SESSION['clipboard_propref_objs'];
-			foreach($propref_objs as $item) {
-				if($item["PropertyID"] != $propref) {
-					$propref_objs_temp[] = $item;
+		
+		// Create a new ids list with the object to delete missing
+		$list_property_ids = $_SESSION['clipboard_property_ids'];
+		$list_property_ids_temp = array();
+		foreach($list_property_ids as $value) {
+			if(trim($value) != trim($property_id)) {
+				$list_property_ids_temp[] = $value;
+			}
+		}
+		$_SESSION['clipboard_property_ids'] = $list_property_ids_temp;
+		
+		// Create a new objs list with the object to delete missing
+		$list_property_objs = $_SESSION['clipboard_property_objs'];
+		$list_property_objs_temp = array();
+		if(isset($_SESSION['clipboard_property_objs'])) {
+			foreach($list_property_objs as $item) {
+				if($item["PropertyID"] != $property_id) {
+					$list_property_objs_temp[] = $item;
 				}
 			}
-			$_SESSION['clipboard_propref_objs'] = $propref_objs_temp;
 		}
-	
-		$list_propref = $_SESSION['clipboard_propref'];
-		$list_propref_temp = array();
-		foreach($list_propref as $value) {
-			if(trim($value) != trim($propref)) {
-				$list_propref_temp[] = $value;
-			}
-		}
-	
-		$_SESSION['clipboard_propref'] = $list_propref_temp;
+		$_SESSION['clipboard_property_objs'] = $list_property_objs_temp;
+		
+		// Indicate success
 		$response = array(
 			'success' => true,
 		);
@@ -279,7 +206,7 @@ class CPDClipboardWidget extends WP_Widget {
 		if ($current_user->ID < 1) {
 			$response = array(
 				'success' => false,
-				'error' => "Please login", 
+				'error' => "Please log in as an administrator to perform this action.", 
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
@@ -288,36 +215,37 @@ class CPDClipboardWidget extends WP_Widget {
 		if ($current_user->roles[0] != 'administrator') {
 			$response = array(
 				'success' => false,
-				'error' => "You are not enough permission", 
+				'error' => "You must be an administrator to perform this action.", 
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
 			exit;
 		}
-	
-		$propref = array();
-		$propref = $_REQUEST['id'];
-		$num_li = count($propref);
+		
+		// Create a template containing short-codes for the indicated props
+		$property_ids = $_REQUEST['id'];
 		$temp = '';
-		for($i = 0; $i < $num_li; $i++){
-			$temp .= '[publish_property_ref id="'.$propref[$i].'"]<br/>';
+		foreach($property_ids as $property_id) {
+			$temp .= '[publish_property_ref id="'.$property_id.'"]<br/>';
 		}
-	
+		
+		// Create the new post entry
 		$update_post = array(
 			'post_content' => $temp,
 			'post_type' => 'post',
 			'post_status' => 'publish',
-			'post_title' => 'publish_property_ref '.$propref[$i]
+			'post_title' => 'publish_property_ref '.join(",", $property_ids)
 		);
-		
 		$post = wp_insert_post($update_post);
-		$link = get_edit_post_link($post,'&');
+		$link = get_edit_post_link($post, '&');
+		
+		// 
 		$results  = array();
-		$results['propref']	= $propref;
+		$results['propref'] = $property_id;
 		$results['link'] = $link;
 		$response = array(
 			'success' => true,
-			'results' => $results
+			'link' => $link,
 		);
 		header( "Content-Type: application/json" );
 		echo json_encode($response);
@@ -327,30 +255,27 @@ class CPDClipboardWidget extends WP_Widget {
 	function publish_property_ref($atts) {
 		global $soapopts;
 		
-		$propref = $atts["id"];
+		$property_id = $atts["id"];
 		
-		// Send our search request to the server
+		// Request the details of this property
 		$searchCriteria = new SearchCriteriaType();
 		$searchCriteria->Start = 1;
 		$searchCriteria->Limit = 1;
 		$searchCriteria->DetailLevel = "full";
 		$propertyIDsType = new PropertyIDsType();
-		$propertyIDsType->PropertyID = $propref;
+		$propertyIDsType->PropertyID = $property_id;
 		$searchCriteria->PropertyIDs = $propertyIDsType;
-		
-		// Perform search
 		$searchRequest = new SearchPropertyType();
 		$searchRequest->SearchCriteria = $searchCriteria;
-		
 		try {
 			$options = get_option('cpd-search-options');
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$searchResponse = $client->SearchProperty($searchRequest);
 		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			return $e->getMessage();
 		}
 	
 		// Filter results to avoid sending sensitive fields over the wire
@@ -358,28 +283,13 @@ class CPDClipboardWidget extends WP_Widget {
 		if(isset($searchResponse->PropertyList->Property)) {
 			$propList = $searchResponse->PropertyList->Property;
 			foreach($propList as $record) {
-				$row = array();
-				$row['PropertyID'] = $record->PropertyID;
-				$row['SectorDescription'] = $record->SectorDescription;
-				$row['SizeDescription'] = $record->SizeDescription;
-				$row['TenureDescription'] = $record->TenureDescription;
-				$row['BriefSummary'] = $record->BriefSummary;
-				$row['Address'] = $record->Address;
-				$row['Latitude'] = $record->Latitude;
-				$row['Longitude'] = $record->Longitude;
-				$row['RegionName'] = $record->RegionName;
-				$row['Location'] = $record->RegionName;
-				$row['Postcode'] = $record->Postcode;
-				
 				// Add thumb URL, only if one is available
+				$thumbURL = null;
 				if(isset($record->PropertyMedia)) {
 					$mediaList = $record->PropertyMedia;
-					if($propList instanceof PropertyMediaType) {
-						$propList = array($propList);
-					}
 					foreach($mediaList as $media) {
 						if($media->Type == "photo" && $media->Position == 1) {
-							$row['ThumbURL'] = $media->ThumbURL;
+							$thumbURL = $media->ThumbURL;
 							break;
 						}
 					}
@@ -388,20 +298,17 @@ class CPDClipboardWidget extends WP_Widget {
 				$results[] = $row;
 				$form = cpd_get_template_contents("publish_property");
 				$form = str_replace("[resultnum]", "", $form);
-				$form = str_replace("[propref]", $propref, $form);
-				$form = str_replace("[typedesc]", $row['SectorDescription'], $form);
-				$form = str_replace("[sizedesc]", $row['SizeDescription'], $form);
-				$form = str_replace("[areadesc]", $row['Address'], $form);
-				$form = str_replace("[summary]", $row['BriefSummary'], $form);
-				$form = str_replace("[photo]", "<img src=\"".$row['ThumbURL']."\"/>", $form);
+				$form = str_replace("[propref]", $prop->PropertyID, $form);
+				$form = str_replace("[typedesc]", $prop->SectorDescription, $form);
+				$form = str_replace("[sizedesc]", $prop->SizeDescription, $form);
+				$form = str_replace("[areadesc]", $prop->Address, $form);
+				$form = str_replace("[summary]", $prop->BriefSummary, $form);
+				$form = str_replace("[photo]", $thumbURL == "" ? "" : "<img src=\"".$thumbURL."\"/>", $form);
 				$form = str_replace("[pluginurl]", plugins_url(), $form);
 			}
 		}
-		return $form ;
-	}
-
-	function load_widgets() {
-		register_widget('CPDClipboardWidget' );
+		
+		return $form;
 	}
 }
 

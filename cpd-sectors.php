@@ -7,7 +7,7 @@ class CPDSectors {
 		// Create the SOAP client
 		$options = get_option('cpd-search-options');
 		$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-		$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+		$headers = cpd_search_wss_security_headers();
 		$client->__setSOAPHeaders($headers);
 
 		// Perform lookup

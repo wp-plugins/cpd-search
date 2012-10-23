@@ -30,7 +30,6 @@ class CPDPasswordChange {
 		
 		// Pass token through
 		$form = str_replace("[token]", $_REQUEST['token'], $form);
-		file_put_contents("/tmp/debug", $form);
 		
 		return $form;
 	}

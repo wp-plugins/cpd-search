@@ -28,7 +28,7 @@ class CPDUserRegistration {
 		$userRegistration->Phone = $phone;
 		$userRegistration->Agent = $options['cpd_agentref'];
 		$userRegistration->Password = $password;
-		$userRegistration->ServiceContext = $options['cpd_service_context'];
+		$userRegistration->ServiceContext = cpd_search_service_context();
 		try {
 			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
 			$registrationResponse = $client->RegisterUser($userRegistration);
@@ -44,8 +44,7 @@ class CPDUserRegistration {
 		}
 	
 		// Store token as a cookie
-		setcookie("cpd_token", $registrationResponse->Token);
-		setcookie("cpd_token_type", "user");
+		cpd_search_set_user_token($registrationResponse->Token);
 
 		// Return response as JSON
 		$response = array(

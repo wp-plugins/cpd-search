@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of page/post tags and widgets that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.4.5
+Version: 1.6.2
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -40,7 +40,6 @@ function myEndSession() {
 }
 
 function cpd_jquery_init() {
-	
 	// Google Maps setup
 	wp_enqueue_script('google-maps', "http://maps.googleapis.com/maps/api/js?sensor=false", array(), "", false);
 	
@@ -63,6 +62,13 @@ function cpd_jquery_init() {
 //add_action('init', 'cpd_jquery_init');
 cpd_jquery_init();
 
+// Set up CPD javascript global
+wp_enqueue_script('cpd-global', cpd_plugin_dir_url(__FILE__) . "js/cpd-global.js", array(), "", false);
+
+// Utility functions
+require_once(dirname(__FILE__) . "/cpd-geocode.php");
+require_once(dirname(__FILE__) . "/cpd-sectors.php");
+
 // User management handlers
 require_once(dirname(__FILE__) . "/cpd-user-registration.php");
 require_once(dirname(__FILE__) . "/cpd-verify-user.php");
@@ -83,9 +89,6 @@ require_once(dirname(__FILE__) . "/cpd-qr-code-landing.php");
 require_once(dirname(__FILE__) . "/cpd-search-form-widget.php");
 require_once(dirname(__FILE__) . "/cpd-clipboard-widget.php");
 require_once(dirname(__FILE__) . "/cpd-saved-searches-widget.php");
-
-// Utility functions
-require_once(dirname(__FILE__) . "/cpd-geocode.php");
-require_once(dirname(__FILE__) . "/cpd-sectors.php");
+require_once(dirname(__FILE__) . "/cpd-login-widget.php");
 
 ?>

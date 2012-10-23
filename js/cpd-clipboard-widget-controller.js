@@ -10,22 +10,6 @@ function CPDClipboardWidget() {
 		self.add(propref);
 	};
 	
-	self.addSuccess = function(data) {
-		if(!data.success) {
-			return self.addError(null, data.error, data.error);
-		}
-		self.clipboard = data.results;
-		
-		// Handle no results scenario
-		jQuery("#form-sidebar .savedcount").text(data.total);
-		if(data.total < 1) {
-			alert("No results found.");
-			return;
-		}
-		
-		self.refreshClipboardView();		
-	}
-	
 	self.refreshClipboardView = function() {
 		// Loop for each result adding to the table
 		jQuery("#contentbox").empty();
@@ -45,18 +29,33 @@ function CPDClipboardWidget() {
 			jQuery("#contentbox").append(row.show());
 		}
 		
-		jQuery('#cpdsearching').hide();
 		jQuery(".clipboardtopcolumnright_sidebar .btn_close").click(self.remove);
-		self.hide_show();
 	};
+	
 	self.addError = function(data, status, error) {
-		// Show error message
-		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
-		jQuery("#cpderror").dialog("open");
+		jQuery('#cpdadding').fadeOut();
 		
-		jQuery('#cpdsearching span').html("Searching... Please wait a moment.");
-		jQuery('#cpdsearching').hide();
+		// Show error message
+		jQuery("#cpderror").html('<p class="error">Failed to add clipboard entry: ' + data.error + '</p>');
+		jQuery("#cpderror").dialog("open");
 	};
+	self.addSuccess = function(data) {
+		jQuery('#cpdadding').fadeOut();
+		
+		if(!data.success) {
+			return self.addError(data.error, data.error, null);
+		}
+		self.clipboard = data.results;
+		
+		// Handle no results scenario
+		jQuery("#form-sidebar .savedcount").text(data.total);
+		if(data.total < 1) {
+			alert("No results found.");
+			return;
+		}
+		
+		self.refreshClipboardView();
+	}
 	self.add = function(propref) {
 		var postdata = {
 			'action':'cpd_clipboard_widget_add_ajax',
@@ -75,24 +74,23 @@ function CPDClipboardWidget() {
 		
 		jQuery.ajax(ajaxopts);
 		
-		jQuery('#cpdsearching span').html("Adding to clipboard... Please wait a moment.");
-		jQuery('#cpdsearching').show();
+		jQuery('#cpdadding').fadeIn();
 	};
 
-	self.removeSuccess = function(propref) {
-		jQuery("#clipboardholdingcontainer_sidebar #clipboard" + propref).remove();
-		jQuery('#cpdsearching span').html("Searching... Please wait a moment.");
-		jQuery('#cpdsearching').hide();
-		self.refreshClipboardView();	
-		self.hide_show();		
-	};
-	self.removeError = function(data) {
-		jQuery("#cpderror").html("<p class='error'>Search failed! " + data.error + ")</p>");
+	self.removeError = function(data, status, error) {
+		jQuery('#cpdremoving').fadeOut();
+		
+		jQuery("#cpderror").html('<p class="error">Failed to remove clipboard entry: ' + data.error + '</p>');
 		jQuery("#cpderror").dialog("open");
-		jQuery('#cpdsearching span').html("Searching... Please wait a moment.");
-		jQuery('#cpdsearching').hide();
 	};
-	self.remove = function(obj) {		
+	self.removeSuccess = function(propref) {
+		jQuery('#cpdremoving').fadeOut();
+		
+		jQuery("#clipboardholdingcontainer_sidebar #clipboard" + propref).remove();
+		
+		self.refreshClipboardView();
+	};
+	self.remove = function(obj) {
 		var propref = jQuery(this).parents('table').attr('id').substr(9);
 		var postdata = {
 			'action':'cpd_clipboard_widget_delete_ajax',
@@ -104,16 +102,31 @@ function CPDClipboardWidget() {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
-			success: self.removeSuccess(propref),
+			success: self.removeSuccess,
 			error: self.removeError,
 			dataType: "json"
 		};
 		jQuery.ajax(ajaxopts);
 
-		jQuery('#cpdsearching span').html("Deleting item from clipboard... Please wait a moment.");
-		jQuery('#cpdsearching').show();
+		jQuery('#cpdremoving').fadeIn();
 	}
 
+	self.pushpostError = function(data, status, error) {
+		jQuery('#cpdremoving').fadeOut();
+		
+		jQuery("#cpderror").html('<p class="error">Failed to create post: ' + data.error + '</p>');
+		jQuery("#cpderror").dialog("open");
+	};
+	self.pushpostSuccess = function(data) {
+		if(!data) {
+			return cpd_server_unavailable();
+		}
+		if (data.success != true) { 
+			self.pushpostError("Post failed", "Post failed", null);
+		}
+		
+		location.href = data.results['link'];
+	};
 	self.pushpost = function() {
 		jQuery('#cpdsearching span').html("Posting clipboard contents... Please wait a moment.");
 		jQuery('#cpdsearching').show();
@@ -138,14 +151,8 @@ function CPDClipboardWidget() {
 		var ajaxopts = {
 			url : CPDAjax.ajaxurl,
 			type: 'POST',
-			data: postdata,		
-			success: function(data){
-				if (data.success==true){ 
-					var link = data.results['link'];
-					location.href = link;
-				}else
-					alert(data.error);
-			},
+			data: postdata,
+			success: pushpostSuccess,
 			error: function(data){
 				alert(data.error);
 			},
@@ -184,42 +191,13 @@ function CPDClipboardWidget() {
 		}
 	};
 
-	self.hide_show = function() {
-		if(jQuery("#cpdclipboard_sidebar #contentbox table").length > 0) {
-			jQuery("#cpdclipboard_sidebar #contentbox table").show();
-			jQuery("#cpdclipboard_sidebar").show();
-			return;
-		}
-		
-		if(jQuery("#cpdsearchnavigationmodel").length == 0) {
-			jQuery("#cpdclipboard_sidebar").hide();
-			return;
-		}
-		
-		if(jQuery("#cpdsearchnavigationmodel").is(':hidden')) {
-			jQuery("#cpdclipboard_sidebar").hide();
-			return;
-		}
-
-		if(jQuery("#cpdclipboard_sidebar #contentbox table").length == 0) {
-			jQuery("#cpdclipboard_sidebar").hide();
-			return;
-		}
-		
-		jQuery("#cpdclipboard_sidebar #contentbox table").show();
-		jQuery("#cpdclipboard_sidebar").show();
-	};
-	
 	self.init = function() {
-		self.hide_show();
-		
 		jQuery(".cbx_clipboard").live('click',self.select_obj);
-		
 		jQuery("#cbx_clipboard_all").click(self.select_all);
-		
 		jQuery("#clipboardpreviewrow").click(self.pushpost);
-		
 		jQuery(".clipboardtopcolumnright_sidebar .btn_close").click(self.remove);
+		
+		self.refreshClipboardView();
 	};
 };
 

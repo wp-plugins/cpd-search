@@ -19,14 +19,17 @@ function CPDUserRegistration() {
 		// Hide registration form, show 'thankyou etc' part
 		jQuery('#cpdregistrationform').dialog("close");
 		jQuery('#cpdregistered').dialog("open");
-
+		
+		// Mark user registered
+		CPD.userRegistered = true;
+		
 		// Process nearly registered interests
 		cpdRegisterInterest.processQueue();
 	};
 	self.registrationError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdregistering').hide();
 	
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("UserAlreadyExistsException") > -1) {
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "UserAlreadyExistsExceptionMsg") {
 			// Show login form
 			jQuery('#cpderror').html("No need to register. There is already an account for this e-mail address. Please try logging in with your existing credentials, or request a password reset if you have forgotten them.");
 			jQuery('#cpderror').dialog("open");
@@ -95,14 +98,21 @@ function CPDUserRegistration() {
 
 		// Add visual identification that user is logged in
 		jQuery('#cpdloggedin').dialog("open");
-
+		
+		jQuery(".logoutlink").show();
+		jQuery(".loginlink").hide();
+		jQuery(".registrationlink").hide();
+		
+		// Mark user registered
+		CPD.userRegistered = true;
+		
 		// Process nearly registered interests
-		cpdRegisterInterest.process_queue();
+		cpdRegisterInterest.processQueue();
 	};
 	self.loginError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdloggingin').dialog("close");
 	
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error.indexOf("AuthenticationFailedException") > -1) {
+		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "AuthenticationFailedExceptionMsg") {
 			// Show login form
 			jQuery('#cpderror').html("Authentication failure! Please try again.");
 			jQuery('#cpderror').dialog("open");
@@ -127,14 +137,40 @@ function CPDUserRegistration() {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
-			success: cpd_user_login_success,
-			error: cpd_user_login_error,
+			success: self.loginSuccess,
+			error: self.loginError,
+			dataType: "json"
+		};
+		jQuery.ajax(ajaxopts);
+	};
+	
+	
+	self.logout = function() {
+		var postdata = {
+			'action':'cpd_user_logout'
+		};
+	
+		// Send AJAX registration request to server
+		var ajaxopts = {
+			type: 'POST',
+			url: CPDAjax.ajaxurl,
+			data: postdata,
+			success: function(data){
+				alert("Logout successfully");
+				jQuery(".logoutlink").hide();
+				jQuery(".loginlink").show();
+				jQuery(".registrationlink").show();
+			},
+			error: function(data){
+				alert("Logout unsuccessfully");
+			},
 			dataType: "json"
 		};
 		jQuery.ajax(ajaxopts);
 	};
 
 	self.init = function() {
+			
 		// Initialise registration form and confirmation
 		jQuery("#cpdregistrationform").dialog({
 			title: "User registration",
@@ -184,7 +220,7 @@ function CPDUserRegistration() {
 			modal: true,
 			buttons: {
 				"Login": function() {
-					cpd_user_login(this);
+					self.login(this);
 				},
 				"Cancel": function() {
 					jQuery(this).dialog("close");
@@ -234,11 +270,21 @@ function CPDUserRegistration() {
 		jQuery('.registrationlink').click(function() {
 			jQuery('#cpdloginform').dialog("close");
 			jQuery('#cpdregistrationform').dialog("open");
+			return false;
 		});
 		jQuery('.loginlink').click(function() {
 			jQuery('#cpdregistrationform').dialog("close");
 			jQuery('#cpdloginform').dialog("open");
+			return false;
 		});
+		jQuery('.logoutlink').click(function(){
+			self.logout();
+			return false;
+		});
+		
+		if(jQuery("#cpdregistrationform").length > 0) {
+			jQuery(".load-form-login").remove();
+		}
 
 		// Add verification of user name
 		jQuery('#cpdregistrationform #name').focusout(function() {
@@ -264,7 +310,7 @@ function CPDUserRegistration() {
 		jQuery('#cpdregistrationform #password1').focusout(function() {
 			var password = jQuery(this).val();
 			if (!self.check_password.test(password)){
-				jQuery('#error-password1').show().html("Minimum 6 Characters");
+				jQuery('#error-password1').show().html("Minimum 6 characters");
 				return;
 			}
 			jQuery('#error-password1').hide();
@@ -273,7 +319,7 @@ function CPDUserRegistration() {
 			var password1 = jQuery('#cpdregistrationform #password1').val();
 			var password2 = jQuery(this).val();
 			if (!self.check_password.test(password2)){
-				jQuery('#error-password2').show().html("Minimum 6 Characters");
+				jQuery('#error-password2').show().html("Minimum 6 characters");
 				return;
 			}
 			else if(password1 != password2){
@@ -283,7 +329,7 @@ function CPDUserRegistration() {
 			jQuery('#error-password1').hide();
 			jQuery('#error-password2').hide();
 		});
-	
+
 		// Add verification of phone
 		jQuery('#cpdregistrationform #phone').focusout(function() {
 			var phone = jQuery(this).val();

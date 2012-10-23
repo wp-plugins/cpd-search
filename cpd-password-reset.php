@@ -38,8 +38,7 @@ class CPDPasswordReset {
 		}
 	
 		// Store token as a cookie
-		setcookie("cpd_token", "");
-		setcookie("cpd_token_type", "");
+		cpd_search_set_user_token($passwordResponse->Token);
 
 		// Notify user of success
 		$response = array(

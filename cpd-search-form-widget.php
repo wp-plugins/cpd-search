@@ -123,7 +123,8 @@ class CPDSearchFormWidget extends WP_Widget {
 		$postcode = $_SESSION['cpd_search_our_database_postcode'];
 		
 		// Read in necessary form template sections from plugin options
-		$form = cpd_get_template_contents("search_form_widget");					
+		$form = cpd_get_template_contents("search_form_widget");
+		
 		// Add options for actionurl pulldown
 		$widget_options = get_option('widget_search_form_widget');
 		
@@ -144,8 +145,10 @@ class CPDSearchFormWidget extends WP_Widget {
 		$sizeunitoptions = cpd_sizeunit_options($sizeunits);
 		$form = str_replace("[sizeunitoptions]", $sizeunitoptions, $form);
 	
-		// Add options for sector pulldown
-		$sectoroptions = cpd_sector_options($sectors);
+		// Add sector options
+		$options = get_option('cpd-search-options');
+		$sod_sectors = explode(",", $options['cpd_sod_sectors']);
+		$sectoroptions = cpd_sector_options($sod_sectors, $sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
 		// Add tenure options

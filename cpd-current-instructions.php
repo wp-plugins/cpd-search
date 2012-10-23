@@ -1,19 +1,21 @@
 <?php
 
-require_once(dirname(__FILE__) . "/cpd-common.php");
-require_once(dirname(__FILE__) . "/cpd-register-interest.php");
-require_once(dirname(__FILE__) . "/cpd-view-property-image.php");
-require_once(dirname(__FILE__) . "/cpd-view-property-pdf.php");
+require_once(dirname(__FILE__) . "/cpd-common-search.php");
 
-class CPDCurrentInstructions {
+class CPDCurrentInstructions extends CPDCommonSearch {
 	function init() {
 		wp_enqueue_script('cpd-common-search-controller', cpd_plugin_dir_url(__FILE__) ."js/cpd-common-search-controller.js");
 		wp_enqueue_script('cpd-current-instructions-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-current-instructions-controller.js");
 		wp_enqueue_script('cpd-view-property-pdf-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-pdf-controller.js");
+		wp_enqueue_script('cpd-view-property-image-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-image-controller.js");
 		wp_localize_script('cpd-current-instructions-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
 		add_shortcode('cpd_current_instructions', array('CPDCurrentInstructions', 'instructions'));
 		add_action('wp_ajax_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
 		add_action('wp_ajax_nopriv_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
+		
+		session_start();
+		
+		cpd_check_agent_sectors();
 	}
 
 	function gather_inputs() {
@@ -75,7 +77,9 @@ class CPDCurrentInstructions {
 		$form .= '<script>jQuery(document).ready(function() { cpdCurrentInstructions.init(); });</script>';
 		
 		// Add sector options
-		$sectoroptions = cpd_sector_options($sectors);
+		$options = get_option('cpd-search-options');
+		$ci_sectors = explode(",", $options['cpd_ci_sectors']);
+		$sectoroptions = cpd_sector_options($ci_sectors, $sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
 		// Populate form defaults
@@ -95,6 +99,9 @@ class CPDCurrentInstructions {
 		// Add theme/plugin base URLs
 		$form = str_replace("[pluginurl]", plugins_url(), $form);
 
+		// Add link to client's T&C URL
+		$form = str_replace("[termsurl]", $options['cpd_terms_url'], $form);
+		
 		return $form;
 	}
 
@@ -105,7 +112,7 @@ class CPDCurrentInstructions {
 		self::gather_inputs();
 		$start = $_SESSION['cpd_current_instructions_start'];
 		$limit = $_SESSION['cpd_current_instructions_limit'];
-		$sectors =  $_SESSION['cpd_current_instructions_sectors'];
+		$sectors = $_SESSION['cpd_current_instructions_sectors'];
 	
 		// Send our search request to the server
 		$searchCriteria = new SearchCriteriaType();
@@ -134,11 +141,15 @@ class CPDCurrentInstructions {
 		$searchRequest->SearchCriteria = $searchCriteria;
 		try {
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = wss_security_headers($options['cpd_agentref'], $options['cpd_password']);
+			$headers = cpd_search_wss_security_headers();
 			$client->__setSOAPHeaders($headers);
 			$searchResponse = $client->SearchProperty($searchRequest);
 		}
 		catch(Exception $e) {
+			if($e->getMessage() == "The security token could not be authenticated or authorized") {
+				cpd_search_discard_token();
+				return self::search_ajax();
+			}
 			$response = array(
 				'success' => false,
 				'error' => $e->getMessage()
@@ -147,48 +158,12 @@ class CPDCurrentInstructions {
 			echo json_encode($response);
 			exit;
 		}
-	
+
 		// Filter results to avoid sending sensitive fields over the wire
 		$results = array();
 		if(isset($searchResponse->PropertyList->Property)) {
-			// Workaround for PITA in PHP SOAP parser...
-			$propList = $searchResponse->PropertyList->Property;
-			if($propList instanceof PropertyType) {
-				$propList = array($propList);
-			}
-			foreach($propList as $record) {
-				$row = array();
-				$row['PropertyID'] = $record->PropertyID;
-				$row['SectorDescription'] = $record->SectorDescription;
-				$row['SizeDescription'] = $record->SizeDescription;
-				$row['TenureDescription'] = $record->TenureDescription;
-				$row['BriefSummary'] = $record->BriefSummary;
-				$row['Address'] = $record->Address;
-				$row['Latitude'] = $record->Latitude;
-				$row['Longitude'] = $record->Longitude;
-				$row['RegionName'] = $record->RegionName;
-			
-				// Add thumb URL, only if one is available
-				if(isset($record->PropertyMedia)) {
-					$mediaList = $record->PropertyMedia;
-					if($mediaList instanceof PropertyMediaType) {
-						$mediaList = array($propList);
-					}
-					foreach($mediaList as $media) {
-						if($media->Position > 1) {
-							continue;
-						}
-						if($media->Type == "photo") {
-							$row['ThumbURL'] = $media->ThumbURL;
-							continue;
-						}
-						if($media->Type == "pdf" && $record->AgentRef == $options['cpd_agentref']) {
-							$row['PDFMediaID'] = $media->MediaID;
-							continue;
-						}
-					}
-				}
-
+			foreach($searchResponse->PropertyList->Property as $record) {
+				$row = self::rowFromDB($record);
 				$results[] = $row;
 			}
 		}

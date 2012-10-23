@@ -69,26 +69,18 @@ class CPDSavedSearchesWidget extends WP_Widget {
 		$str = '';
 		$home = home_url();
 		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
-		$content_template = cpd_get_template_contents("saved_searches");
-		$form_saved_search = substr($content_template,strpos($content_template,"<!--template item-->"));
+		$content_template = cpd_get_template_contents("saved_searches");		
 	
 		if(!isset($_SESSION['cpd_saved_searches_widget']) || count($_SESSION['cpd_saved_searches_widget']) == 0 ) {
-			$item_template = substr($content_template,0,strpos($content_template,"<!--template item-->"));
-			$item_template = str_replace("[display_none]","display:none", $item_template);
-			return str_replace("[contentbox]", $item_template, $form_saved_search);
+			$content_template = str_replace("[contentbox]", "", $content_template);
+			return $content_template;			
 		}
 		
-		$list_li = $_SESSION['cpd_saved_searches_widget'];
-		if(count($list_li) < 1) {
-			return $form_saved_search;
-		}
-		
+		$list_li = $_SESSION['cpd_saved_searches_widget'];			
 		$list_item_template = '';
-		$item_template = substr($content_template,0,strpos($content_template,"<!--template item-->"));
-		$item_template = str_replace("[display_none]","display:none", $item_template);
-		$list_item_template .= $item_template;
+		
 		foreach($list_li as $data) {
-			$item_template = substr($content_template,0,strpos($content_template,"<!--template item-->"));
+			$item_template = substr($content_template,0,strpos($content_template,'<div class="clipboardseperator"></div>'));
 			$item_template = str_replace("[pluginurl]", $path_dir_plugin, $item_template);
 			$item_template = str_replace("[display_none]","", $item_template);
 			$item_template = str_replace("[search_name]", $data['search_name'], $item_template);
@@ -116,7 +108,7 @@ class CPDSavedSearchesWidget extends WP_Widget {
 			$item_template = str_replace("[size]", $data['sizefrom'].'-'. $data['sizeto'].$data['size_text'], $item_template);
 			$list_item_template .= $item_template;
 		}
-		return str_replace("[contentbox]", $list_item_template, $form_saved_search);
+		return str_replace("[contentbox]", $list_item_template, $content_template);
 	}
 	
 	function ajax() {

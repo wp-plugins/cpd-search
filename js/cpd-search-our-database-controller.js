@@ -3,22 +3,37 @@
 function CPDSearchOurDatabase() {
 	var self = new CPDCommonSearchController();
 
+	self.searchError = function(data, status, error) {
+		// Clear other dialogs
+		jQuery("#cpdloading").hide();
+		
+		// Show error message
+		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
+		jQuery("#cpderror").dialog("open");
+		
+		// Start back at the search form
+		jQuery("#cpdsearchform").show();
+	};
+	
 	self.searchSuccess = function(data) {
 		// Check for failure
+		if(!data) {
+			return self.searchError(null, "Connection failed", "Server down. Please try again later");
+		}
 		if(!data.success) {
 			return self.searchError(null, data.error, data.error);
 		}
-
+		
+		// Clear loading dialog, form and results panel
+		jQuery('#cpdloading').hide();
+		jQuery("#cpdsearchform").hide();
+		jQuery('#cpdsearchresults').empty();
+		jQuery("#cpderror").dialog("close");
+		
 		// Handle no results scenario
 		if(data.total < 1) {
-			alert("No results found.");
-			return;
+			return self.searchError(null, "No results found.", "No properties currently found with this criteria.");
 		}
-
-		// Clear results panel
-		jQuery('#cpdsearchresults').empty();
-		jQuery("#cpdsearchform").hide();
-		jQuery("#cpderror").dialog("close");
 		
 		// Count pages
 		var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
@@ -65,24 +80,6 @@ function CPDSearchOurDatabase() {
 		jQuery(".navbarnextpage").click(self.next_page);
 		
 		jQuery("select.limit").change(self.per_page_changed);
-		
-		// Clear loading dialog and hide form
-		cpdClipboardWidget.hide_show();
-		cpdSavedSearchesWidget.hide_show();
-		jQuery('#cpdsearching').hide();
-		jQuery('#cpdsearchform').hide();
-	};
-	self.searchError = function(data, status, error) {
-		// Show error message
-		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
-		jQuery("#cpderror").dialog("open");
-		
-		// Clear other dialogs
-		jQuery("#cpdsearching").hide();
-		jQuery("#cpdloading").hide();
-		
-		// Start back at the search form
-		jQuery("#cpdsearchform").show();
 	};
 
 	self.prev_page = function() {
@@ -118,8 +115,7 @@ function CPDSearchOurDatabase() {
 
 	self.searchDatabase = function() {
 		// Display 'searching...' dialog
-		jQuery('#cpdsearching').show();
-		//jQuery('#cpdsearching').dialog("open");
+		jQuery('#cpdloading').show();
 	
 		// Determine start result number and page length
 		var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
@@ -175,18 +171,22 @@ function CPDSearchOurDatabase() {
 
 		// Activate submit button for search form
 		jQuery("#cpdsearchform #submit").click(self.submitForm);
-		
+
 		// Display the search form
 		jQuery("#cpdsearchform").show();
+
+		// Determine whether user is registered or not
+		CPD.userRegistered = jQuery("span#registered").html() == '1';
+
+		var search_widget = Number(jQuery('span#search_widget').text()).valueOf();
+		if(search_widget) {
+			jQuery("#cpdsearchform").hide();
+			jQuery("#cpdsearchform #submit").click();
+		}
 	};
 	
 	return self;
 }
 
 cpdSearchOurDatabase = new CPDSearchOurDatabase();
-
-// Initialised during load of form instead...
-//jQuery(document).ready(function() {
-//	cpdSearchOurDatabase.init();
-//});
 
