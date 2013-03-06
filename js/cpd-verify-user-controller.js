@@ -18,8 +18,8 @@ function CPDVerifyUser() {
 	self.verifyTokenError = function(data) {
 		jQuery('#cpdverifyuser').dialog("close");
 	
-		if(data != null && data.error != null && data.error == "AccessDeniedExceptionMsg") {
-			jQuery('#cpdverifyuserfailed').show();
+		if(data != null && data.error != null && data.error == "UserAlreadyConfirmedExceptionMsg") {
+			jQuery('#cpduseralreadyconfirmed').show();
 			return;
 		}
 

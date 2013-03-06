@@ -24,6 +24,7 @@ class CPDUserLogin {
 		$userAuthentication->Email = $email;
 		$userAuthentication->Agent = $options['cpd_agentref'];
 		$userAuthentication->Password = $password;
+		$userAuthentication->ServiceContext = cpd_search_service_context();
 		try {
 			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
 			$authenticationResponse = $client->AuthenticateUser($userAuthentication);
@@ -31,7 +32,7 @@ class CPDUserLogin {
 		catch(Exception $e) {
 			$response = array(
 				'success' => false,
-				'error' => $e->getMessage()
+				'error' => $e
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
@@ -71,7 +72,7 @@ class CPDUserLogin {
 		catch(Exception $e) {
 			$response = array(
 				'success' => false,
-				'error' => $e->getMessage()
+				'error' => $e
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);

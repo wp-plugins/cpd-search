@@ -104,7 +104,7 @@ function cpd_search_is_user_registered() {
 function cpd_search_wss_security_headers() {
 	$options = get_option('cpd-search-options');
 	$cpd_token = $_COOKIE['cpd_token'];
-	if(cpd_search_is_user_registered()) {
+	if($cpd_token != "" && cpd_search_is_user_registered()) {
 		return wss_security_headers($cpd_token, '');
 	}
 	return wss_security_headers($options['cpd_application_token'], "");

@@ -4,12 +4,12 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of page/post tags and widgets that can be used to add commercial property database searches into pages. Uses the CPD SOAP API.
-Version: 1.6.2
+Version: 1.6.5
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
 
-Copyright 2011-2012 The CPD Team. All rights reserved. Every last one of them.
+Copyright 2011-2013 The CPD Team. All rights reserved. Every last one of them.
 */
 
 //define('WP_DEBUG', true);

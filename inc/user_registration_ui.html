@@ -1,6 +1,6 @@
 <div id="cpdregistrationform" style="display: none;">
-	<p class="cpdinstruction">Please provide your name and contact e-mail address.</p>
-
+<p class="cpdinstruction">Please provide your name and contact e-mail address so we can send you full details of this property.
+<span class="requiredmessage">Required fields are marked with *</span></p>
 	<form>
 		<fieldset>
 			<table>
@@ -9,7 +9,7 @@
 				<tbody>
 					<tr>
 						<td>
-							<label for="name">Name</label>
+							<label for="name">Name *</label>
 						</td>
 						<td>
 							<input type="text" name="name" id="name"/>
@@ -19,7 +19,7 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="email">E-mail</label>
+							<label for="email">E-mail *</label>
 						</td>
 						<td>
 							<input type="text" name="email" id="email"/>
@@ -29,7 +29,7 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="password1">Password (once)</label>
+							<label for="password1">Password (once) *</label>
 						</td>
 						<td>
 							<input type="password" name="password1" id="password1"/>
@@ -39,7 +39,7 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="password2">Password (twice)</label>
+							<label for="password2">Password (twice) *</label>
 						</td>
 						<td>
 							<input type="password" name="password2" id="password2"/>
@@ -49,7 +49,7 @@
 					</tr>
 					<tr>
 						<td>
-							<label for="phone">Phone</label>
+							<label for="phone">Phone *</label>
 						</td>
 						<td>
 							<input type="text" name="phone" id="phone"/>
@@ -64,7 +64,7 @@
 		
 	<p>If you have previously registered, please  <a class="loginlink">click here to log in</a> with your existing credentials.</p>
 	
-	<p>View our <a href="[termsurl]">Terms and Conditions</a></p>
+	<p id="termsurl">View our <a target="_blank" href="[termsurl]" target="blank">Terms and Conditions</a></p>
 	
 	<div id="cpdregistering" class="registering" style="display: none;">
 		<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>

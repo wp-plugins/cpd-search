@@ -17,6 +17,7 @@ class CPDCommonSearch {
 		$row['Latitude'] = $record->Latitude;
 		$row['Longitude'] = $record->Longitude;
 		$row['RegionName'] = $record->RegionName;
+		$row['EPC'] = $record->EPC;
 	
 		// Add thumb URL, only if one is available
 		$options = get_option('cpd-search-options');

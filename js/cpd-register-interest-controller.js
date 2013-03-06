@@ -107,7 +107,7 @@ function CPDRegisterInterest() {
 	// Called by SOD/CI to have their buttons hooked up
 	self.update_buttons = function(id, propref) {
 		// Activate the register interest, or registered interest button accordingly
-		if(self.registering_interest_refs.indexOf(propref) > -1) {
+		if(self.registering_interest_refs && self.registering_interest_refs.indexOf(propref) > -1) {
 			jQuery("#" + id + " .registerinterest").hide();
 			jQuery("#" + id + " .registeringinterest").show();
 		}

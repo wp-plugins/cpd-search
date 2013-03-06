@@ -1357,3 +1357,8 @@ input.navbarpagenum
 	width:30px;
 	text-align:center;
 }
+
+.requiredmessage {
+	font-size: 8px;
+}
+

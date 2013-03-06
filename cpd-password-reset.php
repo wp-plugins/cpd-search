@@ -23,6 +23,7 @@ class CPDPasswordReset {
 		$passwordRequest = new PasswordResetType();
 		$passwordRequest->Email = $email;
 		$passwordRequest->Agent = $options['cpd_agentref'];
+		$passwordRequest->ServiceContext = cpd_search_service_context();
 		try {
 			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
 			$passwordResponse = $client->PasswordReset($passwordRequest);

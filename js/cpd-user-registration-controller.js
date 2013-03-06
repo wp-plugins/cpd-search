@@ -112,15 +112,19 @@ function CPDUserRegistration() {
 	self.loginError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdloggingin').dialog("close");
 	
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "AuthenticationFailedExceptionMsg") {
-			// Show login form
-			jQuery('#cpderror').html("Authentication failure! Please try again.");
+		if(jqXHR.error != null) {
+			if(jqXHR.error.faultstring == "AuthenticationExceptionMsg") {
+				// Show login form
+				jQuery('#cpderror').html("Authentication failure! Please try again.");
+				jQuery('#cpderror').dialog("open");
+				return;
+			}
+			jQuery('#cpderror').html("Error: " + jqXHR.error);
 			jQuery('#cpderror').dialog("open");
 			return;
 		}
-		if(jqXHR != null && jqXHR.error != null) {
-			alert(jqXHR.error);
-		}
+		jQuery('#cpderror').html("System temporarily unavailable.");
+		jQuery('#cpderror').dialog("open");
 	};
 	self.login = function() {
 		var postdata = {

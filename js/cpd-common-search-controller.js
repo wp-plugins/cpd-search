@@ -16,6 +16,7 @@ function CPDCommonSearchController() {
 		jQuery(".tenuredesc", row).html(property.TenureDescription);
 		jQuery(".address", row).html(property.Address);
 		jQuery(".summary", row).html(property.BriefSummary);
+		jQuery(".epc", row).html(property.EPC ? property.EPC : "-");
 		if(property.ImageThumbURL === undefined) {
 			jQuery(".photo", row).html("(No photo)");
 		}

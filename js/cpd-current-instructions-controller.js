@@ -38,7 +38,7 @@ function CPDCurrentInstructions() {
 		var start = ((pagenum - 1) * limit) + 1;
 		var pagecount = Math.floor((data.total - 1) / limit) + 1;
 
-		// Loop for each result adding to the tableropref
+		// Loop for each result adding to the table
 		var resultnum = start;
 		for (i in data.results) {
 			var property = data.results[i];
@@ -52,7 +52,7 @@ function CPDCurrentInstructions() {
 			jQuery(".resultnum", row).html(resultnum++);
 		}
 		
-		// Add navigationbars
+		// Add navigation bars
 		self.addNavigation(pagenum, pagecount, data.total);
 		jQuery("select.limit").change(self.per_page_changed);
 		jQuery(".navbarprevpage").click(self.prev_page);

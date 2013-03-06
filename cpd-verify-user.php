@@ -54,6 +54,7 @@ class CPDVerifyUser {
 		try {
 			$verify = new VerifyUserType();
 			$verify->Token = $token;
+			$verify->ServiceContext = cpd_search_service_context();
 			$verifyResponse = $client->VerifyUser($verify);
 		}
 		catch(Exception $e) {

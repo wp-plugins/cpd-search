@@ -125,7 +125,7 @@ function CPDSearchOurDatabase() {
 		// Gather criteria from form widgets
 		var sizefrom = jQuery('input#sizefrom').val();
 		var sizeto = jQuery('input#sizeto').val();
-		var sizeunits = jQuery('input#sizeunits').val();
+		var sizeunits = jQuery('select#sizeunits').val();
 		var sectors_options = jQuery("select#sectors option:selected");
 		var sectors = [];
 		for (var i = 0; i < sectors_options.length; i++) {

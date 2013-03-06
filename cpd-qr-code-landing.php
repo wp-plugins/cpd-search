@@ -9,6 +9,8 @@ class CPDQRCodeLanding {
 		add_shortcode('cpd_qr_code_landing', array('CPDQRCodeLanding', 'show_form'));
 		add_action('wp_ajax_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
 		add_action('wp_ajax_nopriv_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
+		add_action('wp_ajax_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
+		add_action('wp_ajax_nopriv_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
 		add_action('wp_ajax_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
 		add_action('wp_ajax_nopriv_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
 	}
@@ -29,7 +31,7 @@ class CPDQRCodeLanding {
 		$searchCriteria->DetailLevel = "brief";
 		$searchCriteria->PropertyIDs = array($id);
 	
-		// Current instructions only searches owner agent's properties
+		// Get agent to request properties as
 		$options = get_option('cpd-search-options');
 		$searchCriteria->Agent = $options['cpd_agentref'];
 	
@@ -42,8 +44,12 @@ class CPDQRCodeLanding {
 			$client->__setSOAPHeaders($headers);
 			$searchResponse = $client->SearchProperty($searchRequest);
 		}
+		catch(SoapFault $sf) {
+			echo $sf->getMessage();
+			return;
+		}
 		catch(Exception $e) {
-			echo $e->getMessage();
+			echo $e;
 			return;
 		}
 	
@@ -72,8 +78,19 @@ class CPDQRCodeLanding {
 			return;
 		}
 		
+		// If the user is already logged in with a valid token, just send them
+		// the PDF directly.
+		$token = '';
+		if(isset($_COOKIE['cpd_token'])) {
+			$token = $_COOKIE['cpd_token'];
+		}
+		
 		// Pass the interesting bits through in the form template
 		$form = cpd_get_template_contents("qr_code_landing");
+		$form .= cpd_get_template_contents("common");
+//		$form .= cpd_get_template_contents("user_login");
+//		$form .= cpd_get_template_contents("user_password_reset");
+		$form = str_replace("[token]", $token, $form);
 		$form = str_replace("[propref]", $id, $form);
 		$form = str_replace("[address]", $prop->Address, $form);
 		$form = str_replace("[media_id]", $media_id, $form);
@@ -82,17 +99,30 @@ class CPDQRCodeLanding {
 	
 	function ajax_register_user() {
 		global $soapopts;
-		
+	
+		// Gather form inputs	
 		$name = $_REQUEST['name'];
 		$email = $_REQUEST['email'];
 		$phone = $_REQUEST['phone'];
 		
+		// If already logged in, no need to re-register
+		if(isset($_COOKIE['cpd_token'])) {
+			$response = array(
+				'success' => true,
+				'token' => $_COOKIE['cpd_token'],
+				'name' => $name,
+				'confirmed' => true
+			);
+			header( "Content-Type: application/json" );
+			echo json_encode($response);
+			exit;
+		}
+
 		// Send our search request to the server
 		$userRegistration = new RegisterUserType();
 		$userRegistration->Name = $name;
 		$userRegistration->Email = $email;
 		$userRegistration->Phone = $phone;
-		//$userRegistration->Password = $password;
 		
 		// Mark this registration as coming from this agent/application
 		$options = get_option('cpd-search-options');
@@ -106,7 +136,7 @@ class CPDQRCodeLanding {
 		catch(Exception $e) {
 			$response = array(
 				'success' => false,
-				'error' => $e->getMessage()
+				'error' => $e
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);
@@ -135,10 +165,10 @@ class CPDQRCodeLanding {
 		$media_id = $_REQUEST['media_id'];
 		
 		// Perform search
+		$options = get_option('cpd-search-options');
 		$viewMedia = new ViewingMediaType();
 		$viewMedia->MediaID = $media_id;
-		$options = get_option('cpd-search-options');
-		$viewMedia->ServiceContext = $options['cpd_service_context'];
+		$viewMedia->ServiceContext = cpd_search_service_context();
 		
 		try {
 			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
@@ -149,7 +179,7 @@ class CPDQRCodeLanding {
 		catch(Exception $e) {
 			$response = array(
 				'success' => false,
-				'error' => $e->getMessage()
+				'error' => $e
 			);
 			header( "Content-Type: application/json" );
 			echo json_encode($response);

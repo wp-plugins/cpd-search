@@ -1,8 +1,12 @@
-<div id="cpdqrregistrationform" style="">
-	<p class="cpdinstruction">Please provide your name and contact e-mail address in order to view the PDF for:</p>
+<input type="hidden" id="token" value="[token]" />
+<input type="hidden" id="propref" value="[propref]" />
+<input type="hidden" id="media_id" value="[media_id]" />
+
+<div id="cpdqrregistrationform" class="cpdpart" style="display:none;">
+	<p class="cpdinstruction">Please provide your name and contact e-mail address in order to view the property details for:</p>
 	<p><b>[address]</b></p>
 
-	<form>
+	<form id="registerform">
 		<fieldset>
 			<table>
 				<colgroup width="135px" />
@@ -23,7 +27,7 @@
 							<label for="email">E-mail</label>
 						</td>
 						<td>
-							<input type="text" name="email" id="email"/>
+							<input type="text" name="email" id="email" autocapitalize="off" autocorrect="off"/>
 							<br/>
 							<span class="formerror" id="error-email"/>
 						</td>
@@ -38,10 +42,9 @@
 							<span class="formerror" id="error-phone"/>
 						</td>
 					</tr>
-					
 					<tr>
 						<td>
-							
+						
 						</td>
 						<td>
 							<input type="button" value="Submit" id="submit" name="submit" />
@@ -50,11 +53,89 @@
 				</tbody>
 			</table>
 		</fieldset>
-		<input type="hidden" id="propref" value="[propref]" />
-		<input type="hidden" id="media_id" value="[media_id]" />
 	</form>
-	
+
 	<p>If you have previously registered, please <a class="loginlink">click here to log in</a> with your existing credentials.</p>
+</div>
+	
+<div id="cpdqrloginform" class="cpdpart" style="display:none;">
+	<div class="message" style="display:none;"></div>
+	
+	<p class="cpdinstruction">Please provide your e-mail address and password to view the property details for:</p>
+	<p><b>[address]</b></p>
+	<form>
+		<fieldset>
+			<table>
+				<colgroup width="135px" />
+				<colgroup width="240px" />
+				<tbody>
+					<tr>
+						<td>
+							<label for="email">E-mail</label>
+						</td>
+						<td>
+							<input type="text" name="email" id="email" autocapitalize="off" autocorrect="off"/>
+							<br/>
+							<span class="formerror" id="error-email"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="password">Password</label>
+						</td>
+						<td>
+							<input type="password" name="password" id="password"/>
+							<br/>
+							<span class="formerror" id="error-password"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						
+						</td>
+						<td>
+							<input type="button" value="Submit" id="submit" name="submit" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</fieldset>
+	</form>
+	<p>If you have lost your password, please <a class="lostpasswordlink">click here to request a new password</a> be sent to your e-mail address.</p>
+	<p>If you have not previously registered, please <a class="registerlink">click here to register</a>.</p>
+</div>
+
+<div id="cpdqrpasswordresetform" class="cpdpart" style="display:none;">
+	<p>Please provide your e-mail address to have a password reset link sent to you.</p>
+	<form>
+		<fieldset>
+			<table>
+				<colgroup width="135px" />
+				<colgroup width="240px" />
+				<tbody>
+					<tr>
+						<td>
+							<label for="email">E-mail</label>
+						</td>
+						<td>
+							<input type="text" name="email" id="email" autocapitalize="off" autocorrect="off"/>
+							<br/>
+							<span class="formerror" id="error-email"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						
+						</td>
+						<td>
+							<input type="button" value="Submit" id="submit" name="submit" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</fieldset>
+	</form>
+	<p>If you have not previously registered, please <a class="registerlink">click here to register</a>.</p>
 </div>
 
 <div id="cpdregistering" class="registering" style="display: none;">
@@ -62,21 +143,32 @@
 	<span>Registering... Please wait a moment.</span>
 </div>
 
-<div id="cpderror" class="cpderror" style="display: none;">
-	
+<div id="cpdloggingin" class="loggingin" style="display: none;">
+	<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>
+	<span>Logging in... Please wait a moment.</span>
 </div>
 
-<div id="cpdregistered" style="display: none;">
+<div id="cpdresettingpassword" class="resettingpassword" style="display: none;">
+	<img id="loadinggraphic" src="[pluginurl]/images/loading-gif-animation.gif"/>
+	<span>Requesting a password reset... Please wait a moment.</span>
+</div>
+
+<div id="cpdpasswordreset" class="resetpassword" style="display: none;">
+	<span>Password reset request sent... Please check your e-mail.</span>
+</div>
+
+<div id="cpdshowpdf" class="showpdf" style="display: none;">
 	<p>
-		Thank you. You have now been registered.
+		Thank you. The details for the following property should download momentarily.
 	</p>
 	<p>
-		Please click the confirmation link in the e-mail you have been sent by e-mail.
+		<b>[address]</b>
+	</p>
+	<p class="emailsent" style="display: none;">
+		Please click the confirmation link in the e-mail you have been sent by e-mail. Once your e-mail address has been confirmed, we will contact you with further details of the properties you are interested in.
 	</p>
 	<p>
-		Once your e-mail address has been confirmed, we will contact you with further details of the properties you are interested in.
-	</p>
-	<p>
-		Please click <a href="">here</a> to view the PDF.
+		If the details do not download automatically, please <a id="directlink">click here</a> to download them.
 	</p>
 </div>
+
