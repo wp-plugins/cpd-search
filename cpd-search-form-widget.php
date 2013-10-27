@@ -94,7 +94,6 @@ class CPDSearchFormWidget extends WP_Widget {
 			$_SESSION['cpd_search_our_database_start'] = 1;
 		}
 		if(($_SESSION['cpd_search_our_database_limit'] * 1) < 1) {
-			$options = get_option('cpd-search-options');
 			$_SESSION['cpd_search_our_database_limit'] = $options['cpd_search_results_per_page'];
 		}
 
@@ -126,7 +125,6 @@ class CPDSearchFormWidget extends WP_Widget {
 		$form = cpd_get_template_contents("search_form_widget");
 		
 		// Add options for actionurl pulldown
-		$widget_options = get_option('widget_search_form_widget');
 		
 		$index = 0;
 		$keytemp = -1;
@@ -146,9 +144,8 @@ class CPDSearchFormWidget extends WP_Widget {
 		$form = str_replace("[sizeunitoptions]", $sizeunitoptions, $form);
 	
 		// Add sector options
-		$options = get_option('cpd-search-options');
-		$sod_sectors = explode(",", $options['cpd_sod_sectors']);
-		$sectoroptions = cpd_sector_options($sod_sectors, $sectors);
+		$sod_sector_ids = explode(",", get_option('cpd_sod_sector_ids'));
+		$sectoroptions = cpd_sector_options($sod_sector_ids, $sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
 		// Add tenure options

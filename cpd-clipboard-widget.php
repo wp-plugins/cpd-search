@@ -2,6 +2,8 @@
 
 class CPDClipboardWidget extends WP_Widget {
 	function init() {
+		wp_enqueue_script('cpd-add-clipboard', plugins_url("cpd-search")."/js/cpd-clipboard-widget-controller.js");
+		
 		add_action( 'widgets_init', array('CPDClipboardWidget', 'load_widgets'));
 		add_action('wp_ajax_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
 		add_action('wp_ajax_nopriv_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));
@@ -17,8 +19,6 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 	
 	function CPDClipboardWidget() {
-		wp_enqueue_script('cpd-add-clipboard', cpd_plugin_dir_url(__FILE__) . "js/cpd-clipboard-widget-controller.js");
-		
 		$widget_ops = array(
 			'classname' => 'clipboard_widget',
 			'description' => __('Clipboard Widget', 'clipboard_widget')
@@ -75,11 +75,8 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 
 	function add_ajax() {
-		global $soapopts;
-		
 		// Gather inputs from request/session
 		$property_id = trim($_REQUEST['propref']);
-		$path_dir_plugin = home_url().cpd_plugin_dir_url('cpd-search');	
 		
 		// Initialise clipboard, if not already done
 		if(!isset($_SESSION['clipboard_property_ids'])) {
@@ -119,39 +116,42 @@ class CPDClipboardWidget extends WP_Widget {
 		$list_property_objs[] = $results[0];
 		$_SESSION['clipboard_property_objs'] = $list_property_objs;
 		
-		// [TODO] This API method isn't quite ready yet, so clipboard results
-		// are just a 'local' thing for now.
-		
-/*
-		// Send our search request to the server
-		$request = new AddToClipboardType();
-		$request->ClipboardName = "Default";
-		$request->PropertyID = $property_id;
-	
-		try {
-			$options = get_option('cpd-search-options');
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$response = $client->AddToClipboard($request);
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		// Adds the record to the user's clipboard on the server
+		$params = array(
+			'clipboard' => null,
+			'property' => $property_id
+		);
+		$url = sprintf("%s/users/clipboards/results/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token(),
+			'Content-Type: application/json'
+		));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
 			exit;
 		}
-*/
+		curl_close($curl);
+		if($info['http_code'] != 201) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+		
 		// Return response as JSON
 		$response = array(
 			'success' => true,
 			'total' => count($list_property_ids)
 		);
-		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		header( "HTTP/1.1 201 Created" );
 		exit;
 	}
 
@@ -192,6 +192,33 @@ class CPDClipboardWidget extends WP_Widget {
 		}
 		$_SESSION['clipboard_property_objs'] = $list_property_objs_temp;
 		
+		$params = array(
+			'clipboard' => null,
+			'property' => $property_id
+		);
+		$url = sprintf("%s/users/clipboards/results/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token()
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
+			exit;
+		}
+		curl_close($curl);
+		if($info['http_code'] != 204) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+
 		// Indicate success
 		$response = array(
 			'success' => true,
@@ -253,30 +280,9 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 
 	function publish_property_ref($atts) {
-		global $soapopts;
-		
 		$property_id = $atts["id"];
 		
-		// Request the details of this property
-		$searchCriteria = new SearchCriteriaType();
-		$searchCriteria->Start = 1;
-		$searchCriteria->Limit = 1;
-		$searchCriteria->DetailLevel = "full";
-		$propertyIDsType = new PropertyIDsType();
-		$propertyIDsType->PropertyID = $property_id;
-		$searchCriteria->PropertyIDs = $propertyIDsType;
-		$searchRequest = new SearchPropertyType();
-		$searchRequest->SearchCriteria = $searchCriteria;
-		try {
-			$options = get_option('cpd-search-options');
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$searchResponse = $client->SearchProperty($searchRequest);
-		}
-		catch(Exception $e) {
-			return $e->getMessage();
-		}
+		// [TODO] Request the details of this property
 	
 		// Filter results to avoid sending sensitive fields over the wire
 		$results = array();
@@ -312,6 +318,6 @@ class CPDClipboardWidget extends WP_Widget {
 	}
 }
 
-CPDClipboardWidget::init();
+add_action("init", array("CPDClipboardWidget", "init"));
 
 ?>

@@ -32,19 +32,16 @@ function CPDClipboardWidget() {
 		jQuery(".clipboardtopcolumnright_sidebar .btn_close").click(self.remove);
 	};
 	
-	self.addError = function(data, status, error) {
+	self.addError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdadding').fadeOut();
 		
 		// Show error message
-		jQuery("#cpderror").html('<p class="error">Failed to add clipboard entry: ' + data.error + '</p>');
+		jQuery("#cpderror").html('<p class="error">Failed to add clipboard entry: ' + textStatus + '</p>');
 		jQuery("#cpderror").dialog("open");
 	};
 	self.addSuccess = function(data) {
 		jQuery('#cpdadding').fadeOut();
 		
-		if(!data.success) {
-			return self.addError(data.error, data.error, null);
-		}
 		self.clipboard = data.results;
 		
 		// Handle no results scenario

@@ -3,16 +3,11 @@
 require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDRegisterInterest {
-	function init() {		
-		wp_enqueue_script('cpd-register-interest-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-register-interest-controller.js");
-		wp_localize_script('cpd-register-interest-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
-		add_action('wp_ajax_cpd_register_interest', array('CPDRegisterInterest', 'ajax'));
-		add_action('wp_ajax_nopriv_cpd_register_interest', array('CPDRegisterInterest', 'ajax'));
+	function init() {
+		wp_enqueue_script('cpd-register-interest-controller', plugins_url("cpd-search")."/js/cpd-register-interest-controller.js");
 	}
 	
 	function ajax() {
-		global $soapopts;
-		
 		// Gather inputs from request
 		$propref = $_REQUEST['propref'];
 	
@@ -29,37 +24,37 @@ class CPDRegisterInterest {
 		}
 	
 		// Send our register interest request to the server
-		$options = get_option('cpd-search-options');
-		$registerInterest = new RegisterInterestType();
-		$registerInterest->PropertyID = $propref;
-		$registerInterest->ServiceContext = cpd_search_service_context();
-		try {
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$registerResponse = $client->RegisterInterest($registerInterest);
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e->getMessage()
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		$context = cpd_search_service_context();
+		$params = array(
+			'property_id' => $propref,
+			'context' => $context
+		);
+		$token = cpd_get_user_token();
+		$url = sprintf("%s/visitors/registerinterest/?%s", get_option('cpd_rest_url'), http_build_query($params));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header("HTTP/1.1 403 Authentication Failed");
 			exit;
 		}
-	
-		// Return response as JSON
-		$response = array(
-			'success' => true,
-			'propref' => $propref,
-		);
+		
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
 		exit;
 	}
 }
 
-CPDRegisterInterest::init();
+add_action('init', array('CPDRegisterInterest', 'init'));
+
+add_action('wp_ajax_cpd_register_interest', array('CPDRegisterInterest', 'ajax'));
+add_action('wp_ajax_nopriv_cpd_register_interest', array('CPDRegisterInterest', 'ajax'));
 
 ?>

@@ -220,11 +220,6 @@ function CPDSavedSearchesWidget() {
 	self.registrationSuccess = function(data) {
 		jQuery("#cpdsaveasearch #cpdregistering").hide();
 		jQuery('#cpdsaveasearch .msg').hide();
-		// Check for failure
-		if(!data.success) {
-			return self.registrationError(data, data.error, data.error);
-		}
-
 		// Hide registration form, show 'thankyou etc' part
 		jQuery('#cpdsaveasearch .msg').html('Thank you. You have now been registered.');
 		jQuery('#cpdsaveasearch .msg').show();

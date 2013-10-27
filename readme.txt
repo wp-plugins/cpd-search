@@ -1,9 +1,9 @@
 === CPD Search ===
 Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
-Requires at least: 3.4
-Tested up to: 3.5.1
-Stable tag: 1.6.5
+Requires at least: 3.6.1
+Tested up to: 3.6.1
+Stable tag: 1.7.1
 
 Allows you to add an extensive UK commercial property search facility to your website.
 
@@ -16,6 +16,18 @@ This plugin provides shortcodes and widgets that embed search forms into your WP
 After installation, see further instructions on configuration page (admin area, 'Settings -> CPD Search').
 
 == Changelog ==
+
+= 1.7.1 =
+* Flatten 'cpd-search-options' into multiple 'cpd_*' options.
+
+= 1.7.0 =
+* Convert SOAP API calls to REST API.
+
+= 1.6.7 =
+* Make use of REST call to retrieve CPD sectors list.
+
+= 1.6.6 =
+* Add automatic detection of agent ref, display of token information in plugin settings.
 
 = 1.6.5 =
 * Fix for detection of AuthenticationFailedExceptionMsg.

@@ -11,53 +11,54 @@ class CPDUserLogin {
 	}
 	
 	function ajax() {
-		global $soapopts;
-		
-		$options = get_option('cpd-search-options');
-	
 		// Gather inputs from request
-		$email = $_REQUEST['email'];
-		$password = $_REQUEST['password'];
-	
-		// Send our search request to the server
-		$userAuthentication = new AuthenticateUserType();
-		$userAuthentication->Email = $email;
-		$userAuthentication->Agent = $options['cpd_agentref'];
-		$userAuthentication->Password = $password;
-		$userAuthentication->ServiceContext = cpd_search_service_context();
-		try {
-			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
-			$authenticationResponse = $client->AuthenticateUser($userAuthentication);
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		$context = cpd_search_service_context();
+		$request = array(
+			'email' => $_REQUEST['email'],
+			'password' => $_REQUEST['password'],
+			'agentref' => get_option('cpd_agentref'),
+			'context' => $context,
+		);
+		
+		// Send registration to server
+		$token = cpd_get_user_token();
+		$url = sprintf("%s/visitors/login/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			//'Content-Type: application/json'
+		));
+		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($request));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header("HTTP/1.0 403 Authentication Failed");
+			echo $rawdata;
 			exit;
 		}
-	
-		// Store token as a cookie
-		cpd_search_set_user_token($authenticationResponse->Token);
+		if($info['http_code'] != 200) {
+			header("HTTP/1.0 500 Internal Server Error");
+			echo $rawdata;
+			exit;
+		}
+		
+		// Store new token as a cookie
+		$response = json_decode($rawdata);
+		cpd_search_set_user_token($response);
 
 		// Return response as JSON
-		$response = array(
-			'success' => true,
-			'token' => $authenticationResponse->Token,
-			'uid' => $authenticationResponse->User->UID,
-			'name' => $authenticationResponse->User->Name,
-			'confirmed' => $authenticationResponse->User->Confirmed,
-		);
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
 		exit;
 	}
 	
 	function logoutajax() {
-		global $soapopts;
-		$options = get_option('cpd-search-options');
 		try {
 			cpd_search_discard_token();
 			

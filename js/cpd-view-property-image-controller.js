@@ -14,10 +14,6 @@ function CPDViewPropertyImage() {
 	self.viewSuccess = function(data) {
 		jQuery('#cpdloading').hide();
 		
-		// Check for failure
-		if(!data) {
-			return self.viewError(null, "Connection failed", "Server down. Please try again later");
-		}
 		if(data.error && data.error == "AccessDeniedExceptionMsg") {
 			// Show registration form
 			return jQuery('#cpdregistrationform').dialog("open");

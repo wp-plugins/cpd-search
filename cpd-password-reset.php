@@ -1,57 +1,57 @@
 <?php
 
 require_once(dirname(__FILE__) . "/cpd-common.php");
-require_once(dirname(__FILE__) . "/cpd-options.php");
+require_once(dirname(__FILE__) . "/cpd-search-options.php");
 
 class CPDPasswordReset {
 	function init() {
-		wp_enqueue_script('cpd-password-reset-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-password-reset-controller.js");
-		wp_localize_script('cpd-password-reset-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
-		add_action('wp_ajax_cpd_password_reset', array('CPDPasswordReset', 'reset_ajax'));
-		add_action('wp_ajax_nopriv_cpd_password_reset', array('CPDPasswordReset', 'reset_ajax'));
+		wp_enqueue_script('cpd-password-reset-controller', plugins_url("cpd-search")."/js/cpd-password-reset-controller.js");
 	}
 	
 	function reset_ajax() {
-		global $soapopts;
-		
-		$options = get_option('cpd-search-options');
-	
 		// Gather inputs from request
 		$email = $_REQUEST['email'];
-	
-		// Send our search request to the server
-		$passwordRequest = new PasswordResetType();
-		$passwordRequest->Email = $email;
-		$passwordRequest->Agent = $options['cpd_agentref'];
-		$passwordRequest->ServiceContext = cpd_search_service_context();
-		try {
-			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
-			$passwordResponse = $client->PasswordReset($passwordRequest);
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e->getMessage()
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		
+		// Send request to verification server to return UID.
+		$token = get_option('cpd_application_token');
+		$request = array(
+			'email' => $email,
+			'context' => cpd_search_service_context(),
+		);
+		$url = sprintf("%s/visitors/passwordreset/?%s", get_option('cpd_rest_url'), http_build_query($request));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			//'Content-Type: application/json'
+		));
+		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 405) {
+			header("HTTP/1.0 405 Method Not Allowed");
+			echo $rawdata;
 			exit;
 		}
-	
-		// Store token as a cookie
-		cpd_search_set_user_token($passwordResponse->Token);
-
-		// Notify user of success
-		$response = array(
-			'success' => true,
-			'response' => $passwordResponse,
-		);
+		if($info['http_code'] != 200) {
+			header("HTTP/1.0 500 Internal Server Error");
+			echo $rawdata;
+			exit;
+		}
+		
+		// Return response as JSON
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
 		exit;
 	}
 }
 
-CPDPasswordReset::init();
+add_action('init', array('CPDPasswordReset', 'init'));
+
+add_action('wp_ajax_cpd_password_reset', array('CPDPasswordReset', 'reset_ajax'));
+add_action('wp_ajax_nopriv_cpd_password_reset', array('CPDPasswordReset', 'reset_ajax'));
 
 ?>

@@ -1,61 +1,94 @@
 <?php
 
 class CPDViewPropertyPDF {
-	function ajax() {
-		global $soapopts;
+	function viewmedia() {
+		if(!isset($_REQUEST['action']) || $_REQUEST['action'] != 'viewmedia') {
+			return;
+		}
 		
 		// Determine first PDF for given property
-		$property_id = $_POST['property_id'];
+		$medialink_id = $_REQUEST['medialink_id'];
+		if(!$medialink_id) {
+			return;
+		}
 		
-		// Perform search
-		$options = get_option('cpd-search-options');
-		$viewMedia = new ViewMediaType();
-		$viewMedia->PropertyID = $property_id;
-		$viewMedia->MediaType = "pdf";
-		$viewMedia->Position = 1;
-		$viewMedia->ServiceContext = cpd_search_service_context();
-		if($options['cpd_unregistered_pdfs']) {
-			$viewMedia->RegistrationNotRequired = true;
-		}
-		try {
-			// Create the SOAP client
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$viewMediaResponse = $client->ViewMedia($viewMedia);
-		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e->getMessage()
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		// Fetch media details
+		$url = sprintf("%s/visitors/viewmedia/?medialink_id=%d", get_option('cpd_rest_url'), $medialink_id);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token()
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
 			exit;
 		}
-	
-		// Add thumb URL, only if one is available
-		if(isset($viewMediaResponse->PropertyMedia)) {
-			$mediaList = $viewMediaResponse->PropertyMedia;
-			if($propList instanceof PropertyMediaType) {
-				$propList = array($propList);
-			}
-			if(isset($mediaList)) {
-				$media = $mediaList;
-			}
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header( "HTTP/1.1 403 Authentication Required" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
 		}
+		if($info['http_code'] != 200) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+		$response = json_decode($rawdata);
 		
-		// Return response as JSON
-		$response = array(
-			'success' => true,
-			'plugin_url' => get_site_url().cpd_plugin_dir_url(__FILE__),
-			'results' => $media,
+		// Redirect user to actual PDF url
+		header( "Location: ".$response->media_url);
+		echo $response->media_url;
+		exit;
+	}
+	
+	function ajax() {
+		// Determine first PDF for given property
+		$medialink_id = $_POST['medialink_id'];
+		
+		// Fetch media details
+		$params = array(
+			'medialink_id' => $medialink_id,
 		);
+		$url = sprintf("%s/visitors/viewmedia/?%s", get_option('cpd_rest_url'), http_build_query($params));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token()
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
+			exit;
+		}
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header( "HTTP/1.1 403 Authentication Required" );
+			exit;
+		}
+		if($info['http_code'] != 200) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+
+		// Return response as JSON
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
 		exit;
 	}
 }
+
+add_action('template_redirect', array('CPDViewPropertyPDF', 'viewmedia'));
 
 add_action('wp_ajax_cpd_view_property_pdf', array('CPDViewPropertyPDF', 'ajax'));
 add_action('wp_ajax_nopriv_cpd_view_property_pdf', array('CPDViewPropertyPDF', 'ajax'));
