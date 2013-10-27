@@ -19,20 +19,8 @@ function CPDRegisterInterest() {
 	};
 	
 	self.registerInterestSuccess = function(data) {
-		// Check for failure
-		if(!data) {
-			return self.registerInterestError(null, "Connection failed", "Server down. Please try again later");
-		}
-		if(data.error && data.error == "AccessDeniedExceptionMsg") {
-			// Show registration form
-			return jQuery('#cpdregistrationform').dialog("open");
-		}
-		if(data.error) {
-			return self.registerInterestError(null, data.error, data.error);
-		}
-		
 		// Remove the propref from the registering list
-		var id = "property" + data.propref;
+		var id = "property" + data.property_id;
 		jQuery("#" + id + " .registeringinterest").hide();
 		for(var i = 0; i < self.registering_interest_refs.length; i++) {
 			if(data.propref == self.registering_interest_refs[i]) {

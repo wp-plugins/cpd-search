@@ -4,71 +4,64 @@ function CPDViewPropertyPDF() {
 	var self = this;
 
 	self.viewError = function(xhr, status, error) {
+		if(xhr.status == 403) {
+			// Show registration form
+			jQuery('#cpdregistrationform').dialog("open");
+			return;
+		}
+		
 		// Show error message
 		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
 		jQuery("#cpderror").dialog("open");
-	
-		if(xhr != null && xhr.error != null && xhr.error == "AccessDeniedExceptionMsg") {
-			// Show registration form
-			jQuery('#cpdregistrationform').dialog("open");
-		}
 	};
 
 	self.viewSuccess = function(data) {
-		// Check for failure
-		if(!data) {
-			return self.viewError(null, "Connection failed", "Server down. Please try again later");
-		}
-		if(data.error && data.error == "AccessDeniedExceptionMsg") {
-			// Show registration form
-			return jQuery('#cpdregistrationform').dialog("open");
-		}
-		if(data.error) {
-			return self.viewError(null, data.error, data.error);
-		}
-
-		// Point the browser to the PDF file
-		window.location.href = data.results.URL;
+		// Allow the redirect to go through
+		window.location.href = data.media_url;
 	};
 	
-	self.view = function(propref) {
+	self.view = function(medialink_id) {
 		// Make a 'view property PDF' call to the server
 		var postdata = {
 			'action': 'cpd_view_property_pdf',
-			'property_id': propref,
+			'medialink_id': medialink_id,
 		};
 	
 		// Display 'loading...' dialog
 		jQuery('#cpdloading').show();
 	
 		// Send AJAX search request to server
+		self.view_allowed = false;
 		var ajaxopts = {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
 			success: self.viewSuccess,
 			error: self.viewError,
-			dataType: "json"
+			dataType: "json",
+			async: false
 		};
 		jQuery.ajax(ajaxopts);
 		jQuery('#cpdloading').hide();
+		
+		return self.view_allowed;
 	};
 	
 	self.click = function() {
-		var propref = jQuery(this).parents('.result').attr('id').substr(8);
-		self.view(propref);
+		var medialink_id = jQuery(this).attr('id').substr(9);
+		return self.view(medialink_id);
 	};
 
 	self.init = function() {
-		jQuery("#cpdsearchresults .buttonpdf").live('click', self.click);
+		//jQuery("#cpdsearchresults .buttonpdf").live('click', self.click);
 	};
 	
 	return self;
 }
 
-cpdCPDViewPropertyPDF = new CPDViewPropertyPDF();
+cpdViewPropertyPDF = new CPDViewPropertyPDF();
 
 jQuery(document).ready(function() {
-	cpdCPDViewPropertyPDF.init();
+	cpdViewPropertyPDF.init();
 });
 

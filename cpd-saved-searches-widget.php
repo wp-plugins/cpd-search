@@ -2,12 +2,7 @@
 
 class CPDSavedSearchesWidget extends WP_Widget {
 	function init(){		
-		wp_enqueue_script('cpd-saved-searches-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-saved-searches-widget-controller.js");
-		add_action('widgets_init', array('CPDSavedSearchesWidget','load_widgets'));
-		add_action('wp_ajax_cpd_saved_searches_widget_ajax', array('CPDSavedSearchesWidget', 'ajax'));
-		add_action('wp_ajax_nopriv_cpd_saved_searches_widget_ajax', array('CPDSavedSearchesWidget', 'ajax'));
-		add_action('wp_ajax_cpd_saved_searches_widget_remove_item_widget_ajax', array('CPDSavedSearchesWidget', 'remove_item_ajax'));
-		add_action('wp_ajax_nopriv_cpd_saved_searches_widget_remove_item_widget_ajax', array('CPDSavedSearchesWidget', 'remove_item_ajax'));
+		wp_enqueue_script('cpd-saved-searches-controller', plugins_url("cpd-search")."/js/cpd-saved-searches-widget-controller.js");
 	}
 	
 	function CPDSavedSearchesWidget(){
@@ -28,10 +23,8 @@ class CPDSavedSearchesWidget extends WP_Widget {
 	
 	function widget($args, $instance) {
 		extract($args);
-		$home = home_url();
-		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
-		$title = apply_filters('widget_title', $instance['title'] );		
-		$save_a_search = cpd_get_template_contents("saved_search_popup");		
+		$title = apply_filters('widget_title', $instance['title'] );
+		$save_a_search = cpd_get_template_contents("saved_search_popup");
 		echo $before_widget;
 		if ($title) {
 			echo $before_title;
@@ -68,20 +61,19 @@ class CPDSavedSearchesWidget extends WP_Widget {
 	function load_items() {
 		$str = '';
 		$home = home_url();
-		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');
-		$content_template = cpd_get_template_contents("saved_searches");		
+		$content_template = cpd_get_template_contents("saved_searches");
 	
 		if(!isset($_SESSION['cpd_saved_searches_widget']) || count($_SESSION['cpd_saved_searches_widget']) == 0 ) {
 			$content_template = str_replace("[contentbox]", "", $content_template);
-			return $content_template;			
+			return $content_template;
 		}
 		
-		$list_li = $_SESSION['cpd_saved_searches_widget'];			
+		$list_li = $_SESSION['cpd_saved_searches_widget'];
 		$list_item_template = '';
 		
 		foreach($list_li as $data) {
 			$item_template = substr($content_template,0,strpos($content_template,'<div class="clipboardseperator"></div>'));
-			$item_template = str_replace("[pluginurl]", $path_dir_plugin, $item_template);
+			$item_template = str_replace("[pluginurl]", plugins_url("cpd-search"), $item_template);
 			$item_template = str_replace("[display_none]","", $item_template);
 			$item_template = str_replace("[search_name]", $data['search_name'], $item_template);
 			$item_template = str_replace("[date_last_search]", $data['date_last_search'], $item_template);
@@ -112,8 +104,6 @@ class CPDSavedSearchesWidget extends WP_Widget {
 	}
 	
 	function ajax() {
-		$home = home_url();
-		$path_dir_plugin = $home.cpd_plugin_dir_url('cpd-search');	
 		$search_name = trim($_REQUEST['search_name']);
 		$date_last_search = trim($_REQUEST['date_last_search']);
 		$id = trim($_REQUEST['id']);
@@ -164,7 +154,7 @@ class CPDSavedSearchesWidget extends WP_Widget {
 		}
 		
 		$response = array(
-			'pluginurl' => $path_dir_plugin,
+			'pluginurl' => plugins_url("cpd-search"),
 			'success' => true,
 			'search_name'=> $search_name,
 			'date_last_search'=> $date_last_search,
@@ -209,6 +199,13 @@ class CPDSavedSearchesWidget extends WP_Widget {
 	}
 }
 
-CPDSavedSearchesWidget::init();
+add_action('init', array('CPDSavedSearchesWidget','init'));
+
+add_action('widgets_init', array('CPDSavedSearchesWidget','load_widgets'));
+
+add_action('wp_ajax_cpd_saved_searches_widget_ajax', array('CPDSavedSearchesWidget', 'ajax'));
+add_action('wp_ajax_nopriv_cpd_saved_searches_widget_ajax', array('CPDSavedSearchesWidget', 'ajax'));
+add_action('wp_ajax_cpd_saved_searches_widget_remove_item_widget_ajax', array('CPDSavedSearchesWidget', 'remove_item_ajax'));
+add_action('wp_ajax_nopriv_cpd_saved_searches_widget_remove_item_widget_ajax', array('CPDSavedSearchesWidget', 'remove_item_ajax'));
 
 ?>

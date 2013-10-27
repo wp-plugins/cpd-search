@@ -1,28 +1,23 @@
 <?php
 
-require_once(dirname(__FILE__) . "/cpd-common-search.php");
-
-class CPDCurrentInstructions extends CPDCommonSearch {
+class CPDCurrentInstructions {
 	function init() {
-		wp_enqueue_script('cpd-common-search-controller', cpd_plugin_dir_url(__FILE__) ."js/cpd-common-search-controller.js");
-		wp_enqueue_script('cpd-current-instructions-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-current-instructions-controller.js");
-		wp_enqueue_script('cpd-view-property-pdf-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-pdf-controller.js");
-		wp_enqueue_script('cpd-view-property-image-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-view-property-image-controller.js");
-		wp_localize_script('cpd-current-instructions-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
-		add_shortcode('cpd_current_instructions', array('CPDCurrentInstructions', 'instructions'));
-		add_action('wp_ajax_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
-		add_action('wp_ajax_nopriv_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
-		
-		session_start();
+		wp_enqueue_script('cpd-common-search-controller', plugins_url("cpd-search")."/js/cpd-common-search-controller.js");
+		wp_enqueue_script('cpd-current-instructions-controller', plugins_url("cpd-search")."/js/cpd-current-instructions-controller.js");
+		wp_enqueue_script('cpd-view-property-pdf-controller', plugins_url("cpd-search")."/js/cpd-view-property-pdf-controller.js");
+		wp_enqueue_script('cpd-view-property-image-controller', plugins_url("cpd-search")."/js/cpd-view-property-image-controller.js");
 		
 		cpd_check_agent_sectors();
+		
+		//cpd_search_clear_stale_token_cookie();
 	}
 
 	function gather_inputs() {
 		// Build the request from session-stored variables and any updated ones
 		// passed in with the POST request
-		if(isset($_REQUEST['start'])) {
-			$_SESSION['cpd_current_instructions_start'] = $_REQUEST['start'];
+		if(isset($_REQUEST['page'])) {
+			$page = $_REQUEST['page'] * 1;
+			$_SESSION['cpd_current_instructions_page'] = ($page > 0 ? $page : 1);
 		}
 		if(isset($_REQUEST['limit'])) {
 			$_SESSION['cpd_current_instructions_limit'] = $_REQUEST['limit'];
@@ -32,32 +27,25 @@ class CPDCurrentInstructions extends CPDCommonSearch {
 		}
 
 		// Ensure any missing values are defaulted
-		if(($_SESSION['cpd_current_instructions_start'] * 1) < 1) {
-			$_SESSION['cpd_current_instructions_start'] = 1;
+		if(!isset($_SESSION['cpd_current_instructions_page']) || ($_SESSION['cpd_current_instructions_page'] * 1) < 1) {
+			$_SESSION['cpd_current_instructions_page'] = 1;
 		}
-		if(($_SESSION['cpd_current_instructions_limit'] * 1) < 1) {
-			$options = get_option('cpd-search-options');
-			$_SESSION['cpd_current_instructions_limit'] = $options['cpd_search_results_per_page'];
-		}
-
-		// Handle page number requests
-		if($_REQUEST['page'] > 0) {
-			$pagenum = $_REQUEST['page'] * 1;
-			$limit = $_SESSION['cpd_current_instructions_limit'] * 1;
-			$start = (($pagenum - 1) * $limit) + 1;
-			$_SESSION['cpd_current_instructions_start'] = ($start > 0 ? $start : 1);
+		if(!isset($_SESSION['cpd_current_instructions_limit']) || ($_SESSION['cpd_current_instructions_limit'] * 1) < 1) {
+			$_SESSION['cpd_current_instructions_limit'] = get_option('cpd_search_results_per_page');
 		}
 	}
 
 	function instructions() {
 		// Gather inputs from request/session
 		self::gather_inputs();
-		$start = $_SESSION['cpd_current_instructions_start'];
+		$page = $_SESSION['cpd_current_instructions_page'];
 		$limit = $_SESSION['cpd_current_instructions_limit'];
-		$sectors = $_SESSION['cpd_current_instructions_sectors'];
+		$sectors = "";
+		if(isset($_SESSION['cpd_current_instructions_sectors'])) {
+			$sectors = $_SESSION['cpd_current_instructions_sectors'];
+		}
 
 		// Read in form template from plugin options
-		// Read in necessary form template sections from plugin options
 		$form = cpd_get_template_contents("common");
 		$form .= cpd_get_template_contents("user_registration");
 		$form .= cpd_get_template_contents("user_login");
@@ -77,19 +65,16 @@ class CPDCurrentInstructions extends CPDCommonSearch {
 		$form .= '<script>jQuery(document).ready(function() { cpdCurrentInstructions.init(); });</script>';
 		
 		// Add sector options
-		$options = get_option('cpd-search-options');
-		$ci_sectors = explode(",", $options['cpd_ci_sectors']);
-		$sectoroptions = cpd_sector_options($ci_sectors, $sectors);
+		$ci_sector_ids = explode(",", get_option('cpd_ci_sector_ids'));
+		$sectoroptions = cpd_sector_options($ci_sector_ids, $sectors);
 		$form = str_replace("[sectoroptions]", $sectoroptions, $form);
 
 		// Populate form defaults
 		$form = str_replace("[sectors]", json_encode($sectors), $form);
 
 		// Add page number and number of pages
-		$start = $_SESSION['cpd_current_instructions_start'] * 1;
-		$pagenum = floor(($start - 1) / $limit) + 1;
-		$form = str_replace("[pagenum]", $pagenum, $form);
-		$form = str_replace("[start]", $start, $form);
+		$page = $_SESSION['cpd_current_instructions_page'] * 1;
+		$form = str_replace("[pagenum]", $page, $form);
 		$form = str_replace("[limit]", $limit, $form);
 
 		// Add per-page options
@@ -97,89 +82,96 @@ class CPDCurrentInstructions extends CPDCommonSearch {
 		$form = str_replace("[perpageoptions]", $perpageoptions, $form);
 
 		// Add theme/plugin base URLs
-		$form = str_replace("[pluginurl]", plugins_url(), $form);
+		$form = str_replace("[pluginurl]", plugins_url("cpd-search"), $form);
 
 		// Add link to client's T&C URL
-		$form = str_replace("[termsurl]", $options['cpd_terms_url'], $form);
+		$form = str_replace("[termsurl]", get_option('cpd_terms_url'), $form);
 		
 		return $form;
 	}
 
 	function search_ajax() {
-		global $soapopts;
-
 		// Gather inputs from request/session
 		self::gather_inputs();
-		$start = $_SESSION['cpd_current_instructions_start'];
+		$page = $_SESSION['cpd_current_instructions_page'];
 		$limit = $_SESSION['cpd_current_instructions_limit'];
 		$sectors = $_SESSION['cpd_current_instructions_sectors'];
-	
+		
 		// Send our search request to the server
-		$searchCriteria = new SearchCriteriaType();
-		$searchCriteria->Start = $start;
-		$searchCriteria->Limit = $limit;
-		$searchCriteria->DetailLevel = "brief";
-	
+		$criteria = array();
+		
 		// Current instructions only searches owner agent's properties
-		$options = get_option('cpd-search-options');
-		$searchCriteria->Agent = $options['cpd_agentref'];
-	
+		$criteria['AgentID'] = get_option('cpd_agent_id');
+		$criteria['Scope'] = "live";
+		
 		// Check for given criteria
 		if(is_array($sectors) && count($sectors) > 0) {
-			$searchSectors = new SectorsType();
-			$searchSectors->Sector = $sectors;
-			$searchCriteria->Sectors = $searchSectors;
+			$criteria['Sector'] = $sectors;
 		}
 		else if(strlen($sectors) > 0) {
-			$searchSectors = new SectorsType();
-			$searchSectors->Sector = array($sectors);
-			$searchCriteria->Sectors = $searchSectors;
+			$criteria['Sector'] = array($sectors);
 		}
-
-		// Perform search
-		$searchRequest = new SearchPropertyType();
-		$searchRequest->SearchCriteria = $searchCriteria;
-		try {
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$searchResponse = $client->SearchProperty($searchRequest);
+		
+		// Record search
+		$token = cpd_get_user_token();
+		$url = sprintf("%s/property/search/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'Content-Type: application/json'
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($criteria));
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if($info['http_code'] != 201) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
-		catch(Exception $e) {
-			if($e->getMessage() == "The security token could not be authenticated or authorized") {
-				cpd_search_discard_token();
-				return self::search_ajax();
-			}
-			$response = array(
-				'success' => false,
-				'error' => $e->getMessage()
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
-			exit;
-		}
-
-		// Filter results to avoid sending sensitive fields over the wire
-		$results = array();
-		if(isset($searchResponse->PropertyList->Property)) {
-			foreach($searchResponse->PropertyList->Property as $record) {
-				$row = self::rowFromDB($record);
-				$results[] = $row;
-			}
-		}
-	
-		// Return response as JSON
-		$response = array(
-			'success' => true,
-			'total' => $searchResponse->ResultCount,
-			'results' => $results,
-		);
+		$search = json_decode($rawdata);
+		
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
+		exit;
+	}
+	
+	function search_page_ajax() {
+		$search_id = $_REQUEST['search_id'];
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] * 1 : 1;
+		$limit = isset($_REQUEST['limit']) ? $_REQUEST['limit'] * 1 : 25;
+		
+		$params = array(
+			'search_id' => $search_id,
+			'page' => $page,
+			'limit' => $limit
+		);
+		$token = cpd_get_user_token();
+		$url = sprintf("%s/property/?%s", get_option('cpd_rest_url'), http_build_query($params));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		curl_close($curl);
+		
+		header( "Content-Type: application/json" );
+		echo $rawdata;
 		exit;
 	}
 }
 
-CPDCurrentInstructions::init();
+add_action("init", array("CPDCurrentInstructions", "init"));
+
+add_shortcode('cpd_current_instructions', array('CPDCurrentInstructions', 'instructions'));
+
+add_action('wp_ajax_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
+add_action('wp_ajax_nopriv_cpd_current_instructions', array('CPDCurrentInstructions', 'search_ajax'));
+add_action('wp_ajax_cpd_current_instructions_page', array('CPDCurrentInstructions', 'search_page_ajax'));
+add_action('wp_ajax_nopriv_cpd_current_instructions_page', array('CPDCurrentInstructions', 'search_page_ajax'));
 
 ?>

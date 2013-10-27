@@ -8,11 +8,6 @@ function CPDPasswordChange() {
 	self.passwordChangeSuccess = function(data) {
 		jQuery('#cpdchangingpassword').dialog("close");
 
-		// Check for failure
-		if(!data.success) {
-			return self.passwordChangeError(data, data.error, data.error);
-		}
-
 		// Hide password change form
 		jQuery('#cpdpasswordchangeform').hide();
 

@@ -8,11 +8,6 @@ function CPDPasswordReset() {
 	self.passwordResetSuccess = function(data) {
 		jQuery('#cpdresettingpassword').dialog("close");
 
-		// Check for failure
-		if(!data.success) {
-			return self.passwordResetError(data, data.error, data.error);
-		}
-
 		// Hide passwordReset form
 		jQuery('#cpdpasswordresetform').dialog("close");
 
@@ -20,22 +15,17 @@ function CPDPasswordReset() {
 		jQuery('#cpdpasswordreset').dialog("open");
 
 		// Process nearly registered interests
-		cpdRegisterInterest.process_queue();
+		cpdRegisterInterest.processQueue();
 	};
 	self.passwordResetError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdresettingpassword').dialog("close");
 	
-		if(jqXHR.error !== undefined && jqXHR.error == "AuthenticationFailedExceptionMsg") {
-			// Show passwordReset form
-			jQuery('#cpderror').html("Authentication failure! Please try again.");
+		if(jqXHR.status == 405) {
+			jQuery('#cpderror').html("User not confirmed. Please re-register the user and click the link in the confirmation e-mail.");
 			jQuery('#cpderror').dialog("open");
 			return;
 		}
-		if(jqXHR.error !== undefined) {
-			jQuery('#cpderror').html("ERROR: " + jqXHR.error);
-			jQuery('#cpderror').dialog("open");
-			return;
-		}
+		
 		jQuery('#cpderror').html(textStatus);
 		jQuery('#cpderror').dialog("open");
 	};

@@ -11,13 +11,10 @@ function CPDQRCodeLanding() {
 	self.view_pdf_success = function(data) {
 		jQuery("#cpdloading").hide();
 
-		// Check for failure
-		if(!data.success) {
-			return self.view_pdf_error(data, data.error, data.error);
-		}
-
 		jQuery("#cpdshowpdf").show();
+		jQuery("#cpdshowpdf .emailsent").remove();
 		jQuery("#cpdshowpdf .directlink").attr('href', data.response.PropertyMedia.URL);
+		
 		window.location.href = data.response.PropertyMedia.URL;
 	};
 	
@@ -28,13 +25,13 @@ function CPDQRCodeLanding() {
 		jQuery("#cpderror").html(textStatus);
 	};
 	
-	self.view_pdf = function(token, media_id) {
+	self.view_pdf = function(token, property_id) {
 		// Use the token to ask for a PDF
 		// Make a 'view property PDF' call to the server
 		var postdata = {
 			'action': 'cpd_qr_code_view_pdf',
 			'token': token,
-			'media_id': media_id,
+			'property_id': property_id,
 		};
 	
 		// Display 'loading...' dialog
@@ -66,8 +63,8 @@ function CPDQRCodeLanding() {
 		// Set token as cookie
 		document.cookie = "cpd_token=" + escape(data.token);
 		
-		var media_id = jQuery('#media_id').val();
-		self.view_pdf(data.token, media_id);
+		var property_id = jQuery('#property_id').val();
+		self.view_pdf(data.token, property_id);
 	};
 	
 	self.registration_error = function(jqXHR, textStatus, errorThrown) {
@@ -149,18 +146,6 @@ function CPDQRCodeLanding() {
 		jQuery('#cpderror').dialog("open");
 	};
 
-	self.show_registering = function(data) {
-		jQuery('#cpdregistering').show();
-	};
-
-	self.show_logging_in = function(data) {
-		jQuery('#cpdloggingin').show();
-	};
-
-	self.show_resetting_password = function(data) {
-		jQuery('#cpdresettingpassword').show();
-	};
-
 	self.registration = function() {
 		// Validation checks
 		var name = jQuery('#cpdqrregistrationform #name').val();
@@ -185,11 +170,11 @@ function CPDQRCodeLanding() {
 		};
 
 		// Send AJAX registration request to server
+		jQuery('#cpdregistering').show();
 		var ajaxopts = {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
-			beforeSend : self.show_registering,
 			success: self.registration_success,
 			error: self.registration_error,
 			dataType: "json"
@@ -216,11 +201,11 @@ function CPDQRCodeLanding() {
 		};
 
 		// Send AJAX registration request to server
+		jQuery('#cpdloggingin').show();
 		var ajaxopts = {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
-			beforeSend : self.show_logging_in,
 			success: self.login_success,
 			error: self.login_error,
 			dataType: "json"
@@ -242,11 +227,11 @@ function CPDQRCodeLanding() {
 		};
 
 		// Send AJAX registration request to server
+		jQuery('#cpdresettingpassword').show();
 		var ajaxopts = {
 			type: 'POST',
 			url: CPDAjax.ajaxurl,
 			data: postdata,
-			beforeSend : self.show_resetting_password,
 			success: self.password_reset_success,
 			error: self.password_reset_error,
 			dataType: "json"
@@ -317,9 +302,9 @@ function CPDQRCodeLanding() {
 		// If user already logged in, go straight to view PDF
 		var token = jQuery('#token').val();
 		if(token != '') {
-			var media_id = jQuery('#media_id').val();
-			self.view_pdf(token, media_id);
-			
+			var property_id = jQuery('#property_id').val();
+			self.view_pdf(token, property_id);
+			return;
 		}
 		
 		// Show registration form for starters

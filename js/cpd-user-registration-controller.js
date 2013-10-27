@@ -11,11 +11,6 @@ function CPDUserRegistration() {
 	self.registrationSuccess = function(data) {
 		jQuery('#cpdregistering').hide();
 
-		// Check for failure
-		if(!data.success) {
-			return self.registrationError(data, data.error, data.error);
-		}
-
 		// Hide registration form, show 'thankyou etc' part
 		jQuery('#cpdregistrationform').dialog("close");
 		jQuery('#cpdregistered').dialog("open");
@@ -29,7 +24,7 @@ function CPDUserRegistration() {
 	self.registrationError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdregistering').hide();
 	
-		if(jqXHR != null && jqXHR.error != null && jqXHR.error == "UserAlreadyExistsExceptionMsg") {
+		if(jqXHR != null && jqXHR.status == 409) {
 			// Show login form
 			jQuery('#cpderror').html("No need to register. There is already an account for this e-mail address. Please try logging in with your existing credentials, or request a password reset if you have forgotten them.");
 			jQuery('#cpderror').dialog("open");
@@ -88,11 +83,6 @@ function CPDUserRegistration() {
 	self.loginSuccess = function(data) {
 		jQuery('#cpdloggingin').dialog("close");
 
-		// Check for failure
-		if(!data.success) {
-			return self.loginError(data, data.error, data.error);
-		}
-
 		// Hide login form
 		jQuery('#cpdloginform').dialog("close");
 
@@ -112,14 +102,15 @@ function CPDUserRegistration() {
 	self.loginError = function(jqXHR, textStatus, errorThrown) {
 		jQuery('#cpdloggingin').dialog("close");
 	
-		if(jqXHR.error != null) {
-			if(jqXHR.error.faultstring == "AuthenticationExceptionMsg") {
+		if(jqXHR.status >= 200) {
+			if(jqXHR.status == 403) {
 				// Show login form
 				jQuery('#cpderror').html("Authentication failure! Please try again.");
 				jQuery('#cpderror').dialog("open");
 				return;
 			}
-			jQuery('#cpderror').html("Error: " + jqXHR.error);
+			console.log(jqXHR.error());
+			jQuery('#cpderror').html("Error: " + jqXHR.error());
 			jQuery('#cpderror').dialog("open");
 			return;
 		}
@@ -179,8 +170,6 @@ function CPDUserRegistration() {
 		jQuery("#cpdregistrationform").dialog({
 			title: "User registration",
 			autoOpen: false,
-			height: 540,
-			width: 420,
 			resizable: false,
 			modal: true,
 			buttons: {

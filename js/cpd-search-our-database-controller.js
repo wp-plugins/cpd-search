@@ -4,7 +4,7 @@ function CPDSearchOurDatabase() {
 	var self = new CPDCommonSearchController();
 
 	self.searchError = function(data, status, error) {
-		// Clear other dialogs
+		// Clear loading dialog
 		jQuery("#cpdloading").hide();
 		
 		// Show error message
@@ -16,14 +16,29 @@ function CPDSearchOurDatabase() {
 	};
 	
 	self.searchSuccess = function(data) {
-		// Check for failure
-		if(!data) {
-			return self.searchError(null, "Connection failed", "Server down. Please try again later");
-		}
-		if(!data.success) {
-			return self.searchError(null, data.error, data.error);
-		}
+		// Clear loading dialog
+		jQuery("#cpdloading").hide();
 		
+		// Remember search id
+		self.search_id = data.id;
+		
+		// Kick off first page
+		self.searchPage();
+	};
+	
+	self.searchPageError = function(data, status, error) {
+		// Clear loading dialog
+		jQuery("#cpdloading").hide();
+		
+		// Show error message
+		jQuery("#cpderror").html("<p class='error'>Search failed! " + error + " (" + status + ")</p>");
+		jQuery("#cpderror").dialog("open");
+		
+		// Start back at the search form
+		jQuery("#cpdsearchform").show();
+	};
+	
+	self.searchPageSuccess = function(data) {
 		// Clear loading dialog, form and results panel
 		jQuery('#cpdloading').hide();
 		jQuery("#cpdsearchform").hide();
@@ -31,38 +46,24 @@ function CPDSearchOurDatabase() {
 		jQuery("#cpderror").dialog("close");
 		
 		// Handle no results scenario
-		if(data.total < 1) {
+		self.count = data.count;
+		if(data.count < 1) {
 			return self.searchError(null, "No results found.", "No properties currently found with this criteria.");
 		}
 		
 		// Count pages
-		var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
-		if(isNaN(pagenum)) {
-			pagenum = 1;
-		}
-		var limit = Number(jQuery('span#limit').text()).valueOf();
-		if(isNaN(limit)) {
-			limit = 20;
-		}
-		jQuery("select.limit").val(limit);
-		jQuery("select.limit option").each(function() { 
-			jQuery(this).removeAttr('selected');
-			if(Number(this.text).valueOf() == limit)
-				jQuery(this).attr('selected','selected');
-		});
-		var start = ((pagenum - 1) * limit) + 1;
-		var pagecount = Math.floor((data.total - 1) / limit) + 1;
+		var start = ((self.page - 1) * self.limit) + 1;
+		var pagecount = Math.floor((data.count - 1) / self.limit) + 1;
 		
 		// Determine sector(s) selected
 		var sectors_json = jQuery('span#sectors').html();
 		var sectors = jQuery.parseJSON(sectors_json);
 		
 		// Loop for each result adding to the table
-		var resultnum = start;
-		for (i in data.results) {
+		var resultnum = ((self.page - 1) * self.limit) + 1;
+		for (var i in data.results) {
 			var property = data.results[i];
-			var propref = property.PropertyID.toString();
-			var id = "property" + propref;
+			var id = "property" + property.propref;
 			
 			// Clone a result model for this result
 			var row = jQuery("#cpdsearchresultmodel").clone();
@@ -74,53 +75,18 @@ function CPDSearchOurDatabase() {
 		}
 		
 		// Add navigationbars
-		self.addNavigation(pagenum, pagecount, data.total);
-		jQuery("select.limit").change(self.per_page_changed);
-		jQuery(".navbarprevpage").click(self.prev_page);
-		jQuery(".navbarnextpage").click(self.next_page);
-		
-		jQuery("select.limit").change(self.per_page_changed);
+		self.addNavigation(data.count);
 	};
-
-	self.prev_page = function() {
-		jQuery('.navbarprevpage').click(false);
-		var page = Number(jQuery("span#pagenum").text()).valueOf() - 1;
-		jQuery('span#pagenum').text(page)
-		var limit = jQuery("select.limit option:selected").val();
-		self.searchDatabase();
-	};
-
-	self.next_page = function() {
-		jQuery('.navbarnextpage').click(false);
-		var page = Number(jQuery("span#pagenum").text()).valueOf() + 1;
-		jQuery('span#pagenum').text(page)
-		var limit = jQuery("select.limit option:selected").val();
-		self.searchDatabase();
-	};
-	
-	self.per_page_changed = function(data) {
-		var limit = jQuery("select.limit option:selected").val();
-		jQuery('span#limit').text(limit)
-		jQuery('span#pagenum').text("1")
-		self.searchDatabase();
-	}
 
 	self.submitForm = function() {
 		// Revert to first page
-		jQuery('span#pagenum').html("1")
-	
-		// Run search
+		self.page = 1;
 		self.searchDatabase();
 	};
 
 	self.searchDatabase = function() {
 		// Display 'searching...' dialog
 		jQuery('#cpdloading').show();
-	
-		// Determine start result number and page length
-		var pagenum = Number(jQuery('span#pagenum').text()).valueOf();
-		var limit = Number(jQuery('span#limit').text()).valueOf();
-		var start = ((pagenum - 1) * limit) + 1;
 	
 		// Gather criteria from form widgets
 		var sizefrom = jQuery('input#sizefrom').val();
@@ -141,8 +107,8 @@ function CPDSearchOurDatabase() {
 		var postcode = jQuery('input#postcode').val();
 		var postdata = {
 			'action':'cpd_search_our_database',
-			'start': start,
-			'limit': limit,
+			'page': self.page,
+			'limit': self.limit,
 			'sizefrom': sizefrom,
 			'sizeto': sizeto,
 			'sizeunits': sizeunits,
@@ -152,7 +118,7 @@ function CPDSearchOurDatabase() {
 			'address': address,
 			'postcode': postcode,
 		};
-	
+		
 		// Send AJAX search request to server
 		var ajaxopts = {
 			type: 'POST',
@@ -160,6 +126,28 @@ function CPDSearchOurDatabase() {
 			data: postdata,
 			success: self.searchSuccess,
 			error: self.searchError,
+			dataType: "json"
+		};
+		jQuery.ajax(ajaxopts);
+	};
+	
+	self.searchPage = function() {
+		// Display 'searching...' dialog
+		jQuery('#cpdloading').show();
+	
+		// Send AJAX search request to server
+		var params = {
+			'action': 'cpd_search_our_database_page',
+			'search_id': self.search_id,
+			'page': self.page,
+			'limit': self.limit
+		};
+		var ajaxopts = {
+			type: 'GET',
+			url: CPDAjax.ajaxurl,
+			data: params,
+			success: self.searchPageSuccess,
+			error: self.searchPageError,
 			dataType: "json"
 		};
 		jQuery.ajax(ajaxopts);

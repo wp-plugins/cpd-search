@@ -3,56 +3,53 @@
 require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDQRCodeLanding {
-	function init() {
-		wp_enqueue_script('cpd-qr-code-landing-controller', cpd_plugin_dir_url(__FILE__) . "js/cpd-qr-code-landing-controller.js");
-		wp_localize_script('cpd-qr-code-landing-controller', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
-		add_shortcode('cpd_qr_code_landing', array('CPDQRCodeLanding', 'show_form'));
-		add_action('wp_ajax_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
-		add_action('wp_ajax_nopriv_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
-		add_action('wp_ajax_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
-		add_action('wp_ajax_nopriv_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
-		add_action('wp_ajax_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
-		add_action('wp_ajax_nopriv_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
-	}
-	
 	function show_form() {
-		global $soapopts;
+		wp_enqueue_script('cpd-qr-code-landing-controller', plugins_url("cpd-search")."/js/cpd-qr-code-landing-controller.js");
 		
 		if(!isset($_REQUEST["id"])) {
 			echo '<p class="error">No \'id\' provided.</p>';
 			return;
 		}
-		$id = $_REQUEST["id"];
+		$property_id = $_REQUEST["id"];
 		
 		// Fetch property
-		$searchCriteria = new SearchCriteriaType();
-		$searchCriteria->Start = 1;
-		$searchCriteria->Limit = 1;
-		$searchCriteria->DetailLevel = "brief";
-		$searchCriteria->PropertyIDs = array($id);
-	
-		// Get agent to request properties as
-		$options = get_option('cpd-search-options');
-		$searchCriteria->Agent = $options['cpd_agentref'];
-	
-		// Perform search
-		$searchRequest = new SearchPropertyType();
-		$searchRequest->SearchCriteria = $searchCriteria;
-		try {
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$searchResponse = $client->SearchProperty($searchRequest);
+		$url = sprintf("%s/visitors/viewproperty/?property_id=%d", get_option('cpd_rest_url'), $property_id);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token()
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
+			exit;
 		}
-		catch(SoapFault $sf) {
-			echo $sf->getMessage();
-			return;
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header( "HTTP/1.1 403 Authentication Required" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
 		}
-		catch(Exception $e) {
-			echo $e;
-			return;
+		if($info['http_code'] != 200) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
 		}
-	
+		$response = json_decode($rawdata);
+		
+		// [TODO] Tie up this lot...
+		
+		// Redirect user to actual PDF url
+		/*
+		header( "Location: ".$response->media_url);
+		echo $response->media_url;
+		exit;
+		*/
+		
 		// Filter results to avoid sending sensitive fields over the wire
 		$results = array();
 		if(!isset($searchResponse->PropertyList->Property)) {
@@ -91,20 +88,13 @@ class CPDQRCodeLanding {
 //		$form .= cpd_get_template_contents("user_login");
 //		$form .= cpd_get_template_contents("user_password_reset");
 		$form = str_replace("[token]", $token, $form);
-		$form = str_replace("[propref]", $id, $form);
+		$form = str_replace("[property_id]", $id, $form);
 		$form = str_replace("[address]", $prop->Address, $form);
 		$form = str_replace("[media_id]", $media_id, $form);
 		echo $form;
 	}
 	
 	function ajax_register_user() {
-		global $soapopts;
-	
-		// Gather form inputs	
-		$name = $_REQUEST['name'];
-		$email = $_REQUEST['email'];
-		$phone = $_REQUEST['phone'];
-		
 		// If already logged in, no need to re-register
 		if(isset($_COOKIE['cpd_token'])) {
 			$response = array(
@@ -118,83 +108,103 @@ class CPDQRCodeLanding {
 			exit;
 		}
 
-		// Send our search request to the server
-		$userRegistration = new RegisterUserType();
-		$userRegistration->Name = $name;
-		$userRegistration->Email = $email;
-		$userRegistration->Phone = $phone;
-		
 		// Mark this registration as coming from this agent/application
-		$options = get_option('cpd-search-options');
-		$userRegistration->Agent = $options['cpd_agentref'];
-		$userRegistration->ServiceContext = cpd_search_service_context();
+		$context = cpd_search_qrcode_service_context();
+		$registration = array(
+			'name' => $_REQUEST['name'],
+			'email' => $_REQUEST['email'],
+			'password' => $_REQUEST['password'],
+			'phone' => $_REQUEST['phone'],
+			'registrationcontext' => $context,
+		);
 		
-		try {
-			$client = new UserService($options['cpd_soap_base_url']."UserService?wsdl", $soapopts);
-			$registrationResponse = $client->RegisterUser($userRegistration);
+		// Send registration to server
+		$token = cpd_get_user_token();
+		$url = sprintf("%s/visitors/registeruser/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'Content-Type: application/json'
+		));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($registration));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 409) {
+			header("HTTP/1.0 409 Conflict");
+			echo $rawdata;
+			exit;
 		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		if($info['http_code'] != 201) {
+			header("HTTP/1.0 500 Internal Server Error");
+			echo $rawdata;
 			exit;
 		}
 		
-		// Store token as a cookie
-		cpd_search_set_user_token($registrationResponse->Token);
-		
-		// Return response as JSON
-		$response = array(
-			'success' => true,
-			'token' => $registrationResponse->Token,
-			'uid' => $registrationResponse->User->UID,
-			'name' => $registrationResponse->User->Name,
-			'confirmed' => $registrationResponse->User->Confirmed,
-		);
+		// Store new token as a cookie
+		$usertoken = json_decode($rawdata);
+		cpd_search_set_user_token($usertoken);
+
+		header("HTTP/1.0 201 Created");
 		header( "Content-Type: application/json" );
-		echo json_encode($response);
+		echo $rawdata;
 		exit;
 	}
 	
 	function ajax_view_property_pdf() {
-		global $soapopts;
-
-		$media_id = $_REQUEST['media_id'];
-		
-		// Perform search
-		$options = get_option('cpd-search-options');
-		$viewMedia = new ViewingMediaType();
-		$viewMedia->MediaID = $media_id;
-		$viewMedia->ServiceContext = cpd_search_service_context();
-		
-		try {
-			$client = new CPDPropertyService($options['cpd_soap_base_url']."CPDPropertyService?wsdl", $soapopts);
-			$headers = cpd_search_wss_security_headers();
-			$client->__setSOAPHeaders($headers);
-			$viewMediaResponse = $client->ViewingMedia($viewMedia);
+		// Determine first PDF for given property
+		$medialink_id = $_REQUEST['medialink_id'];
+		if(!$medialink_id) {
+			return;
 		}
-		catch(Exception $e) {
-			$response = array(
-				'success' => false,
-				'error' => $e
-			);
-			header( "Content-Type: application/json" );
-			echo json_encode($response);
+		
+		// Fetch media details
+		$url = sprintf("%s/visitors/viewmedia/?medialink_id=%d", get_option('cpd_rest_url'), $medialink_id);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.cpd_get_user_token()
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if(curl_errno($curl)) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Curl error: ".curl_error($curl);
 			exit;
 		}
-		header( "Content-Type: application/json" );
-		$response = array(
-			'success' => true,
-			'response' => $viewMediaResponse
-		);
-		echo json_encode($response);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			header( "HTTP/1.1 403 Authentication Required" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+		if($info['http_code'] != 200) {
+			header( "HTTP/1.1 501 Internal Server Error" );
+			echo "Proxy returned status ".$info['http_code'];
+			exit;
+		}
+		$response = json_decode($rawdata);
+		
+		// Redirect user to actual PDF url
+		header( "Location: ".$response->media_url);
+		echo $response->media_url;
 		exit;
 	}
 }
 
-CPDQRCodeLanding::init();
+add_shortcode('cpd_qr_code_landing', array('CPDQRCodeLanding', 'show_form'));
+
+add_action('wp_ajax_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
+add_action('wp_ajax_nopriv_cpd_qr_code_register_user', array('CPDQRCodeLanding', 'ajax_register_user'));
+add_action('wp_ajax_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
+add_action('wp_ajax_nopriv_cpd_qr_code_login_user', array('CPDQRCodeLanding', 'ajax_login_user'));
+add_action('wp_ajax_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
+add_action('wp_ajax_nopriv_cpd_qr_code_view_pdf', array('CPDQRCodeLanding', 'ajax_view_property_pdf'));
 
 ?>
