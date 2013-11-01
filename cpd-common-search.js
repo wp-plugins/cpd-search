@@ -38,15 +38,17 @@ function CPDCommonSearchController() {
 		}
 		
 		jQuery(".buttonpdf", row).hide();
-		for(var i in property.medialinks) {
-			var medialink = property.medialinks[i];
-			if(medialink.type != 'pdf') {
-				continue;
+		if(property.agent.uid == CPDAjax.agentid) {
+			for(var i in property.medialinks) {
+				var medialink = property.medialinks[i];
+				if(medialink.type != 'pdf') {
+					continue;
+				}
+				var buttonpdf = jQuery(".buttonpdf", row);
+				buttonpdf.attr('id', 'medialink' + medialink.id);
+				buttonpdf.show();
+				buttonpdf.click(cpdViewPropertyPDF.click);
 			}
-			var buttonpdf = jQuery(".buttonpdf", row);
-			buttonpdf.attr('id', 'medialink' + medialink.id);
-			buttonpdf.show();
-			buttonpdf.click(cpdViewPropertyPDF.click);
 		}
 		
 		// Hook up buttonsidebar
