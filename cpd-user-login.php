@@ -12,12 +12,10 @@ class CPDUserLogin {
 	
 	function ajax() {
 		// Gather inputs from request
-		$context = cpd_search_service_context();
 		$request = array(
 			'email' => $_REQUEST['email'],
 			'password' => $_REQUEST['password'],
 			'agentref' => get_option('cpd_agentref'),
-			'context' => $context,
 		);
 		
 		// Send registration to server
@@ -29,6 +27,7 @@ class CPDUserLogin {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.cpd_search_service_context(),
 			//'Content-Type: application/json'
 		));
 		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request));

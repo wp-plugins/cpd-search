@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . "/cpd-search-options.php");
 
 class CPDPasswordChange {
 	function init() {
-		wp_enqueue_script('cpd-password-change-controller', plugins_url("cpd-search")."/js/cpd-password-change-controller.js");
+		wp_enqueue_script('cpd-password-change-controller', plugins_url("cpd-search")."/cpd-password-change.js");
 	}
 	
 	function change_form() {

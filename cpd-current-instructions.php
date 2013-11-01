@@ -2,10 +2,10 @@
 
 class CPDCurrentInstructions {
 	function init() {
-		wp_enqueue_script('cpd-common-search-controller', plugins_url("cpd-search")."/js/cpd-common-search-controller.js");
-		wp_enqueue_script('cpd-current-instructions-controller', plugins_url("cpd-search")."/js/cpd-current-instructions-controller.js");
-		wp_enqueue_script('cpd-view-property-pdf-controller', plugins_url("cpd-search")."/js/cpd-view-property-pdf-controller.js");
-		wp_enqueue_script('cpd-view-property-image-controller', plugins_url("cpd-search")."/js/cpd-view-property-image-controller.js");
+		wp_enqueue_script('cpd-common-search-controller', plugins_url("cpd-search")."/cpd-common-search.js");
+		wp_enqueue_script('cpd-current-instructions-controller', plugins_url("cpd-search")."/cpd-current-instructions.js");
+		wp_enqueue_script('cpd-view-property-pdf-controller', plugins_url("cpd-search")."/cpd-view-property-pdf.js");
+		wp_enqueue_script('cpd-view-property-image-controller', plugins_url("cpd-search")."/cpd-view-property-image.js");
 		
 		cpd_check_agent_sectors();
 		
@@ -130,7 +130,6 @@ class CPDCurrentInstructions {
 		if($info['http_code'] != 201) {
 			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
-		$search = json_decode($rawdata);
 		
 		header( "Content-Type: application/json" );
 		echo $rawdata;

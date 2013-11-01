@@ -2,7 +2,7 @@
 
 class CPDSavedSearchesWidget extends WP_Widget {
 	function init(){		
-		wp_enqueue_script('cpd-saved-searches-controller', plugins_url("cpd-search")."/js/cpd-saved-searches-widget-controller.js");
+		wp_enqueue_script('cpd-saved-searches-controller', plugins_url("cpd-search")."/cpd-saved-searches-widget.js");
 	}
 	
 	function CPDSavedSearchesWidget(){

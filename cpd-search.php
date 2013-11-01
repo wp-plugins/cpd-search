@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a range of page/post tags and widgets that can be used to add commercial property database searches into pages. Uses the CPD REST API.
-Version: 1.7.1
+Version: 1.7.2
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -32,8 +32,11 @@ class CPDSearch {
 		wp_enqueue_script('jquery-ui-slider');
 	
 		// Set up CPD javascript global
-		wp_enqueue_script('cpd-global', plugins_url("cpd-search")."/js/cpd-global.js", array(), "", false);
-		wp_localize_script('cpd-global', 'CPDAjax', array('ajaxurl' => admin_url('admin-ajax.php')));
+		wp_enqueue_script('cpd-global', plugins_url("cpd-search")."/cpd-global.js", array(), "", false);
+		wp_localize_script('cpd-global', 'CPDAjax', array(
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'agentid' => get_option('cpd_agent_id'),
+		));
 
 		// CPD custom CSS
 		wp_enqueue_style('cpd-search', plugins_url("cpd-search")."/css/cpd-search-style.css");

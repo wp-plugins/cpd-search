@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . "/cpd-search-options.php");
 
 class CPDVerifyUser {
 	function init() {
-		wp_enqueue_script('cpd-verify-user-controller', plugins_url("cpd-search")."/js/cpd-verify-user-controller.js");
+		wp_enqueue_script('cpd-verify-user-controller', plugins_url("cpd-search")."/cpd-verify-user.js");
 	}
 	
 	function form() {
@@ -38,9 +38,6 @@ class CPDVerifyUser {
 		}
 		$token = $_REQUEST['token'];
 
-		// Gather inputs from request
-		$context = cpd_search_service_context();
-		
 		// Send registration to server
 		$url = sprintf("%s/visitors/verifyuser/", get_option('cpd_rest_url'));
 		$curl = curl_init();

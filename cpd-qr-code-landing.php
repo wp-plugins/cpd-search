@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDQRCodeLanding {
 	function show_form() {
-		wp_enqueue_script('cpd-qr-code-landing-controller', plugins_url("cpd-search")."/js/cpd-qr-code-landing-controller.js");
+		wp_enqueue_script('cpd-qr-code-landing-controller', plugins_url("cpd-search")."cpd-qr-code-landing.js");
 		
 		if(!isset($_REQUEST["id"])) {
 			echo '<p class="error">No \'id\' provided.</p>';
@@ -109,13 +109,11 @@ class CPDQRCodeLanding {
 		}
 
 		// Mark this registration as coming from this agent/application
-		$context = cpd_search_qrcode_service_context();
 		$registration = array(
 			'name' => $_REQUEST['name'],
 			'email' => $_REQUEST['email'],
 			'password' => $_REQUEST['password'],
 			'phone' => $_REQUEST['phone'],
-			'registrationcontext' => $context,
 		);
 		
 		// Send registration to server
@@ -127,6 +125,7 @@ class CPDQRCodeLanding {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.cpd_search_qrcode_service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($registration));

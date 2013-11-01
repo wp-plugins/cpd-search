@@ -5,7 +5,7 @@ require_once(dirname(__FILE__) . "/cpd-search-options.php");
 
 class CPDPasswordReset {
 	function init() {
-		wp_enqueue_script('cpd-password-reset-controller', plugins_url("cpd-search")."/js/cpd-password-reset-controller.js");
+		wp_enqueue_script('cpd-password-reset-controller', plugins_url("cpd-search")."/cpd-password-reset.js");
 	}
 	
 	function reset_ajax() {
@@ -16,7 +16,6 @@ class CPDPasswordReset {
 		$token = get_option('cpd_application_token');
 		$request = array(
 			'email' => $email,
-			'context' => cpd_search_service_context(),
 		);
 		$url = sprintf("%s/visitors/passwordreset/?%s", get_option('cpd_rest_url'), http_build_query($request));
 		$curl = curl_init();
@@ -24,6 +23,7 @@ class CPDPasswordReset {
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.cpd_search_service_context(),
 			//'Content-Type: application/json'
 		));
 		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($request));

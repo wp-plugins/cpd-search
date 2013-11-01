@@ -52,44 +52,4 @@ function cpd_search_discard_token() {
 	setcookie("cpd_token", "", time() - 86400, "/");
 }
 
-function cpd_search_clear_stale_token_cookie() {
-	// If CPD token cookie is stale, remove it now before it causes problems
-	// with the PDF/image links running into 403 at the proxy
-	if(cpd_search_is_user_registered()) {
-		$token = cpd_get_user_token();
-		if(!cpd_search_check_token($token)) {
-			cpd_search_discard_token();
-		}
-	}
-}
-
-function cpd_search_check_token($token) {
-	// Set the given server URL and token details
-	
-	// Confirm the connection works by requesting the status of the agent token
-	$params = array(
-		'refresh' => true
-	);
-	$url = sprintf("%s/agents/statuscheck/?%s", get_option('cpd_rest_url'), http_build_query($params));
-	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-		'X-CPD-Token: '.$token
-	));
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-	$rawdata = curl_exec($curl);
-	$info = curl_getinfo($curl);
-	if(curl_errno($curl)) {
-		error_log("CURL error: ".curl_error($curl));
-		return false;
-	}
-	curl_close($curl);
-	if($info['http_code'] != 200) {
-		error_log("Token status check returned status: ".$info['http_code']);
-		return false;
-	}
-	return true;
-}
-
 ?>

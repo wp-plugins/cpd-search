@@ -2,7 +2,7 @@
 
 class CPDClipboardWidget extends WP_Widget {
 	function init() {
-		wp_enqueue_script('cpd-add-clipboard', plugins_url("cpd-search")."/js/cpd-clipboard-widget-controller.js");
+		wp_enqueue_script('cpd-add-clipboard', plugins_url("cpd-search")."/cpd-clipboard-widget.js");
 		
 		add_action( 'widgets_init', array('CPDClipboardWidget', 'load_widgets'));
 		add_action('wp_ajax_cpd_clipboard_widget_add_ajax', array('CPDClipboardWidget', 'add_ajax'));

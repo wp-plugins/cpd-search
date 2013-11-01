@@ -4,22 +4,20 @@ require_once(dirname(__FILE__) . "/cpd-common.php");
 
 class CPDUserRegistration {
 	function init() {
-		wp_enqueue_script('cpd-user-registration-controller', plugins_url("cpd-search")."/js/cpd-user-registration-controller.js");
+		wp_enqueue_script('cpd-user-registration-controller', plugins_url("cpd-search")."/cpd-user-registration.js");
 	}
 	
 	function ajax() {
 		// Gather inputs from request
-		$context = cpd_search_service_context();
 		$registration = array(
 			'name' => $_REQUEST['name'],
 			'email' => $_REQUEST['email'],
 			'password' => $_REQUEST['password'],
 			'phone' => $_REQUEST['phone'],
-			'registrationcontext' => $context,
 		);
 		
 		// Send registration to server
-		$token = cpd_get_user_token();
+		$token = get_option('cpd_application_token');
 		$url = sprintf("%s/visitors/registeruser/", get_option('cpd_rest_url'));
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
@@ -27,6 +25,7 @@ class CPDUserRegistration {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.cpd_search_service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($registration));
@@ -34,6 +33,11 @@ class CPDUserRegistration {
 		$rawdata = curl_exec($curl);
 		$info = curl_getinfo($curl);
 		curl_close($curl);
+		if($info['http_code'] == 400) {
+			header("HTTP/1.0 400 Bad Request");
+			echo $rawdata;
+			exit;
+		}
 		if($info['http_code'] == 409) {
 			header("HTTP/1.0 409 Conflict");
 			echo $rawdata;

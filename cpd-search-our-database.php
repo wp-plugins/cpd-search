@@ -2,12 +2,12 @@
 
 class CPDSearchOurDatabase {
 	function init() {
-		wp_enqueue_script('cpd-common-search-controller', plugins_url("cpd-search")."/js/cpd-common-search-controller.js");
-		wp_enqueue_script('cpd-search-our-database-controller', plugins_url("cpd-search")."/js/cpd-search-our-database-controller.js");
-		wp_enqueue_script('cpd-view-property-pdf-controller', plugins_url("cpd-search")."/js/cpd-view-property-pdf-controller.js");
-		wp_enqueue_script('cpd-view-property-image-controller', plugins_url("cpd-search")."/js/cpd-view-property-image-controller.js");
+		wp_enqueue_script('cpd-common-search-controller', plugins_url("cpd-search")."/cpd-common-search.js");
+		wp_enqueue_script('cpd-search-our-database-controller', plugins_url("cpd-search")."/cpd-search-our-database.js");
+		wp_enqueue_script('cpd-view-property-pdf-controller', plugins_url("cpd-search")."/cpd-view-property-pdf.js");
+		wp_enqueue_script('cpd-view-property-image-controller', plugins_url("cpd-search")."/cpd-view-property-image.js");
 		wp_enqueue_script('cpd-view-property-image-lightbox-controller', plugins_url("cpd-search")."/js/lightbox/js/jquery.lightbox-0.5.js");
-		wp_enqueue_style('cpd-view-property-image-lightbox-style', plugins_url("cpd-search")."//js/lightbox/css/jquery.lightbox-0.5.css");
+		wp_enqueue_style('cpd-view-property-image-lightbox-style', plugins_url("cpd-search")."/js/lightbox/css/jquery.lightbox-0.5.css");
 		
 		cpd_check_agent_sectors();
 		
