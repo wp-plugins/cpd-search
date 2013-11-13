@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.3
+Version: 3.0.4
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -25,7 +25,7 @@ require_once(dirname(__FILE__) . "/cpd-search-ajax.php");
 
 // Workaround for symlinked plugins (in development)...
 if(!defined("cpd_plugin_dir_url")) {
-	static function cpd_plugin_dir_url($file) { return "/wp-content/plugins/cpd-search/".$file; }
+	function cpd_plugin_dir_url($file) { return "/wp-content/plugins/cpd-search/".$file; }
 }
 
 // Utility functions
