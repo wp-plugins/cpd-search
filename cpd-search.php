@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.4
+Version: 3.0.6
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -31,6 +31,7 @@ if(!defined("cpd_plugin_dir_url")) {
 // Utility functions
 class CPDSearchUserAlreadyExistsException extends Exception {}
 class CPDSearchUserNotRegisteredException extends Exception {}
+class CPDSearchAgentNotAllowedVisitorsException extends Exception {}
 
 class CPDSearch {
 	static function init() {
@@ -54,7 +55,7 @@ class CPDSearch {
 		}
 	}
 	
-	static function cpd_search_service_context() {
+	static function service_context() {
 		$serviceContext = get_option('cpd_service_context');
 		if($serviceContext == "") {
 			return "WordpressPlugin";
@@ -72,7 +73,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -83,6 +84,9 @@ class CPDSearch {
 			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
 		$search = json_decode($rawdata);
+		
+		// Record the search id in the session for later
+		$_SESSION['cpdSearchId'] = $search->id;
 		
 		// Record and return results
 		return $search;
@@ -104,7 +108,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$rawdata = curl_exec($curl);
@@ -133,7 +137,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($visitor));
@@ -143,6 +147,9 @@ class CPDSearch {
 		curl_close($curl);
 		if($info['http_code'] == 409) {
 			throw new CPDSearchUserAlreadyExistsException();
+		}
+		if($info['http_code'] == 405) {
+			throw new CPDSearchAgentNotAllowedVisitorsException();
 		}
 		if($info['http_code'] != 201) {
 			throw new Exception("Server connection failed: ".$info['http_code']);
@@ -171,7 +178,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -203,7 +210,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -236,7 +243,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'X-CPD-Context: '.cpd_search_service_context(),
+			'X-CPD-Context: '.CPDSearch::service_context(),
 			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
