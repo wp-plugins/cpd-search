@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.6
+Version: 3.0.7
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -13,6 +13,11 @@ Copyright 2011-2013 The CPD Team. All rights reserved. Every last one of them.
 */
 
 //define('WP_DEBUG', true);
+
+// Workaround for symlinked plugins (in development)...
+if(!defined("cpd_plugin_dir_url")) {
+	function cpd_plugin_dir_url($file) { return "/wp-content/plugins/cpd-search/".$file; }
+}
 
 // User token management functions
 require_once(dirname(__FILE__) . "/cpd-user-token.php");
@@ -23,10 +28,8 @@ require_once(dirname(__FILE__) . "/cpd-search-options.php");
 // Some AJAX-related utility functions
 require_once(dirname(__FILE__) . "/cpd-search-ajax.php");
 
-// Workaround for symlinked plugins (in development)...
-if(!defined("cpd_plugin_dir_url")) {
-	function cpd_plugin_dir_url($file) { return "/wp-content/plugins/cpd-search/".$file; }
-}
+// A widget for displaying the shortlist/basket/clipboard
+require_once(dirname(__FILE__) . "/cpd-shortlist-widget.php");
 
 // Utility functions
 class CPDSearchUserAlreadyExistsException extends Exception {}
@@ -90,6 +93,10 @@ class CPDSearch {
 		
 		// Record and return results
 		return $search;
+	}
+	
+	static function last_search_id() {
+		return isset($_SESSION['cpdSearchId']) ? $_SESSION['cpdSearchId'] * 1 : 0;
 	}
 	
 	static function results($search_id, $opts) {
@@ -296,11 +303,20 @@ class CPDSearch {
 		return $clipboard['clipboard_id'];
 	}
 	
+	static function clipboard_id() {
+		$clipboard = $_SESSION['cpd_clipboard'];
+		return $clipboard['clipboard_id'];
+	}
+
 	/**
 	 * @throws CPDSearchUserNotRegisteredException if user is not yet
 	 *   registered.
 	 */
 	static function fetch_clipboard($clipboard_id) {
+		if($clipboard_id < 1) {
+			return CPDSearch::create_clipboard();
+		}
+		
 		$token = CPDSearchToken::get_user_token();
 		$url = sprintf("%s/users/clipboards/%d/", get_option('cpd_rest_url'), $clipboard_id);
 		$curl = curl_init();
@@ -373,12 +389,11 @@ class CPDSearch {
 	 *   registered.
 	 */
 	static function remove_from_clipboard($propertyid) {
-		$clipboard = $_SESSION['cpd_clipboard'];
-		$clipboardid = $clipboard['clipboard_id'];
+		$clipboardid = CPDSearch::clipboard_id();
 		
 		$token = CPDSearchToken::get_user_token();
 		$params = array(
-		'property_id' => $propertyid,
+			'property_id' => $propertyid,
 			'action' => 'remove'
 		);
 		$url = sprintf("%s/users/clipboards/%s/?%s", get_option('cpd_rest_url'), $clipboardid, http_build_query($params));
@@ -403,6 +418,62 @@ class CPDSearch {
 		// Record and return results
 		$_SESSION['cpd_clipboard'] = $clipboard;
 		return $clipboard;
+	}
+	
+	static function fetch_shortlist() {
+		$shortlist = $_SESSION['cpdShortlist'];
+		if(!$shortlist) {
+			$shortlist = array();
+			$_SESSION['cpdShortlist'] = $shortlist;
+		}
+		return $shortlist;
+	}
+	
+	static function add_to_shortlist($propertyid) {
+		// No need if already present
+		$shortlist = self::fetch_shortlist();
+		if(isset($shortlist[$propertyid])) {
+			return $shortlist;
+		}
+		
+		// Look up the address/brief details
+		$token = CPDSearchToken::get_user_token();
+		$url = sprintf("%s/property/%d/", get_option('cpd_rest_url'), $propertyid);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.CPDSearch::service_context(),
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		$property = json_decode($rawdata);
+		
+		// Add to the shortlist, with the address
+		$entry = array(
+			'propertyid' => $property->propref,
+			'address' => $property->address,
+		);
+		$shortlist[] = $entry;
+		$_SESSION['cpdShortlist'] = $shortlist;
+		return $shortlist;
+	}
+	
+	static function remove_from_shortlist($propertyid) {
+		// No need if not already present
+		$shortlist = self::fetch_shortlist();
+		if(!isset($shortlist[$propertyid])) {
+			return $shortlist;
+		}
+
+		unset($shortlist[$propertyid]);
+		$_SESSION['cpdShortlist'] = $shortlist;
+		return $shortlist;
 	}
 	
 	static function generate_password() {
@@ -452,8 +523,113 @@ class CPDSearch {
 		return self::_cpd_media_folder($media)."/medium.jpg";
 	}
 
+	static function sector_ids() {
+		return array(
+			"1" => "Office",
+			"2" => "Serviced Office",
+			"3" => "Shops",
+			"4" => "Industrial Warehousing",
+			"5" => "Business Units",
+			"6" => "Restaurant/Takeaway",
+			"7" => "Pubs",
+			"8" => "Leisure",
+			"9" => "Retail Warehousing",
+			"10" => "Showrooms",
+			"11" => "Motor Related",
+			"12" => "Mixed/Commercial",
+			"13" => "Medical",
+			"14" => "Studio/Gallery",
+			"15" => "Arts/Crafts",
+			"16" => "Live/Work Unit",
+			"17" => "Education",
+			"18" => "Storage",
+			"19" => "Land/Site",
+			"20" => "Hall/Misc",
+			"21" => "Garden Centers"
+		);
+	}
+
+	static function area_ids() {
+		return array(
+			'15' => 'London (E)',
+			'73' => 'London (Clerkenwell)',
+			'6' => 'London (EC)',
+			'14' => 'London (N)',
+			'13' => 'London (NW)',
+			'11' => 'London (SE)',
+			'10' => 'London (SW)',
+			'7' => 'London (SW1 Knightsbridge)',
+			'8' => 'London (SW1 St James)',
+			'9' => 'London (SW1 Victoria)',
+			'12' => 'London (W)',
+			'2' => "London (W1 Fitzrovia",
+			'72' => "London (W1 Noho)",
+			'3' => "London (W1 Soho)",
+			'4' => "London (W1 Mayfair)",
+			'1' => "London (W1 Marylebone)",
+			'74' => "London (W1 Portland Place/Regent St)",
+			'5' => "London (WC)",
+			'73' => "London (Clerkenwell)",
+			'17' => 'Bedfordshire',
+			'19' => 'Berkshire',
+			'18' => 'Buckinghamshire',
+			'52' => 'Cambridgeshire',
+			'37' => 'Channel Islands',
+			'63' => 'Cheshire',
+			'30' => 'City of Bristol',
+			'61' => 'Cleveland',
+			'36' => 'Cornwall',
+			'67' => 'Cumbria',
+			'46' => 'Derbyshire',
+			'35' => 'Devon',
+			'34' => 'Dorset',
+			'59' => 'Durham',
+			'20' => 'Essex',
+			'32' => 'Gloucestershire',
+			'65' => 'Greater Manchester',
+			'23' => 'Hampshire',
+			'44' => 'Hereford and Worcester',
+			'24' => 'Hertfordshire',
+			'57' => 'Humberside',
+			'68' => 'Isle of Man',
+			'29' => 'Isle of Wight',
+			'71' => 'Jersey',
+			'21' => 'Kent',
+			'64' => 'Lancashire',
+			'47' => 'Leicestershire',
+			'49' => 'Lincolnshire',
+			'66' => 'Merseyside',
+			'25' => 'Middlesex',
+			'53' => 'Norfolk',
+			'70' => 'North Ireland',
+			'50' => 'Northamptonshire',
+			'62' => 'Northumberland',
+			'48' => 'Nottinghamshire',
+			'26' => 'Oxfordshire',
+			'51' => 'Rutland',
+			'69' => 'Scotland',
+			'42' => 'Shropshire',
+			'33' => 'Somerset',
+			'43' => 'Staffordshire',
+			'54' => 'Suffolk',
+			'16' => 'Surrey',
+			'22' => 'Sussex (East)',
+			'28' => 'Sussex (West)',
+			'60' => 'Tyne and Wear',
+			'39' => 'Wales (Middle)',
+			'38' => 'Wales (North)',
+			'40' => 'Wales (South)',
+			'45' => 'Warwickshire',
+			'41' => 'West Midlands',
+			'31' => 'Wiltshire',
+			'55' => 'Yorkshire (North)',
+			'58' => 'Yorkshire (South)',
+			'56' => 'Yorkshire (West)'
+		);
+	}
 }
 
 add_action('init', array('CPDSearch', 'init'), 1);
 
 ?>
+
