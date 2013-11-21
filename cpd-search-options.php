@@ -200,4 +200,3 @@ function cpd_search_admin_menu() {
 add_action('admin_init', 'cpd_search_admin_init');
 add_action('admin_menu', 'cpd_search_admin_menu');
 
-?>

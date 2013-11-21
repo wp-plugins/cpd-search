@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.7
+Version: 3.0.8
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -525,8 +525,8 @@ class CPDSearch {
 
 	static function sector_ids() {
 		return array(
-			"1" => "Office",
-			"2" => "Serviced Office",
+			"1" => "Offices",
+			"2" => "Serviced Offices",
 			"3" => "Shops",
 			"4" => "Industrial Warehousing",
 			"5" => "Business Units",
@@ -630,6 +630,4 @@ class CPDSearch {
 }
 
 add_action('init', array('CPDSearch', 'init'), 1);
-
-?>
 

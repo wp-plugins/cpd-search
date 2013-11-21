@@ -143,4 +143,3 @@ add_action('wp_ajax_cpd_remove_from_shortlist', array('CPDSearchAjax', 'remove_f
 add_action('wp_ajax_nopriv_cpd_register_interest', array('CPDSearchAjax', 'register_interest_ajax'));
 add_action('wp_ajax_cpd_register_interest', array('CPDSearchAjax', 'register_interest_ajax'));
 
-?>
