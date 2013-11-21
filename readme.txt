@@ -1,117 +1,57 @@
 === CPD Search ===
 Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
-Requires at least: 3.6.1
-Tested up to: 3.6.1
-Stable tag: 1.7.2
+Requires at least: 3.6
+Tested up to: 3.7.1
+Stable tag: 3.0.8
 
-Allows you to add an extensive UK commercial property search facility to your website.
+Thin layer to provide custom themes and plugins with access to CPD's commercial property database.
 
 == Description ==
 
-This plugin provides shortcodes and widgets that embed search forms into your WP posts or pages, and handlers that connect to CPD's extensive database of UK commercial property.
+Acts as a thin layer between your UK commercial property estate agent's WordPress theme, and CPD's powerful commercial property search engine, with comprehensive details of the latest properties across the UK. In effect, this plugin allows your developers to add an extensive UK commercial property search facility to your website. Designed as a simple set of PHP classes, and an AJAX/JSON handler to help your page handlers capture and process your visitor's search criteria, results, contact details and their clipboard. The end goal is that an e-mail is sent to you and your visitor, containing the short-list of properties they are interested in.
 
 == Installation ==
 
-After installation, see further instructions on configuration page (admin area, 'Settings -> CPD Search').
+You need to develop or customise your WordPress theme with custom 'page-*.php' pages that handle the functionality required in your particular use case, but having those pages make calls to the CPD REST API, via the utility functions provided by this plugin.
+
+In short, you need to create at least one custom page each for your property search form, search results, details view, and clipboard results view. More detailed documentation is forthcoming, along with a demonstration theme that you can download and play with to see how it works, and use in whole or part to augment similar functionality in your own theme.
+
+Be sure to put a valid CPD application token into the 'CPD Search' configuration page found in the WordPress admin area, until 'Settings -> 'CPD Search'.
+
+Support available by e-mail <support at cpd.co.uk>
 
 == Changelog ==
 
-= 1.7.2 =
-* Move JS files alongside their PHP equivalents for ease-of-navigation.
+= 3.0.8 =
+* Drop stray empty lines from PHP files, causing 'header output already started' warning.
 
-= 1.7.1 =
-* Flatten 'cpd-search-options' into multiple 'cpd_*' options.
+= 3.0.7 =
+* Add functions to add/remove properties from SESSION-based shortlist.
 
-= 1.7.0 =
-* Convert SOAP API calls to REST API.
+= 3.0.6 =
+* Recognise 405 status when agents 'visitor' flag is not set, raise exception.
 
-= 1.6.7 =
-* Make use of REST call to retrieve CPD sectors list.
+= 3.0.5 =
+* Update 'cpd_search_service_context' to a static class method.
 
-= 1.6.6 =
-* Add automatic detection of agent ref, display of token information in plugin settings.
+= 3.0.4 =
+* Typofix.
 
-= 1.6.5 =
-* Fix for detection of AuthenticationFailedExceptionMsg.
+= 3.0.3 =
+* Rename plugin from 'cpd-search-lite' to 'cpd-search'.
 
-= 1.6.4 =
-* Include 'EPC' field in output.
+= 3.0.2 =
+* Replace 'CPDAjax' global JS with 'CPDSearchConfig'.
 
-= 1.6.3 =
-* Fix for search by units other than metres treating figures provided as metres.
+= 3.0.1 =
+* Various bugfixes from in-house testing.
 
-= 1.6.2 =
-* Provide setting to allow 'terms and conditions' link to be customised.
+= 3.0.0 =
+* Switch functions wrapped from older SOAP API to use our newer REST API.
 
-= 1.6.1 =
-* Provide setting to allow PDFs to be viewed without needing the user to register.
+= 2.0.2 =
+* Drop blank line at end of file causing session header problems.
 
-= 1.6.0 =
-* Use application token instead of agent password for agent authentication.
-
-= 1.4.7 =
-* Fix to make use of sectors appropriate to authenticated agent.
-
-= 1.4.6 =
-* Fix bug where registering user with an empty context.
-
-= 1.4.5 =
-* Fix some bugs related to auto-submitting of searches.
-
-= 1.4.4 =
-* Fix bug conflicting with 'submit' button of admin login.
-
-= 1.4.3 =
-* Fix ambiguous jQuery selector which accidentally overrode the admin login submit button.
-
-= 1.4.2 =
-* Fix sneaky post-release bug (including wrong template).
-
-= 1.4.1 =
-* Fixed regressions.
-
-= 1.4.0 =
-* Convert to OO/classes to improve extensibility.
-
-= 1.2.8 =
-* Pass ServiceContext in RegisterUser request.
-
-= 1.2.7 =
-* Allow for ServiceContext to be customisable per site.
-
-= 1.2.6 =
-* Update to work with JQuery in WordPress 3.4
-* Further improvements to clipboard code.
-* Add ability for admin user to create pages from search results
-
-= 1.2.5 =
-* Fix CSS layout issue.
-
-= 1.2.4 =
-* Fix bugs related to page navigation.
-* Add initial search form sidebar widget.
-* Add beta code for putting results into a clipboard.
-
-= 1.2.3 =
-* Fix bugs related to page navigation.
-
-= 1.2.2 =
-* Re-release w/version number fixed in plugin.
-
-= 1.2.1 =
-* Fix issues with paging and registering interest on current instructions results.
-
-= 1.2.0 =
-* First public release.
-
-= 1.1.1 =
-* Add support for user registration and 'register interest' facility.
-* Switch to new CPD area ids.
-* Add 'development' mode for quicker testing of templates etc.
-
-= 1.1.0 =
-* Version with separate tags for Google Map search 
-
-= 1.0.0 =
-* Initial version.
+= 2.0.1 =
+* Initial version. Re-write, avoiding lessons learned developing/deploying v1.
