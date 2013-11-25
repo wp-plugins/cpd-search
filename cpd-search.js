@@ -1,11 +1,9 @@
-CPDSearch = function(token) {
+CPDSearch = function() {
 	var self = this;
-	self.token = token;
 	
 	self.search = function(criteria, success_cb, failure_cb) {
 		// Send AJAX request to handler
 		var postdata = {
-			'token': self.token,
 			'action': 'cpd_search',
 			'criteria': criteria,
 		};
@@ -21,12 +19,11 @@ CPDSearch = function(token) {
 		return false;
 	};
 	
-	self.addToClipboard = function(id, success_cb, failure_cb) {
+	self.addToClipboard = function(property_id, success_cb, failure_cb) {
 		// Send AJAX request to handler
 		var postdata = {
-			'token': self.token,
 			'action': 'cpd_add_to_clipboard',
-			'property_id': id,
+			'property_id': property_id,
 		};
 		var ajaxopts = {
 			type: 'POST',
@@ -40,12 +37,11 @@ CPDSearch = function(token) {
 		return false;
 	};
 	
-	self.removeFromClipboard = function(id, success_cb, failure_cb) {
+	self.removeFromClipboard = function(property_id, success_cb, failure_cb) {
 		// Send AJAX request to handler
 		var postdata = {
-			'token': self.token,
 			'action': 'cpd_remove_from_clipboard',
-			'property_id': id,
+			'property_id': property_id,
 		};
 		var ajaxopts = {
 			type: 'POST',
@@ -59,14 +55,13 @@ CPDSearch = function(token) {
 		return false;
 	};
 	
-	self.addToShortlist = function(propertyId, success_cb, error_cb) {
+	self.addToShortlist = function(property_id, success_cb, error_cb) {
 		var ajaxopts = {
 			type: 'GET',
 			url: CPDSearchConfig.ajaxurl,
 			data: {
-				'token': self.token,
 				'action': 'cpd_add_to_shortlist',
-				'property_id': propertyId
+				'property_id': property_id
 			},
 			success: success_cb,
 			error: error_cb,
@@ -76,14 +71,13 @@ CPDSearch = function(token) {
 		return false;
 	};
 	
-	self.removeFromShortlist = function(propertyId, success_cb, error_cb) {
+	self.removeFromShortlist = function(property_id, success_cb, error_cb) {
 		var ajaxopts = {
 			type: 'GET',
 			url: CPDSearchConfig.ajaxurl,
 			data: {
-				'token': self.token,
 				'action': 'cpd_remove_from_shortlist',
-				'property_id': propertyId
+				'property_id': property_id
 			},
 			success: success_cb,
 			error: error_cb,
@@ -96,7 +90,6 @@ CPDSearch = function(token) {
 	self.registerInterest = function(id, success_cb, failure_cb) {
 		// Send AJAX request to handler
 		var postdata = {
-			'token': self.token,
 			'action': 'cpd_register_interest',
 			'property_id': id,
 		};

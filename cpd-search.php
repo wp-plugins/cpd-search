@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.8
+Version: 3.0.9
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -35,11 +35,18 @@ require_once(dirname(__FILE__) . "/cpd-shortlist-widget.php");
 class CPDSearchUserAlreadyExistsException extends Exception {}
 class CPDSearchUserNotRegisteredException extends Exception {}
 class CPDSearchAgentNotAllowedVisitorsException extends Exception {}
+class CPDSearchUserLoginFailedException extends Exception {}
 
 class CPDSearch {
 	static function init() {
 		// JQuery UI setup
 		wp_enqueue_script('jquery');
+		
+		// Set up CPD javascript global config
+		wp_enqueue_script('cpd-global', cpd_plugin_dir_url("cpd-global.js"), array(), "", false);
+		
+		// Set up CPD javascript controller for shortlist panel
+		wp_enqueue_script('cpd-shortlist-widget', cpd_plugin_dir_url("cpd-shortlist-widget.js"), array(), "", false);
 		
 		// Set up CPD javascript global config
 		wp_enqueue_script('cpd-search', cpd_plugin_dir_url("cpd-search.js"), array(), "", false);
@@ -172,6 +179,83 @@ class CPDSearch {
 		}
 		
 		return $usertoken;
+	}
+	
+	/**
+	 * @throws CPDSearchUserLoginFailedException if login/password is incorrect
+	 */
+	static function login_visitor($email, $password) {
+		$login = array(
+			'email' => $email,
+			'password' => $password,
+			'agentref' => get_option('cpd_agent_ref')
+		);
+		
+		// Send visitor registration to server
+		$token = get_option('cpd_application_token');
+		$url = sprintf("%s/visitors/login/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.CPDSearch::service_context(),
+			//'Content-Type: application/json'
+		));
+		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($login));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $login);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			throw new CPDSearchUserLoginFailedException();
+		}
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		
+		// Store new token as a cookie
+		$usertoken = json_decode($rawdata);
+		CPDSearchToken::set_user_token($usertoken);
+		
+		// Ensure there is a clipboard in session memory
+		if(!isset($_SESSION['cpd_clipboard'])) {
+			$_SESSION['cpd_clipboard'] = CPDSearch::create_clipboard();
+		}
+		
+		return $usertoken;
+	}
+	
+	/**
+	 * @throws CPDSearchUserLoginFailedException if login/password is incorrect
+	 */
+	static function reset_password($email) {
+		$params = array(
+			'email' => $email,
+		);
+		
+		// Send visitor registration to server
+		$token = get_option('cpd_application_token');
+		$url = sprintf("%s/visitors/passwordreset/?%s", get_option('cpd_rest_url'), http_build_query($params));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.CPDSearch::service_context(),
+			//'Content-Type: application/json'
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		
+		return true;
 	}
 	
 	static function view_property($propertyid) {
@@ -432,8 +516,10 @@ class CPDSearch {
 	static function add_to_shortlist($propertyid) {
 		// No need if already present
 		$shortlist = self::fetch_shortlist();
-		if(isset($shortlist[$propertyid])) {
-			return $shortlist;
+		foreach($shortlist as $idx => $entry) {
+			if($entry['propertyid'] == $propertyid) {
+				return $shortlist;
+			}
 		}
 		
 		// Look up the address/brief details
@@ -467,11 +553,11 @@ class CPDSearch {
 	static function remove_from_shortlist($propertyid) {
 		// No need if not already present
 		$shortlist = self::fetch_shortlist();
-		if(!isset($shortlist[$propertyid])) {
-			return $shortlist;
+		foreach($shortlist as $idx => $entry) {
+			if($entry['propertyid'] == $propertyid) {
+				unset($shortlist[$idx]);
+			}
 		}
-
-		unset($shortlist[$propertyid]);
 		$_SESSION['cpdShortlist'] = $shortlist;
 		return $shortlist;
 	}
@@ -506,6 +592,13 @@ class CPDSearch {
 		else {
 			return $sizefrom." to ".$sizeto." ".$sizeunit;
 		}
+	}
+
+	static function areaDescription($property) {
+		if($property->postcode && $property->postcode->cpd_area) {
+			return $property->postcode->cpd_area->name;
+		}
+		return "N/A";
 	}
 
 	static function _cpd_media_folder($media) {

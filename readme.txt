@@ -3,7 +3,7 @@ Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
 Requires at least: 3.6
 Tested up to: 3.7.1
-Stable tag: 3.0.8
+Stable tag: 3.0.9
 
 Thin layer to provide custom themes and plugins with access to CPD's commercial property database.
 
@@ -22,6 +22,13 @@ Be sure to put a valid CPD application token into the 'CPD Search' configuration
 Support available by e-mail <support at cpd.co.uk>
 
 == Changelog ==
+
+= 3.0.9 =
+* Fix for broken 'removeFromShortlist' method.
+* Fix for broken 'is_user_registered' method.
+* Add utility 'getCookie' and 'setCookie' methods to CPD JS.
+* Add 'areaDescription' PHP function.
+* Add missing 'login_visitor' and 'reset_password' PHP methods.
 
 = 3.0.8 =
 * Drop stray empty lines from PHP files, causing 'header output already started' warning.

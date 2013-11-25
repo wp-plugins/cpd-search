@@ -44,8 +44,15 @@ class CPDSearchToken {
 	}
 
 	function is_user_registered() {
-		$cpd_token = $_COOKIE['cpd_token'];
-		return ($cpd_token != null && strlen($cpd_token) == 36);
+		if(!isset($_SESSION['cpd_user_token'])) {
+			return false;
+		}
+		$usertoken = $_SESSION['cpd_user_token'];
+		// HACK: A better 'proxy' user check is desirable
+		if(substr($usertoken->user->email, 0, 8) == "apiproxy") {
+			return false;
+		}
+		return true;
 	}
 
 	function discard_token() {

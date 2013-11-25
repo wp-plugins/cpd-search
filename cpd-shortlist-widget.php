@@ -3,11 +3,6 @@
 class CPDShortlist_Widget extends WP_Widget {
 	function init() {
 		add_action('widgets_init', array('CPDShortlist_Widget', 'load_widgets'));
-		
-		wp_enqueue_script('cpd-shortlist-widget', cpd_plugin_dir_url('cpd-shortlist-widget.js'));
-		
-		$shortlist = CPDSearch::fetch_shortlist();
-		wp_localize_script('cpd-shortlist-widget', "CPDShortlist", $shortlist);
 	}
 	
 	function load_widgets() {
@@ -35,22 +30,22 @@ class CPDShortlist_Widget extends WP_Widget {
 	}
 	
 	function widget($args, $instance) {
-		$title = apply_filters('widget_title', $instance['title']);
-		$url = apply_filters('widget_url', $instance['url']);
-		$link = $instance['link'];
-
 		echo $args['before_widget'];
-		if(!empty($title)) {
-			echo $args['before_title'];
-			echo $title;
-			echo $args['after_title'];
-		}
+		echo $args['before_title'];
+		echo "Shortlist";
+		echo $args['after_title'];
 		echo self::shortlist();
 		echo $args['after_widget'];
 	}
 	
 	function shortlist() {
-		return '<div class="cpdshortlist">Shortlisted properties...</div>';
+		ob_start();
+		?>
+		<div class="cpdshortlist">Loading...</div>
+		<?php
+		$retval = ob_get_contents();
+		ob_end_clean();
+		return $retval;
 	}
 	
 	function form($instance) {
