@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.9
+Version: 3.0.10
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -36,6 +36,7 @@ class CPDSearchUserAlreadyExistsException extends Exception {}
 class CPDSearchUserNotRegisteredException extends Exception {}
 class CPDSearchAgentNotAllowedVisitorsException extends Exception {}
 class CPDSearchUserLoginFailedException extends Exception {}
+class CPDSearchInvalidTokenException extends Exception {}
 
 class CPDSearch {
 	static function init() {
@@ -182,6 +183,42 @@ class CPDSearch {
 	}
 	
 	/**
+	 * @throws CPDSearchInvalidTokenException if token is invalid (expires/used)
+	 */
+	static function verify_user($token) {
+		// Send visitor registration to server
+		$url = sprintf("%s/visitors/verifyuser/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.CPDSearch::service_context(),
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			throw new CPDSearchInvalidTokenException();
+		}
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		
+		// Store new token as a cookie
+		$usertoken = json_decode($rawdata);
+		CPDSearchToken::set_user_token($usertoken);
+		
+		// Ensure there is a clipboard in session memory
+		if(!isset($_SESSION['cpd_clipboard'])) {
+			$_SESSION['cpd_clipboard'] = CPDSearch::create_clipboard();
+		}
+		
+		return $usertoken;
+	}
+	
+	/**
 	 * @throws CPDSearchUserLoginFailedException if login/password is incorrect
 	 */
 	static function login_visitor($email, $password) {
@@ -251,6 +288,41 @@ class CPDSearch {
 		$rawdata = curl_exec($curl);
 		$info = curl_getinfo($curl);
 		curl_close($curl);
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * @throws CPDSearchInvalidTokenException if token is invalid (expires/used)
+	 */
+	static function change_password($token, $password) {
+		$params = array(
+			'password' => $password,
+		);
+		
+		// Send visitor registration to server
+		$url = sprintf("%s/visitors/passwordchange/", get_option('cpd_rest_url'));
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+			'X-CPD-Context: '.CPDSearch::service_context(),
+			//'Content-Type: application/json'
+		));
+		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($login));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		curl_close($curl);
+		if($info['http_code'] == 403) {
+			throw new CPDSearchInvalidTokenException();
+		}
 		if($info['http_code'] != 200) {
 			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
@@ -599,6 +671,16 @@ class CPDSearch {
 			return $property->postcode->cpd_area->name;
 		}
 		return "N/A";
+	}
+
+	static function tenureDescription($tenure) {
+		if($tenure == "L") {
+			return "Leasehold";
+		}
+		else if($tenure == "F") {
+			return "Freehold";
+		}
+		return "Leasehold/Freehold";
 	}
 
 	static function _cpd_media_folder($media) {
