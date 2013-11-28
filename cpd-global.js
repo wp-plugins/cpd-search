@@ -1,14 +1,29 @@
-// Accessible by all CPD javascript controllers
+// Collection of globally accessible utility functions
+CPD = {
+	setCookie: function(name, value) {
+		var date = new Date();
+		date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+		var expires = "; expires=" + date.toGMTString();
+		document.cookie = name + "=" + value + expires + "; path=/";
+	},
 
-function CPD() {
-	var self = this;
-	
-	self.userRegistered = false;
-	
-	return self;
+	getCookie: function(name) {
+		if (document.cookie.length <= 0) {
+			return "";
+		}
+		c_start = document.cookie.indexOf(name + "=");
+		if (c_start < 0) {
+			return "";
+		}
+		c_start = c_start + name.length + 1;
+		c_end = document.cookie.indexOf(";", c_start);
+		if (c_end == -1) {
+			c_end = document.cookie.length;
+		}
+		return unescape(document.cookie.substring(c_start, c_end));
+	}
+
 }
-
-CPD = new CPD();
 
 // Workaround for Array.indexOf in MSIE <= 8
 if (!Array.prototype.indexOf) {
@@ -29,54 +44,3 @@ if (!Array.prototype.indexOf) {
 		return -1;
 	};
 }
-
-function fullAddress(property) {
-	var address = property.address;
-	if(property.buildingnum && property.buildingnum.length > 0) {
-		address = property.buildingnum + ' ' + address;
-	}
-	if(property.buildingname && property.buildingname.length > 0) {
-		address = property.buildingname + ' ' + address;
-	}
-	return address;
-}
-
-function tenureDescription(tenure) {
-	if(tenure == 'L') {
-		return 'Leasehold';
-	}
-	else if(tenure == 'F') {
-		return 'Freehold';
-	}
-	else {
-		return 'Leasehold/Freehold';
-	}
-}
-
-function sizeDescription(property) {
-	var sizefrom = property.sizefrom;
-	var sizeto = property.sizeto;
-	var sizeunit = property.sizeunit == 1 ? 'sq ft' : 'sq m';
-	if(sizefrom == sizeto) {
-		return sizefrom + " " + sizeunit;
-	}
-	else {
-		return sizefrom + " to " + sizeto + " " + sizeunit;
-	}
-}
-
-function _mediaFolder(media) {
-	initial = media.uuid.substring(0,1);
-	four = media.uuid.substring(0,4);
-	return "https://s3.amazonaws.com/cpd-media-live-" + initial + "/" + four + "/" + media.uuid;
-}
-function mediaDownloadURL(media) {
-	return _mediaFolder(media) + "/original/" + media.filename;
-}
-function mediaSmallThumb(media) {
-	return _mediaFolder(media) + "/thumb.jpg";
-}
-function mediaMediumThumb(media) {
-	return _mediaFolder(media) + "/medium.jpg";
-}
-
