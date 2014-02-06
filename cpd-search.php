@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/cpd-search/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.10
+Version: 3.0.11
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -632,6 +632,32 @@ class CPDSearch {
 		}
 		$_SESSION['cpdShortlist'] = $shortlist;
 		return $shortlist;
+	}
+	
+	/**
+	 * Fetch a list of sectors pertinent to a particular agent.
+	 */
+	static function fetch_agent_sectors($agent_id) {
+		// TODO: simple caching mech for efficiency/speed
+		$token = CPDSearchToken::get_user_token();
+		$url = sprintf("%s/property/sectors/?agent_id=%d", get_option('cpd_rest_url'), $agent_id);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		$agent_sectors = json_decode($rawdata, true);
+		
+		// Record and return results
+		$_SESSION['cpd_agent_sectors'] = $agent_sectors;
+		return $agent_sectors;
 	}
 	
 	static function generate_password() {
