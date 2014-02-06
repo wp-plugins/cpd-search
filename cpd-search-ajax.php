@@ -124,6 +124,26 @@ class CPDSearchAjax {
 		echo json_encode($response);
 		exit;
 	}
+	
+	static function fetch_agent_sectors_ajax() {
+		// Gather inputs from request/session
+		$agent_id = trim($_REQUEST['agent_id']);
+		try {
+			$response = CPDSearch::agent_sectors($agent_id);
+			$response = array(
+				'success' => true,
+				'response' => $response,
+			);
+		}
+		catch(Exception $e) {
+			header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+			$response = $e->getMessage();
+		}
+		
+		header( "Content-Type: application/json" );
+		echo json_encode($response);
+		exit;
+	}
 }
 
 add_action('init', array('CPDSearchAjax', 'init'), 1);
