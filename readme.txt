@@ -3,7 +3,7 @@ Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
 Requires at least: 3.6
 Tested up to: 3.7.1
-Stable tag: 3.0.12
+Stable tag: 3.1.1
 
 Thin layer to provide custom themes and plugins with access to CPD's commercial property database.
 
@@ -22,6 +22,12 @@ Be sure to put a valid CPD application token into the 'CPD Search' configuration
 Support available by e-mail <support at cpd.co.uk>
 
 == Changelog ==
+
+= 3.1.1 =
+* Fix for display of 'sectors' field/column.
+
+= 3.1.0 =
+* Allow for updated responses with multiple sectors per property.
 
 = 3.0.12 =
 * Fix for 'create_clipboard' bug causing error for users verifying their address.

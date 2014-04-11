@@ -2,14 +2,14 @@
 
 /*
 Plugin Name: CPD Search
-Plugin URI: http://www.cpd.co.uk/cpd-search/
+Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.12
+Version: 3.1.0
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
 
-Copyright 2011-2013 The CPD Team. All rights reserved. Every last one of them.
+Copyright 2011-2014 The CPD Team. All rights reserved. Every last one of them.
 */
 
 //define('WP_DEBUG', true);
@@ -679,6 +679,17 @@ class CPDSearch {
 			return $property->postcode->cpd_area->name;
 		}
 		return "N/A";
+	}
+
+	static function sectorsDescription($property) {
+		if(!$property->sectors || count($property->sectors) < 1) {
+			return "N/A";
+		}
+		$desc = "";
+		foreach($property->sectors as $sector) {
+			$desc .= ", ".$sector->name;
+		}
+		return substr($desc, 2);
 	}
 
 	static function tenureDescription($tenure) {
