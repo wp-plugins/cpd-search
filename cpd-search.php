@@ -2,14 +2,14 @@
 
 /*
 Plugin Name: CPD Search
-Plugin URI: http://www.cpd.co.uk/cpd-search/
+Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.0.10
+Version: 3.1.0
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
 
-Copyright 2011-2013 The CPD Team. All rights reserved. Every last one of them.
+Copyright 2011-2014 The CPD Team. All rights reserved. Every last one of them.
 */
 
 //define('WP_DEBUG', true);
@@ -174,11 +174,6 @@ class CPDSearch {
 		$usertoken = json_decode($rawdata);
 		CPDSearchToken::set_user_token($usertoken);
 		
-		// Ensure there is a clipboard in session memory
-		if(!isset($_SESSION['cpd_clipboard'])) {
-			$_SESSION['cpd_clipboard'] = CPDSearch::create_clipboard();
-		}
-		
 		return $usertoken;
 	}
 	
@@ -209,11 +204,6 @@ class CPDSearch {
 		// Store new token as a cookie
 		$usertoken = json_decode($rawdata);
 		CPDSearchToken::set_user_token($usertoken);
-		
-		// Ensure there is a clipboard in session memory
-		if(!isset($_SESSION['cpd_clipboard'])) {
-			$_SESSION['cpd_clipboard'] = CPDSearch::create_clipboard();
-		}
 		
 		return $usertoken;
 	}
@@ -256,11 +246,6 @@ class CPDSearch {
 		// Store new token as a cookie
 		$usertoken = json_decode($rawdata);
 		CPDSearchToken::set_user_token($usertoken);
-		
-		// Ensure there is a clipboard in session memory
-		if(!isset($_SESSION['cpd_clipboard'])) {
-			$_SESSION['cpd_clipboard'] = CPDSearch::create_clipboard();
-		}
 		
 		return $usertoken;
 	}
@@ -430,14 +415,11 @@ class CPDSearch {
 	 */
 	static function create_clipboard() {
 		$token = CPDSearchToken::get_user_token();
-		$params = array(
-			'property_id' => $propertyid,
-		);
 		$url = sprintf("%s/users/clipboards/", get_option('cpd_rest_url'));
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_POST, $url);
+		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
 			'Content-Type: application/json'
@@ -634,6 +616,32 @@ class CPDSearch {
 		return $shortlist;
 	}
 	
+	/**
+	 * Fetch a list of sectors pertinent to a particular agent.
+	 */
+	static function fetch_agent_sectors($agent_id) {
+		// TODO: simple caching mech for efficiency/speed
+		$token = CPDSearchToken::get_user_token();
+		$url = sprintf("%s/property/sectors/?agent_id=%d", get_option('cpd_rest_url'), $agent_id);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			'X-CPD-Token: '.$token,
+		));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		$rawdata = curl_exec($curl);
+		$info = curl_getinfo($curl);
+		if($info['http_code'] != 200) {
+			throw new Exception("Server connection failed: ".$info['http_code']);
+		}
+		$agent_sectors = json_decode($rawdata, true);
+		
+		// Record and return results
+		$_SESSION['cpd_agent_sectors'] = $agent_sectors;
+		return $agent_sectors;
+	}
+	
 	static function generate_password() {
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$randomString = '';
@@ -671,6 +679,17 @@ class CPDSearch {
 			return $property->postcode->cpd_area->name;
 		}
 		return "N/A";
+	}
+
+	static function sectorsDescription($property) {
+		if(!$property->sectors || count($property->sectors) < 1) {
+			return "N/A";
+		}
+		$desc = "";
+		foreach($property->sectors as $sector) {
+			$desc .= ", ".$sector->name;
+		}
+		return substr($desc, 2);
 	}
 
 	static function tenureDescription($tenure) {
