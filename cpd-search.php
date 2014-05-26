@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.1.0
+Version: 3.1.2
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -622,7 +622,7 @@ class CPDSearch {
 	static function fetch_agent_sectors($agent_id) {
 		// TODO: simple caching mech for efficiency/speed
 		$token = CPDSearchToken::get_user_token();
-		$url = sprintf("%s/property/sectors/?agent_id=%d", get_option('cpd_rest_url'), $agent_id);
+		$url = sprintf("%s/property/sectors/?agent_id=%d&live=true", get_option('cpd_rest_url'), $agent_id);
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
