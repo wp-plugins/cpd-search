@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.1.2
+Version: 3.1.3
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -139,6 +139,7 @@ class CPDSearch {
 	}
 	
 	/**
+	 * @link https://www.cpd.co.uk/api/visitors/register/
 	 * @throws CPDSearchUserAlreadyExistsException if e-mail is already
 	 *  registered.
 	 */
@@ -163,7 +164,7 @@ class CPDSearch {
 		if($info['http_code'] == 409) {
 			throw new CPDSearchUserAlreadyExistsException();
 		}
-		if($info['http_code'] == 405) {
+		if($info['http_code'] == 402) {
 			throw new CPDSearchAgentNotAllowedVisitorsException();
 		}
 		if($info['http_code'] != 201) {
@@ -215,7 +216,6 @@ class CPDSearch {
 		$login = array(
 			'email' => $email,
 			'password' => $password,
-			'agentref' => get_option('cpd_agent_ref')
 		);
 		
 		// Send visitor registration to server
@@ -228,9 +228,7 @@ class CPDSearch {
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
 			'X-CPD-Context: '.CPDSearch::service_context(),
-			//'Content-Type: application/json'
 		));
-		//curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($login));
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $login);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$rawdata = curl_exec($curl);
