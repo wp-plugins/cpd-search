@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.1.4
+Version: 3.1.5
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -50,9 +50,10 @@ class CPDSearch {
 		wp_enqueue_script('cpd-shortlist-widget', cpd_plugin_dir_url("cpd-shortlist-widget.js"), array(), "", false);
 		
 		// Set up CPD javascript global config
+		$is_ssl = isset($_SERVER['HTTPS']);
 		wp_enqueue_script('cpd-search', cpd_plugin_dir_url("cpd-search.js"), array(), "", false);
 		wp_localize_script('cpd-search', 'CPDSearchConfig', array(
-			'ajaxurl' => admin_url('admin-ajax.php'),
+			'ajaxurl' => admin_url('admin-ajax.php', $is_ssl),
 			'context' => get_option('cpd_service_context'),
 			'agent_id' => get_option('cpd_agent_id'),
 			'agent_ref' => get_option('cpd_agent_ref'),
