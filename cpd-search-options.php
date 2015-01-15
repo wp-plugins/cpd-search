@@ -1,9 +1,8 @@
 <?php
 
 $cpd_server_options = array(
-	"Production" => "https://rest.cpd.co.uk",
-	"Staging" => "https://staging.cpd.co.uk/restapi/v1",
-	"Local development" => "http://localhost:8001",
+	"Production" => "https://www.cpd.co.uk/restapi/v1",
+	"Sandbox" => "https://sandbox.cpd.co.uk/restapi/v1",
 );
 
 function cpd_search_options_page() {
