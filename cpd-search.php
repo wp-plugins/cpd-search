@@ -4,12 +4,12 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.2.2
+Version: 3.2.3
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
 
-Copyright 2011-2014 The CPD Team. All rights reserved. Every last one of them.
+Copyright 2011-2015 The CPD Team. All rights reserved. Every last one of them.
 */
 
 //define('WP_DEBUG', true);
@@ -724,19 +724,14 @@ class CPDSearch {
 		return "Leasehold/Freehold";
 	}
 
-	static function _cpd_media_folder($media) {
-		$initial = substr($media->uuid, 0, 1);
-		$four = substr($media->uuid, 0, 4);
-		return sprintf("https://s3.amazonaws.com/cpd-media-live-%s/%s/%s", $initial, $four, $media->uuid);
-	}
 	static function mediaUrl($media) {
-		return self::_cpd_media_folder($media)."/original/".$media->filename;
+		return $media->original_url;
 	}
 	static function smallThumbUrl($media) {
-		return self::_cpd_media_folder($media)."/thumb.jpg";
+		return $media->small_thumb_url;
 	}
 	static function mediumThumbUrl($media) {
-		return self::_cpd_media_folder($media)."/medium.jpg";
+		return $media->medium_thumb_url;
 	}
 
 	static function sector_ids() {
