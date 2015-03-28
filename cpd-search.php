@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.2.3
+Version: 3.3.0
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -517,11 +517,12 @@ class CPDSearch {
 		
 		$token = CPDSearchToken::get_user_token();
 		$params = array(
-			'property_id' => $propertyid,
-			'action' => 'add'
+			'clipboard' => $clipboard_id,
+			'property' => $propertyid,
 		);
-		$url = sprintf("%s/users/clipboards/%d/?%s", get_option('cpd_rest_url'), $clipboard_id, http_build_query($params));
+		$url = sprintf("%s/users/clipboards/results/", get_option('cpd_rest_url'));
 		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
@@ -534,7 +535,7 @@ class CPDSearch {
 		if($info['http_code'] == 403) {
 			throw new CPDSearchUserNotRegisteredException();
 		}
-		if($info['http_code'] != 200) {
+		if($info['http_code'] != 201) {
 			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
 		$clipboard = json_decode($rawdata, true);
@@ -548,21 +549,14 @@ class CPDSearch {
 	 * @throws CPDSearchUserNotRegisteredException if user is not yet
 	 *   registered.
 	 */
-	static function remove_from_clipboard($propertyid) {
-		$clipboardid = CPDSearch::clipboard_id();
-		
+	static function remove_from_clipboard($resultid) {
 		$token = CPDSearchToken::get_user_token();
-		$params = array(
-			'property_id' => $propertyid,
-			'action' => 'remove'
-		);
-		$url = sprintf("%s/users/clipboards/%s/?%s", get_option('cpd_rest_url'), $clipboardid, http_build_query($params));
+		$url = sprintf("%s/users/clipboards/results/%s/", get_option('cpd_rest_url'), $resultid, http_build_query($params));
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$rawdata = curl_exec($curl);
