@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.3.0
+Version: 3.3.1
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -435,16 +435,15 @@ class CPDSearch {
 	 * @throws CPDSearchUserNotRegisteredException if user is not yet
 	 *   registered.
 	 */
-	static function create_clipboard() {
+	static function _create_clipboard() {
 		$token = CPDSearchToken::get_user_token();
-		$url = sprintf("%s/users/clipboards/", get_option('cpd_rest_url'));
+		$url = sprintf("%s/visitors/clipboards/", get_option('cpd_rest_url'));
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'X-CPD-Token: '.$token,
-			'Content-Type: application/json'
 		));
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -460,11 +459,16 @@ class CPDSearch {
 		
 		// Record and return results
 		$_SESSION['cpd_clipboard'] = $clipboard;
-		return $clipboard['clipboard_id'];
+		return $clipboard;
 	}
 	
 	static function clipboard_id() {
-		$clipboard = $_SESSION['cpd_clipboard'];
+		if(isset($_SESSION['cpd_clipboard'])) {
+			$clipboard = $_SESSION['cpd_clipboard'];
+		}
+		else {
+			$clipboard = CPDSearch::_create_clipboard();
+		}
 		return $clipboard['clipboard_id'];
 	}
 
@@ -472,13 +476,11 @@ class CPDSearch {
 	 * @throws CPDSearchUserNotRegisteredException if user is not yet
 	 *   registered.
 	 */
-	static function fetch_clipboard($clipboard_id) {
-		if($clipboard_id < 1) {
-			return CPDSearch::create_clipboard();
-		}
+	static function fetch_clipboard() {
+		$clipboard_id = CPDSearchToken::clipboard_id();
 		
 		$token = CPDSearchToken::get_user_token();
-		$url = sprintf("%s/users/clipboards/%d/", get_option('cpd_rest_url'), $clipboard_id);
+		$url = sprintf("%s/visitors/clipboards/%d/", get_option('cpd_rest_url'), $clipboard_id);
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -506,21 +508,14 @@ class CPDSearch {
 	 *   registered.
 	 */
 	static function add_to_clipboard($propertyid) {
-		// Identify existing clipboard, if we have one
-		if(!isset($_SESSION['cpd_clipboard'])) {
-			$clipboard_id = CPDSearch::create_clipboard();
-		}
-		else {
-			$clipboard = $_SESSION['cpd_clipboard'];
-			$clipboard_id = $clipboard['clipboard_id'];
-		}
+		$clipboard_id = CPDSearch::clipboard_id();
 		
 		$token = CPDSearchToken::get_user_token();
 		$params = array(
 			'clipboard' => $clipboard_id,
 			'property' => $propertyid,
 		);
-		$url = sprintf("%s/users/clipboards/results/", get_option('cpd_rest_url'));
+		$url = sprintf("%s/visitors/clipboards/results/", get_option('cpd_rest_url'));
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_POST, 1);
 		curl_setopt($curl, CURLOPT_URL, $url);
@@ -529,6 +524,7 @@ class CPDSearch {
 			'X-CPD-Token: '.$token,
 			'Content-Type: application/json'
 		));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$rawdata = curl_exec($curl);
 		$info = curl_getinfo($curl);
@@ -549,10 +545,24 @@ class CPDSearch {
 	 * @throws CPDSearchUserNotRegisteredException if user is not yet
 	 *   registered.
 	 */
-	static function remove_from_clipboard($resultid) {
+	static function remove_from_clipboard($propertyid) {
+		// Determine result id for REST request
+		$resultid = 0;
+		$clipboard = $_SESSION['clipboard'];
+		foreach($clipboard['properties'] as $result) {
+			if($result['property']['propref'] == $propertyid) {
+				$resultid = $propertyid;
+			}
+		}
+		if($resultid == 0) {
+			// No such result, return existing clipboard
+			return $clipboard;
+		}
+		
 		$token = CPDSearchToken::get_user_token();
-		$url = sprintf("%s/users/clipboards/results/%s/", get_option('cpd_rest_url'), $resultid, http_build_query($params));
+		$url = sprintf("%s/visitors/clipboards/results/%s/", get_option('cpd_rest_url'), $resultid);
 		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
@@ -564,7 +574,7 @@ class CPDSearch {
 		if($info['http_code'] == 403) {
 			throw new CPDSearchUserNotRegisteredException();
 		}
-		if($info['http_code'] != 200) {
+		if($info['http_code'] != 204) {
 			throw new Exception("Server connection failed: ".$info['http_code']);
 		}
 		$clipboard = json_decode($rawdata, true);
