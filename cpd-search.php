@@ -4,7 +4,7 @@
 Plugin Name: CPD Search
 Plugin URI: http://www.cpd.co.uk/wordpress-plugins/
 Description: Provides a thin layer to the CPD REST API, via PHP/AJAX methods.
-Version: 3.3.1
+Version: 3.3.2
 Author: The CPD Team
 Author URI: http://www.cpd.co.uk/
 Text Domain: cpd-search
@@ -477,7 +477,7 @@ class CPDSearch {
 	 *   registered.
 	 */
 	static function fetch_clipboard() {
-		$clipboard_id = CPDSearchToken::clipboard_id();
+		$clipboard_id = CPDSearch::clipboard_id();
 		
 		$token = CPDSearchToken::get_user_token();
 		$url = sprintf("%s/visitors/clipboards/%d/", get_option('cpd_rest_url'), $clipboard_id);
@@ -537,8 +537,7 @@ class CPDSearch {
 		$clipboard = json_decode($rawdata, true);
 		
 		// Record and return results
-		$_SESSION['cpd_clipboard'] = $clipboard;
-		return $clipboard;
+		return CPDSearch::fetch_clipboard();
 	}
 	
 	/**
@@ -548,10 +547,10 @@ class CPDSearch {
 	static function remove_from_clipboard($propertyid) {
 		// Determine result id for REST request
 		$resultid = 0;
-		$clipboard = $_SESSION['clipboard'];
+		$clipboard = $_SESSION['cpd_clipboard'];
 		foreach($clipboard['properties'] as $result) {
 			if($result['property']['propref'] == $propertyid) {
-				$resultid = $propertyid;
+				$resultid = $result['id'];
 			}
 		}
 		if($resultid == 0) {
@@ -580,8 +579,7 @@ class CPDSearch {
 		$clipboard = json_decode($rawdata, true);
 		
 		// Record and return results
-		$_SESSION['cpd_clipboard'] = $clipboard;
-		return $clipboard;
+		return CPDSearch::fetch_clipboard();
 	}
 	
 	static function fetch_shortlist() {
