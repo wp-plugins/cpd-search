@@ -2,8 +2,8 @@
 Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
 Requires at least: 3.6
-Tested up to: 4.1.0
-Stable tag: 3.3.2
+Tested up to: 4.2.0
+Stable tag: 3.3.4
 
 Thin layer to provide custom themes and plugins with access to CPD's commercial property database.
 
@@ -22,6 +22,12 @@ Be sure to put a valid CPD application token into the 'CPD Search' configuration
 Support available by e-mail <support at cpd.co.uk>
 
 == Changelog ==
+
+= 3.3.4 =
+* Fix for handling of 403 errors when using test tokens.
+
+= 3.3.3 =
+* Bump version to indicate compatibility with WordPress 4.2.
 
 = 3.3.2 =
 * Fix return values from clipboard functions, and session corruption bug.

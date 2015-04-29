@@ -27,6 +27,10 @@ class CPDSearchToken {
 		$rawdata = curl_exec($curl);
 		$info = curl_getinfo($curl);
 		curl_close($curl);
+		if($info['http_code'] == 401) {
+			self::discard_token();
+			throw new CPDSearchInvalidTokenException();
+		}
 		if($info['http_code'] != 200) {
 			throw new Exception("Invalid HTTP status: ".$info['http_code']);
 		}
