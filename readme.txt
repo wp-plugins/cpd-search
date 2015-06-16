@@ -3,7 +3,7 @@ Contributors: rossigee
 Tags: commercial, property, database, search, office, shop, restaurant, retail, industrial, warehouse
 Requires at least: 3.6
 Tested up to: 4.2.2
-Stable tag: 3.3.5
+Stable tag: 3.3.6
 
 Thin layer to provide custom themes and plugins with access to CPD's commercial property database.
 
@@ -23,7 +23,7 @@ Support available by e-mail <support at cpd.co.uk>
 
 == Changelog ==
 
-= 3.3.5 =
+= 3.3.6 =
 * Fix 401 response when unregistered visitor registers interest using AJAX method.
 
 = 3.3.4 =

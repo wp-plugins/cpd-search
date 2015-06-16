@@ -117,7 +117,7 @@ class CPDSearchAjax {
 		}
 		catch(CPDSearchUserNotRegisteredException $unre) {
 			header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized', true, 401);
-			$response = $e->getMessage();
+			$response = $unre->getMessage();
 		}
 		catch(Exception $e) {
 			header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
